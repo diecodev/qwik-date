@@ -1,0 +1,8 @@
+{
+  "conventionalCommits.emojiFormat": "emoji",
+  "conventionalCommits.scopes": [
+    "website",
+    "headless",
+    "styled"
+  ],
+}
