@@ -4,5 +4,6 @@
     "dbaeumer.vscode-eslint",
     "seatonjiang.gitmoji-vscode",
     "vivaxy.vscode-conventional-commits",
+    "connor4312.nodejs-testing"
   ]
 }
