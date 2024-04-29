@@ -3,6 +3,7 @@
   "conventionalCommits.scopes": [
     "website",
     "headless",
-    "styled"
+    "styled",
+    "core"
   ],
 }
