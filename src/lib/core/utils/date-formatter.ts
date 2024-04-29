@@ -1,5 +1,5 @@
 import { MONTHS_LG, MONTHS_SM } from "../constants/index";
-import { DateFormat, Separator } from "./types";
+import { DateFormat, Separator } from "../types";
 
 interface Props {
   date: Date;
