@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "types": [
       "vite/client",
@@ -8,8 +8,11 @@
     "baseUrl": ".",
     "paths": {
       "@lib/*": [
-        "../lib/*"
+        "../src/lib/*"
       ]
     }
-  }
+  },
+  "include": [
+    "."
+  ]
 }
