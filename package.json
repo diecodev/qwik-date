@@ -1,5 +1,5 @@
 {
-  "name": "qwik-calendar",
+  "name": "qwik-date",
   "version": "0.0.1",
   "description": "Create a reusable Qwik component library",
   "main": "./lib/index.qwik.mjs",
