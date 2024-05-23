@@ -36,19 +36,20 @@
     "qwik": "qwik"
   },
   "devDependencies": {
-    "@builder.io/qwik": "1.5.2",
-    "@types/eslint": "^8.56.6",
+    "@builder.io/qwik": "1.5.4",
+    "@floating-ui/dom": "^1.6.5",
+    "@types/eslint": "^8.56.10",
     "@types/node": "^20.12.7",
-    "@typescript-eslint/eslint-plugin": "^7.3.1",
-    "@typescript-eslint/parser": "^7.3.1",
+    "@typescript-eslint/eslint-plugin": "^7.7.1",
+    "@typescript-eslint/parser": "^7.7.1",
     "eslint": "^8.57.0",
     "eslint-plugin-qwik": "latest",
     "np": "^8.0.4",
     "prettier": "^3.2.5",
-    "tsx": "4.7.3",
-    "typescript": "5.3.3",
+    "tsx": "4.10.5",
+    "typescript": "5.4.5",
     "undici": "*",
-    "vite": "^5.1.6",
+    "vite": "^5.2.10",
     "vite-tsconfig-paths": "^4.2.1"
   }
 }
