@@ -1,4 +1,4 @@
-import { MONTHS_LG, MONTHS_SM } from "../constants/index";
+import { MONTHS_LG, MONTHS_SM } from "../constants";
 import { DateFormat, Separator } from "../types";
 
 interface Props {
@@ -25,11 +25,11 @@ export function formatDate({ date, dateFormat, separator, locale }: Props) {
   const countM = dateFormat.toLowerCase().split("m").length - 1;
   const countY = dateFormat.toLowerCase().split("y").length - 1;
 
-  const isMUpperCase = dateFormat.includes("M");
+  const isUpperCase = dateFormat.includes("M");
 
   let monthFormatted = "";
 
-  if (isMUpperCase) {
+  if (isUpperCase) {
     monthFormatted =
       countM === 3
         ? MONTHS_SM[locale ?? "en"][Number(month) - 1]
