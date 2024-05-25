@@ -80,10 +80,12 @@ export const CalendarDays = component$<PropsOf<"button">>((props) => {
 
   const validateIfSelected = (props: {
     day: string | null;
-    activeDate: Date;
+    activeDate: Date | null;
   }) => {
     const { day, activeDate } = props;
     if (!day) return false;
+
+    if (!activeDate) return false;
 
     const localActiveDate = getClientLocalDate({
       date: activeDate,
@@ -123,7 +125,7 @@ export const CalendarDays = component$<PropsOf<"button">>((props) => {
                       props.onClick$,
                       $(() => {
                         // convert `day` to a Date object but respecting the client's timezone (is UTC by default)
-                        const currentTZ = activeDate.value.getTimezoneOffset();
+                        const currentTZ = new Date().getTimezoneOffset();
                         const rawDateObject = new Date(day + "T00:00:00Z");
                         rawDateObject.setMinutes(currentTZ);
                         activeDate.value = rawDateObject;
@@ -132,6 +134,7 @@ export const CalendarDays = component$<PropsOf<"button">>((props) => {
                     aria-label={intlFormat.format(new Date(day))}
                     data-value={day}
                     disabled={disabled}
+                    data-qwik-date-day
                   >
                     {day.split("-")[2]}
                   </button>

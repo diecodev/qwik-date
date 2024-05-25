@@ -55,3 +55,18 @@ export function formatDate({ date, dateFormat, separator, locale }: Props) {
 
   return formattedDate;
 }
+
+export const generateMinDate = (activeDate: Date) => {
+  const minDateYear = activeDate.getFullYear() - 100;
+  return new Date(minDateYear, 0, 1);
+};
+
+export const generateMaxDate = (activeDate: Date) => {
+  const maxDateYear = activeDate.getFullYear() + 100;
+  return new Date(maxDateYear, 11, 31);
+};
+
+export const validateDateString = (date: string) => {
+  const dateToValidate = new Date(date);
+  return dateToValidate instanceof Date && !isNaN(dateToValidate.getTime());
+};

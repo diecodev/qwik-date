@@ -36,7 +36,7 @@ interface CalendarArrowProps extends PropsOf<"button"> {
 
 export const CalendarNext = component$<CalendarArrowProps>(
   ({ svgProps = {}, ...props }) => {
-    const { locale, maxDate, minDate, dateToRender, activeDate } =
+    const { locale, maxDate, minDate, dateToRender } =
       useContext(QwikDateCtxId);
 
     const nextAriaLabel = ARIA_LABELS[locale].next;
@@ -67,7 +67,7 @@ export const CalendarNext = component$<CalendarArrowProps>(
 
 export const CalendarPrevious = component$<CalendarArrowProps>(
   ({ svgProps = {}, ...props }) => {
-    const { locale, maxDate, minDate, dateToRender, activeDate } =
+    const { locale, maxDate, minDate, dateToRender } =
       useContext(QwikDateCtxId);
 
     const previousAriaLabel = ARIA_LABELS[locale].previous;

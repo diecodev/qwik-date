@@ -11,7 +11,8 @@ export type QwikDateCtx = {
   completeWeeks: boolean;
   minDate: Readonly<Signal<Date>>;
   maxDate: Readonly<Signal<Date>>;
-  activeDate: Signal<Date>;
+  defaultDate: string | undefined;
+  activeDate: Signal<Date | null>;
   dateToRender: Signal<Date>;
   locale: "en" | "es";
   theme: "light" | "dark" | "system";

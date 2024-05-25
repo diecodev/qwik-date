@@ -1,6 +1,7 @@
 import {
   $,
   component$,
+  PropsOf,
   Slot,
   sync$,
   useComputed$,
@@ -10,10 +11,11 @@ import {
   useSignal,
 } from "@builder.io/qwik";
 import { QwikDateCtx, QwikDateCtxId } from "./context";
+import { generateMaxDate, generateMinDate } from "../core";
 
-interface RootProps {
+interface RootProps extends PropsOf<"div"> {
   completeWeeks?: boolean;
-  activeDate?: Date;
+  defaultDate?: string;
   minDate?: Date;
   maxDate?: Date;
   locale?: "en" | "es";
@@ -21,25 +23,16 @@ interface RootProps {
   dir?: "ltr" | "rtl" | "auto";
 }
 
-const generateMinDate = (activeDate: Date) => {
-  const minDateYear = activeDate.getFullYear() - 100;
-  return new Date(minDateYear, 0, 1);
-};
-
-const generateMaxDate = (activeDate: Date) => {
-  const maxDateYear = activeDate.getFullYear() + 100;
-  return new Date(maxDateYear, 11, 31);
-};
-
 export const CalendarRoot = component$<RootProps>(
   ({
     completeWeeks = false,
-    activeDate: activeDateProp,
+    defaultDate,
     dir = "auto",
     maxDate: maxDateProp,
     locale = "en",
     minDate: minDateProp,
     theme = "system",
+    ...props
   }) => {
     if (
       minDateProp &&
@@ -57,16 +50,18 @@ export const CalendarRoot = component$<RootProps>(
       );
     }
 
+    const defaultDateParsed = defaultDate ? new Date(defaultDate) : new Date();
+
     // signals and constants
-    const activeDate = useSignal<Date>(activeDateProp ?? new Date());
-    const dateToRender = useSignal<Date>(activeDate.value);
+    const activeDate = useSignal<Date | null>(null);
+    const dateToRender = useSignal<Date>(defaultDateParsed);
 
     // computed values
     const minDate = useComputed$<Date>(
-      () => minDateProp ?? generateMinDate(activeDate.value)
+      () => minDateProp ?? generateMinDate(defaultDateParsed)
     );
     const maxDate = useComputed$<Date>(
-      () => maxDateProp ?? generateMaxDate(activeDate.value)
+      () => maxDateProp ?? generateMaxDate(defaultDateParsed)
     );
 
     // refs
@@ -80,20 +75,15 @@ export const CalendarRoot = component$<RootProps>(
       contentId,
       minDate,
       maxDate,
-      activeDate,
+      defaultDate,
       dateToRender,
       locale,
       theme,
       completeWeeks,
+      activeDate,
     };
 
     useContextProvider(QwikDateCtxId, ctx);
-
-    const updateDefaultDateIfNeeded = $(() => {
-      if (activeDateProp) return;
-
-      activeDate.value = new Date();
-    });
 
     useOnWindow(
       "DOMContentLoaded",
@@ -128,7 +118,6 @@ export const CalendarRoot = component$<RootProps>(
 
         function onMountDirHandler() {
           const dir = contentEl?.getAttribute("dir")!;
-
           if (dir && dir !== "auto") return;
 
           const newDir = window.getComputedStyle(
@@ -159,17 +148,37 @@ export const CalendarRoot = component$<RootProps>(
           });
         }
 
+        function onMountPreSelectionHandler() {
+          const dayEl = document.querySelectorAll("button[data-qwik-date-day]");
+
+          if (!dayEl) return;
+
+          dayEl.forEach((el) => {
+            const contentDay = contentEl?.getAttribute("data-default-date");
+            const btnDay = el.getAttribute("data-value");
+
+            if (!btnDay) return;
+
+            if (contentDay === btnDay) {
+              el.setAttribute("data-pre-selected", "true");
+            }
+          });
+        }
+
         onMountThemeHandler();
         onMountDirHandler();
-
-        // grab the user's timezone preference
+        onMountPreSelectionHandler();
       })
     );
 
-    useOnWindow("DOMContentLoaded", updateDefaultDateIfNeeded);
-
     return (
-      <div data-theme={theme} dir={dir} data-qwik-date>
+      <div
+        {...props}
+        data-theme={theme}
+        dir={dir}
+        data-default-date={defaultDate}
+        data-qwik-date
+      >
         <Slot />
       </div>
     );
