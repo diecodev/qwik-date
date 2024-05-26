@@ -2,7 +2,7 @@ import { MONTHS_LG, MONTHS_SM } from "../constants";
 import { DateFormat, Separator } from "../types";
 
 interface Props {
-  date: Date;
+  date: string | Date;
   dateFormat: DateFormat;
   separator?: Separator;
   locale?: "en" | "es";
@@ -18,7 +18,12 @@ export function formatDate({ date, dateFormat, separator, locale }: Props) {
     separator ?? formatSeparator[0],
     separator ?? formatSeparator[1],
   ];
-  const dateToWorkWith = date.toISOString().split("T")[0];
+  const dateToWorkWith =
+    date instanceof Date
+      ? date.toISOString().split("T")[0]
+      : date.includes("T")
+        ? date.split("T")[0]
+        : date;
   const [year, month, day] = dateToWorkWith.split("-");
 
   const countD = dateFormat.split("d").length - 1;

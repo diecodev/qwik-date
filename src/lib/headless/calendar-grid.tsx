@@ -12,7 +12,12 @@ import { getClientLocalDate } from "../core/utils/timezone-formatter";
 
 export const CalendarGrid = component$<PropsOf<"table">>((props) => {
   return (
-    <table {...props} role="grid" aria-labelledby="qwik-date-heading">
+    <table
+      {...props}
+      role="grid"
+      aria-labelledby="qwik-date-heading"
+      data-calendar-table
+    >
       <Slot />
     </table>
   );
@@ -23,9 +28,9 @@ export const CalendarWeekdays = component$<PropsOf<"thead">>((props) => {
 
   return (
     <thead {...props}>
-      <tr>
+      <tr data-calendar-weekdays>
         {WEEKDAYS[locale].map((day) => (
-          <th key={day} scope="col" aria-label={day}>
+          <th key={day} scope="col" aria-label={day} data-calendar-weekday>
             {day
               .slice(0, 2)
               .normalize("NFD")
@@ -38,8 +43,15 @@ export const CalendarWeekdays = component$<PropsOf<"thead">>((props) => {
 });
 
 export const CalendarDays = component$<PropsOf<"button">>((props) => {
-  const { dateToRender, minDate, maxDate, completeWeeks, locale, activeDate } =
-    useContext(QwikDateCtxId);
+  const {
+    dateToRender,
+    minDate,
+    maxDate,
+    completeWeeks,
+    locale,
+    activeDate,
+    defaultDate,
+  } = useContext(QwikDateCtxId);
 
   const daysArr = useComputed$(() => {
     return generateDaysGrid({
@@ -55,6 +67,7 @@ export const CalendarDays = component$<PropsOf<"button">>((props) => {
     month: "long",
     day: "numeric",
     weekday: "long",
+    timeZone: "UTC",
   });
 
   const validateIfDisabled = (props: {
@@ -75,7 +88,12 @@ export const CalendarDays = component$<PropsOf<"button">>((props) => {
       locale,
     });
 
-    return day >= localMaxDate || day < localMinDate;
+    const outOfDates = day >= localMaxDate || day < localMinDate;
+    const outOfMonth =
+      day.split("-")[1] !==
+      getClientLocalDate({ date: dateToRender.value, locale }).split("-")[1];
+
+    return outOfDates || outOfMonth;
   };
 
   const validateIfSelected = (props: {
@@ -97,8 +115,8 @@ export const CalendarDays = component$<PropsOf<"button">>((props) => {
 
   return (
     <tbody role="rowgroup">
-      {daysArr.value.days.map((arr, arrIdx) => (
-        <tr key={arr.join("")}>
+      {daysArr.value.days.map((arr) => (
+        <tr key={arr.join("")} data-calendar-row>
           {arr.map((day, idx) => {
             const disabled = validateIfDisabled({
               day,
@@ -112,7 +130,12 @@ export const CalendarDays = component$<PropsOf<"button">>((props) => {
             });
 
             return (
-              <td role="presentation" key={idx} aria-disabled={disabled}>
+              <td
+                role="presentation"
+                key={idx}
+                aria-disabled={disabled}
+                data-calendar-cell
+              >
                 {day && (
                   <button
                     {...props}
@@ -135,6 +158,7 @@ export const CalendarDays = component$<PropsOf<"button">>((props) => {
                     data-value={day}
                     disabled={disabled}
                     data-qwik-date-day
+                    data-preselected={day === defaultDate}
                   >
                     {day.split("-")[2]}
                   </button>

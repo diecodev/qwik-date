@@ -15,7 +15,7 @@ import { generateMaxDate, generateMinDate } from "../core";
 
 interface RootProps extends PropsOf<"div"> {
   completeWeeks?: boolean;
-  defaultDate?: string;
+  defaultDate?: Date | string;
   minDate?: Date;
   maxDate?: Date;
   locale?: "en" | "es";
@@ -52,7 +52,7 @@ export const CalendarRoot = component$<RootProps>(
 
     const defaultDateParsed = defaultDate ? new Date(defaultDate) : new Date();
 
-    // signals and constants
+    // signals
     const activeDate = useSignal<Date | null>(null);
     const dateToRender = useSignal<Date>(defaultDateParsed);
 
@@ -66,6 +66,13 @@ export const CalendarRoot = component$<RootProps>(
 
     // refs
     const triggerRef = useSignal<HTMLButtonElement>();
+    const rootEl = useSignal<HTMLDivElement>();
+
+    // constants
+    const formatDefaultDate =
+      defaultDate instanceof Date
+        ? defaultDate.toISOString().split("T")[0]
+        : defaultDate?.split("T")[0];
 
     // context stuffs
     const localId = useId();
@@ -75,7 +82,7 @@ export const CalendarRoot = component$<RootProps>(
       contentId,
       minDate,
       maxDate,
-      defaultDate,
+      defaultDate: formatDefaultDate,
       dateToRender,
       locale,
       theme,
@@ -148,37 +155,13 @@ export const CalendarRoot = component$<RootProps>(
           });
         }
 
-        function onMountPreSelectionHandler() {
-          const dayEl = document.querySelectorAll("button[data-qwik-date-day]");
-
-          if (!dayEl) return;
-
-          dayEl.forEach((el) => {
-            const contentDay = contentEl?.getAttribute("data-default-date");
-            const btnDay = el.getAttribute("data-value");
-
-            if (!btnDay) return;
-
-            if (contentDay === btnDay) {
-              el.setAttribute("data-pre-selected", "true");
-            }
-          });
-        }
-
         onMountThemeHandler();
         onMountDirHandler();
-        onMountPreSelectionHandler();
       })
     );
 
     return (
-      <div
-        {...props}
-        data-theme={theme}
-        dir={dir}
-        data-default-date={defaultDate}
-        data-qwik-date
-      >
+      <div {...props} data-theme={theme} dir={dir} data-qwik-date>
         <Slot />
       </div>
     );

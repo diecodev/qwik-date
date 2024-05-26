@@ -10,7 +10,7 @@ import { MONTHS_LG } from "../core";
 
 export const CalendarHeader = component$<PropsOf<"header">>((props) => {
   return (
-    <header {...props}>
+    <header {...props} data-header>
       <Slot />
     </header>
   );
@@ -25,7 +25,12 @@ export const CalendarHeaderTitle = component$<PropsOf<"div">>((props) => {
   });
 
   return (
-    <div role="presentation" aria-live="polite" id="qwik-date-heading">
+    <div
+      role="presentation"
+      aria-live="polite"
+      id="qwik-date-heading"
+      data-header-content
+    >
       {monthToDisplay} {dateToRender.value.getFullYear()}
     </div>
   );
