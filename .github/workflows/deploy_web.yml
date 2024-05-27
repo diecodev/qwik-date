@@ -1,0 +1,42 @@
+name: Deploy to Deno Deploy
+on:
+  push:
+    branches: main
+    paths: website/**
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write # Needed for auth with Deno Deploy
+      contents: read # Needed to clone the repository
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Install Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Build qwik-date
+        run: "pnpm install --no-frozen-lockfile && pnpm run build"
+
+      - name: Build website
+        run: "pnpm install --no-frozen-lockfile && pnpm run build"
+        working-directory: ./website
+
+      - name: Upload to Deno Deploy
+        uses: denoland/deployctl@v1
+        with:
+          project: "qwik-sonner"
+          entrypoint: "https://deno.land/std@0.244.0/http/file_server.ts" # 📝 Update the entrypoint if necessary
+          root: "./website/dist" # 📝 Update the root if necessary
