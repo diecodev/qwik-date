@@ -14,9 +14,11 @@ export const ScriptCode = component$(() => {
   });
 
   return (
-    <section class="space-y-8">
+    <section class="space-y-10">
       <div class="space-y-3">
-        <h3 class="font-medium">{"> "}Installation</h3>
+        <h3 class="text-center font-medium">
+          {"> "}Installation{" <"}
+        </h3>
         <pre
           class="relative cursor-copy rounded-lg bg-neutral-50 p-3 text-sm font-thin text-neutral-600 transition-all dark:bg-neutral-800 dark:text-neutral-200"
           onClick$={() => copyToClipboard("#installation")}
@@ -48,7 +50,9 @@ export const ScriptCode = component$(() => {
         </pre>
       </div>
       <div class="space-y-3">
-        <h3 class="font-medium">{"> "}Usage</h3>
+        <h3 class="text-center font-medium">
+          {"> "}How to use{" <"}
+        </h3>
         <code
           class="relative flex cursor-copy flex-col rounded-lg bg-neutral-50 p-3 text-sm font-thin text-neutral-600 transition-all dark:bg-neutral-800 dark:text-neutral-200"
           onClick$={() => copyToClipboard("#usage")}

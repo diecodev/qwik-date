@@ -39,7 +39,7 @@ const props = [
   {
     name: "onDateSelect$",
     description: `The callback function to call when a date is selected`,
-    default: "undefined",
+    default: "-",
   },
   {
     name: "prevButtonProps",
