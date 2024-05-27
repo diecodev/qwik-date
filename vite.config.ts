@@ -7,29 +7,39 @@ const { dependencies = {}, peerDependencies = {} } = pkg as any;
 const makeRegex = (dep) => new RegExp(`^${dep}(/.*)?$`);
 const excludeAll = (obj) => Object.keys(obj).map(makeRegex);
 
-export default defineConfig({
-  plugins: [qwikVite(), tsconfigPaths()],
-  build: {
-    target: "es2020",
-    lib: {
-      entry: {
-        utils: "./src/lib/core/utils/utils.ts",
-        constants: "./src/lib/core/constants/constants.ts",
-        types: "./src/lib/core/types.ts",
+export default defineConfig(({ command }) => {
+  const env = process.env.ENTRY as "styled" | "headless" | undefined;
+
+  if (!env && command === "build") throw new Error("ENTRY env var is required");
+
+  const entry =
+    env === "headless"
+      ? "src/lib/headless/index.ts"
+      : "src/lib/styled/calendar.tsx";
+
+  return {
+    plugins: [qwikVite(), tsconfigPaths()],
+    build: {
+      target: "es2020",
+      outDir: "lib",
+      lib: {
+        entry,
+        formats: ["es", "cjs"],
+        fileName: (format) => {
+          const ext = format === "es" ? "mjs" : "cjs";
+          const name = env === "headless" ? "headless" : "index";
+          return `${name}.qwik.${ext}`;
+        },
       },
-      formats: ["es", "cjs"],
-      fileName: (format, entry) => {
-        console.log({ format, entry });
-        return `${entry}.qwik.${format === "es" ? "mjs" : "cjs"}`;
+      emptyOutDir: env === "headless",
+      rollupOptions: {
+        // externalize deps that shouldn't be bundled into the library
+        external: [
+          /^node:.*/,
+          ...excludeAll(dependencies),
+          ...excludeAll(peerDependencies),
+        ],
       },
     },
-    rollupOptions: {
-      // externalize deps that shouldn't be bundled into the library
-      external: [
-        /^node:.*/,
-        ...excludeAll(dependencies),
-        ...excludeAll(peerDependencies),
-      ],
-    },
-  },
+  };
 });

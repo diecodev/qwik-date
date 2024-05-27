@@ -1,15 +1,54 @@
 {
   "name": "qwik-date",
   "version": "0.0.1",
-  "description": "Create a reusable Qwik component library",
+  "description": "Qwik calendar, simple integration.",
+  "keywords": [
+    "qwik",
+    "qwik library",
+    "typescript",
+    "qwik date",
+    "calendar",
+    "qwik calendar",
+    "qwik date picker",
+    "qwik calendar picker",
+    "date picker",
+    "calendar picker"
+  ],
+  "author": {
+    "name": "diecodev",
+    "url": "https://github.com/diecodev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/diecodev/qwik-date.git"
+  },
   "main": "./lib/index.qwik.mjs",
   "qwik": "./lib/index.qwik.mjs",
   "types": "./lib-types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./lib/index.qwik.mjs",
-      "require": "./lib/index.qwik.cjs",
-      "types": "./lib-types/index.d.ts"
+      "node": {
+        "import": "./lib/index.qwik.mjs",
+        "require": "./lib/index.qwik.cjs",
+        "types": "./lib-types/styled/calendar.d.ts"
+      },
+      "default": {
+        "import": "./lib/index.qwik.mjs",
+        "require": "./lib/index.qwik.cjs",
+        "types": "./lib-types/styled/calendar.d.ts"
+      }
+    },
+    "./headless": {
+      "node": {
+        "import": "./lib/headless.qwik.mjs",
+        "require": "./lib/headless.qwik.cjs",
+        "types": "./lib-types/headless/index.d.ts"
+      },
+      "default": {
+        "import": "./lib/headless.qwik.mjs",
+        "require": "./lib/headless.qwik.cjs",
+        "types": "./lib-types/headless/index.d.ts"
+      }
     }
   },
   "files": [
@@ -23,25 +62,28 @@
   "type": "module",
   "scripts": {
     "build": "qwik build",
-    "build.lib": "vite build --mode lib",
+    "build.lib": "ENTRY=headless vite build --mode lib && ENTRY=styled vite build --mode lib",
     "build.types": "tsc --emitDeclarationOnly -p ./tsconfig.lib.json",
     "dev": "vite --mode ssr",
     "dev.debug": "node --inspect-brk ./node_modules/vite/bin/vite.js --mode ssr --force",
     "fmt": "prettier --write .",
     "fmt.check": "prettier --check .",
     "lint": "eslint \"src/**/*.ts*\"",
-    "release": "np",
+    "prepublishOnly": "pnpm build",
+    "release": "bumpp --commit --tag --push",
     "start": "vite --open --mode ssr",
-    "test": "echo \"No test specified\" && exit 0",
+    "test": "playwright test",
     "qwik": "qwik"
   },
   "devDependencies": {
     "@builder.io/qwik": "1.5.4",
     "@floating-ui/dom": "^1.6.5",
+    "@playwright/test": "^1.38.1",
     "@types/eslint": "^8.56.10",
     "@types/node": "^20.12.7",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "@typescript-eslint/parser": "^7.7.1",
+    "bumpp": "9.4.1",
     "eslint": "^8.57.0",
     "eslint-plugin-qwik": "latest",
     "np": "^8.0.4",
