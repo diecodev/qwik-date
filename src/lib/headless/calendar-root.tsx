@@ -1,9 +1,10 @@
 import {
   $,
   component$,
+  isSignal,
   PropsOf,
+  Signal,
   Slot,
-  sync$,
   useComputed$,
   useContextProvider,
   useId,
@@ -11,14 +12,14 @@ import {
   useSignal,
 } from "@builder.io/qwik";
 import { QwikDateCtx, QwikDateCtxId } from "./context";
-import { generateMaxDate, generateMinDate } from "../core";
+import { generateMaxDate, generateMinDate, Locale } from "../core";
 
 interface RootProps extends PropsOf<"div"> {
-  completeWeeks?: boolean;
+  completeWeeks?: Signal<boolean> | boolean;
   defaultDate?: Date | string;
   minDate?: Date;
   maxDate?: Date;
-  locale?: "en" | "es";
+  locale?: Signal<Locale> | Locale;
   theme?: "light" | "dark" | "system";
   dir?: "ltr" | "rtl" | "auto";
 }
@@ -27,9 +28,9 @@ export const CalendarRoot = component$<RootProps>(
   ({
     completeWeeks = false,
     defaultDate,
-    dir = "auto",
+    dir,
     maxDate: maxDateProp,
-    locale = "en",
+    locale,
     minDate: minDateProp,
     theme = "system",
     ...props
@@ -84,8 +85,7 @@ export const CalendarRoot = component$<RootProps>(
       maxDate,
       defaultDate: formatDefaultDate,
       dateToRender,
-      locale,
-      theme,
+      locale: isSignal(locale) ? locale : locale ?? "en",
       completeWeeks,
       activeDate,
     };
@@ -94,14 +94,13 @@ export const CalendarRoot = component$<RootProps>(
 
     useOnWindow(
       "DOMContentLoaded",
-      sync$(() => {
-        const contentEl = document.querySelector("[data-qwik-date]");
-        if (!contentEl) {
+      $(() => {
+        if (!rootEl.value) {
           throw new Error("Content ref not found");
         }
 
         function onMountThemeHandler() {
-          const selectedTheme = contentEl?.getAttribute("data-theme");
+          const selectedTheme = rootEl.value?.getAttribute("data-theme");
 
           if (selectedTheme !== "system") return;
 
@@ -112,7 +111,7 @@ export const CalendarRoot = component$<RootProps>(
               ? "dark"
               : "light";
 
-          contentEl?.setAttribute(
+          rootEl.value?.setAttribute(
             "data-theme",
             themeFromLocalStorage ?? themeFromMediaQuery
           );
@@ -124,13 +123,13 @@ export const CalendarRoot = component$<RootProps>(
         }
 
         function onMountDirHandler() {
-          const dir = contentEl?.getAttribute("dir")!;
+          const dir = rootEl.value?.getAttribute("dir")!;
           if (dir && dir !== "auto") return;
 
           const newDir = window.getComputedStyle(
             document.documentElement
           ).direction;
-          contentEl?.setAttribute("dir", newDir);
+          rootEl.value?.setAttribute("dir", newDir);
 
           const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -142,9 +141,9 @@ export const CalendarRoot = component$<RootProps>(
                   "dir"
                 );
                 if (value === "auto" || !value) {
-                  return contentEl?.setAttribute("dir", newDir);
+                  return rootEl.value?.setAttribute("dir", newDir);
                 }
-                contentEl?.setAttribute("dir", value);
+                rootEl.value?.setAttribute("dir", value);
               }
             });
           });
@@ -161,7 +160,7 @@ export const CalendarRoot = component$<RootProps>(
     );
 
     return (
-      <div {...props} data-theme={theme} dir={dir} data-qwik-date>
+      <div {...props} data-theme={theme} dir={dir} data-qwik-date ref={rootEl}>
         <Slot />
       </div>
     );

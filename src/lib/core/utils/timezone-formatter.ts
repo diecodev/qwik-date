@@ -9,7 +9,7 @@ export const getClientLocalDate = ({
   locale,
 }: {
   date: Date;
-  locale: Locale;
+  locale?: Locale;
 }) => {
   const month = date.toLocaleDateString(locale, {
     timeZone: getClientTimeZone(),

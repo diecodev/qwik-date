@@ -1,5 +1,6 @@
 import {
   component$,
+  isSignal,
   PropsOf,
   Slot,
   useComputed$,
@@ -21,7 +22,9 @@ export const CalendarHeaderTitle = component$<PropsOf<"div">>((props) => {
 
   //BUG: we need to use `useComputed$` to update the month label bc for some reason in qwik >= 1.5.4 it doesn't update if you use the constant object directly in the JSX
   const monthToDisplay = useComputed$(() => {
-    return MONTHS_LG[locale][dateToRender.value.getMonth()];
+    return MONTHS_LG[isSignal(locale) ? locale.value : locale][
+      dateToRender.value.getMonth()
+    ];
   });
 
   return (
@@ -30,6 +33,7 @@ export const CalendarHeaderTitle = component$<PropsOf<"div">>((props) => {
       aria-live="polite"
       id="qwik-date-heading"
       data-header-content
+      {...props}
     >
       {monthToDisplay} {dateToRender.value.getFullYear()}
     </div>

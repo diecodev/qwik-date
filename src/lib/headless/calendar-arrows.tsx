@@ -2,6 +2,7 @@ import {
   $,
   Component,
   component$,
+  isSignal,
   PropsOf,
   useContext,
 } from "@builder.io/qwik";
@@ -38,7 +39,8 @@ export const CalendarNext = component$<CalendarArrowProps>(
     const { locale, maxDate, minDate, dateToRender } =
       useContext(QwikDateCtxId);
 
-    const nextAriaLabel = ARIA_LABELS[locale].next;
+    const nextAriaLabel =
+      ARIA_LABELS[isSignal(locale) ? locale.value : locale].next;
 
     const goToNextMonth = $(() => {
       const { nextDate } = generateInlineMonthsObject({
@@ -72,7 +74,8 @@ export const CalendarPrevious = component$<CalendarArrowProps>(
     const { locale, maxDate, minDate, dateToRender } =
       useContext(QwikDateCtxId);
 
-    const previousAriaLabel = ARIA_LABELS[locale].previous;
+    const previousAriaLabel =
+      ARIA_LABELS[isSignal(locale) ? locale.value : locale].previous;
 
     const goToPrevMonth = $(() => {
       const { prevDate } = generateInlineMonthsObject({

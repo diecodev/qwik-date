@@ -1,6 +1,7 @@
 import {
   $,
   component$,
+  isSignal,
   PropsOf,
   Slot,
   useComputed$,
@@ -29,7 +30,7 @@ export const CalendarWeekdays = component$<PropsOf<"thead">>((props) => {
   return (
     <thead {...props}>
       <tr data-calendar-weekdays>
-        {WEEKDAYS[locale].map((day) => (
+        {WEEKDAYS[isSignal(locale) ? locale.value : locale].map((day) => (
           <th key={day} scope="col" aria-label={day} data-calendar-weekday>
             {day
               .slice(0, 2)
@@ -58,17 +59,22 @@ export const CalendarDays = component$<PropsOf<"button">>((props) => {
       activeDate: dateToRender.value,
       minDate: minDate.value,
       maxDate: maxDate.value,
-      completeWeeks: completeWeeks,
+      completeWeeks: isSignal(completeWeeks)
+        ? completeWeeks.value
+        : completeWeeks,
     });
   });
 
-  const intlFormat = new Intl.DateTimeFormat(locale, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "long",
-    timeZone: "UTC",
-  });
+  const intlFormat = new Intl.DateTimeFormat(
+    isSignal(locale) ? locale.value : locale,
+    {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "long",
+      timeZone: "UTC",
+    }
+  );
 
   const validateIfDisabled = (props: {
     day: string | null;
@@ -80,18 +86,21 @@ export const CalendarDays = component$<PropsOf<"button">>((props) => {
 
     const localMinDate = getClientLocalDate({
       date: minDate,
-      locale,
+      locale: isSignal(locale) ? locale.value : locale,
     });
 
     const localMaxDate = getClientLocalDate({
       date: maxDate,
-      locale,
+      locale: isSignal(locale) ? locale.value : locale,
     });
 
     const outOfDates = day >= localMaxDate || day < localMinDate;
     const outOfMonth =
       day.split("-")[1] !==
-      getClientLocalDate({ date: dateToRender.value, locale }).split("-")[1];
+      getClientLocalDate({
+        date: dateToRender.value,
+        locale: isSignal(locale) ? locale.value : locale,
+      }).split("-")[1];
 
     return outOfDates || outOfMonth;
   };
@@ -107,7 +116,7 @@ export const CalendarDays = component$<PropsOf<"button">>((props) => {
 
     const localActiveDate = getClientLocalDate({
       date: activeDate,
-      locale,
+      locale: isSignal(locale) ? locale.value : locale,
     });
 
     return day === localActiveDate;
