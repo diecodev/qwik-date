@@ -1,25 +1,22 @@
 import {
-  $,
   Component,
   component$,
   Fragment,
+  isSignal,
   PropsOf,
   QRL,
-  useOnWindow,
   useStyles$,
-  useVisibleTask$,
 } from "@builder.io/qwik";
 import { DateFormat, formatDate, Separator } from "../core";
 import * as HeadlessCalendar from "../headless";
 import styles from "./style.css?inline";
-import { getClientLocalDate } from "../core/utils/timezone-formatter";
 
 type CalendarRootProps = PropsOf<typeof HeadlessCalendar.Root>;
 
 interface QwikDateProps extends CalendarRootProps {
   showWeekNumbers?: boolean;
   showWeekdays?: boolean;
-  onDateChange$?: QRL<(date: string) => any>;
+  onDateSelect$?: QRL<(date: string) => any>;
   prevButtonProps?: PropsOf<"button">;
   nextButtonProps?: PropsOf<"button">;
   headerProps?: PropsOf<"header">;
@@ -38,7 +35,7 @@ export const Calendar = component$<QwikDateProps>(
     headerProps,
     format = "yyyy-mm-dd",
     dateButtonProps,
-    onDateChange$,
+    onDateSelect$,
     nextButtonProps,
     prevButtonProps,
     showWeekNumbers = false,
@@ -85,11 +82,13 @@ export const Calendar = component$<QwikDateProps>(
               const formattedDate = formatDate({
                 date,
                 dateFormat: format,
-                locale: props.locale,
+                locale: isSignal(props.locale)
+                  ? props.locale.value
+                  : props.locale,
                 separator,
               });
 
-              onDateChange$?.(formattedDate);
+              onDateSelect$?.(formattedDate);
             }}
           />
         </HeadlessCalendar.Grid>
