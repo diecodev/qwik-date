@@ -63,3 +63,13 @@ The production build will generate client and server modules by running both cli
 ```shell
 pnpm build # or `pnpm build`
 ```
+
+## Deno Server
+
+This app has a minimal [Deno server](https://docs.deno.com/runtime/tutorials/http_server) implementation. After running a full build, you can preview the build using the command:
+
+```
+pnpm serve
+```
+
+Then visit [http://localhost:8080/](http://localhost:8080/)
