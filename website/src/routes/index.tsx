@@ -7,6 +7,7 @@ import { Customize } from "~/components/customize";
 import "@fontsource-variable/onest";
 import { ScriptCode } from "~/components/script";
 import { Docs } from "~/components/docs";
+import { Footer } from "~/components/footer";
 
 export default component$(() => {
   const theme = useSignal<"light" | "dark">("light");
@@ -66,6 +67,7 @@ export default component$(() => {
         <ScriptCode />
         <Docs />
       </main>
+      <Footer />
     </>
   );
 });
