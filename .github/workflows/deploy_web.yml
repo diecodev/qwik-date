@@ -2,7 +2,10 @@ name: Deploy to Deno Deploy
 on:
   push:
     branches: main
-    paths: website/**
+    paths:
+      - "website/**"
+      - ".github/workflows/deploy_web.yml"
+      - "./src/lib/**"
 
 jobs:
   deploy:
