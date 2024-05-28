@@ -122,6 +122,13 @@ export const CalendarDays = component$<PropsOf<"button">>((props) => {
     return day === localActiveDate;
   };
 
+  const realDefaultDate =
+    defaultDate ??
+    getClientLocalDate({
+      date: new Date(),
+      locale: isSignal(locale) ? locale.value : locale,
+    });
+
   return (
     <tbody role="rowgroup">
       {daysArr.value.days.map((arr) => (
@@ -150,7 +157,7 @@ export const CalendarDays = component$<PropsOf<"button">>((props) => {
                     {...props}
                     role="gridcell"
                     name="day"
-                    tabIndex={-1}
+                    tabIndex={day === realDefaultDate ? 0 : -1}
                     type="button"
                     aria-selected={isSelected}
                     onClick$={[
@@ -167,7 +174,7 @@ export const CalendarDays = component$<PropsOf<"button">>((props) => {
                     data-value={day}
                     disabled={disabled}
                     data-qwik-date-day
-                    data-preselected={day === defaultDate}
+                    data-preselected={day === realDefaultDate}
                   >
                     {day.split("-")[2]}
                   </button>
