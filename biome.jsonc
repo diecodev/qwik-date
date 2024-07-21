@@ -1,0 +1,174 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"complexity": {
+				"noBannedTypes": "off",
+				"noExtraBooleanCast": "error",
+				"noMultipleSpacesInRegularExpressionLiterals": "error",
+				"noUselessCatch": "error",
+				"noUselessTypeConstraint": "error",
+				"noWith": "error"
+			},
+			"correctness": {
+				"noConstAssign": "error",
+				"noConstantCondition": "error",
+				"noEmptyCharacterClassInRegex": "error",
+				"noEmptyPattern": "error",
+				"noGlobalObjectCalls": "error",
+				"noInnerDeclarations": "error",
+				"noInvalidConstructorSuper": "error",
+				"noNewSymbol": "error",
+				"noNonoctalDecimalEscape": "error",
+				"noPrecisionLoss": "error",
+				"noSelfAssign": "error",
+				"noSetterReturn": "error",
+				"noSwitchDeclarations": "off",
+				"noUndeclaredVariables": "error",
+				"noUnreachable": "error",
+				"noUnreachableSuper": "error",
+				"noUnsafeFinally": "error",
+				"noUnsafeOptionalChaining": "error",
+				"noUnusedLabels": "error",
+				"noUnusedVariables": "error",
+				"useArrayLiterals": "off",
+				"useIsNan": "error",
+				"useValidForDirection": "error",
+				"useYield": "error",
+				"noUnusedImports": "error"
+			},
+			"style": {
+				"noInferrableTypes": "off",
+				"noNamespace": "off",
+				"noNonNullAssertion": "off",
+				"useAsConstAssertion": "error"
+			},
+			"suspicious": {
+				"noAsyncPromiseExecutor": "error",
+				"noCatchAssign": "error",
+				"noClassAssign": "error",
+				"noCompareNegZero": "error",
+				"noControlCharactersInRegex": "error",
+				"noDebugger": "error",
+				"noDuplicateCase": "error",
+				"noDuplicateClassMembers": "error",
+				"noDuplicateObjectKeys": "error",
+				"noDuplicateParameters": "error",
+				"noEmptyBlockStatements": "error",
+				"noExplicitAny": "off",
+				"noExtraNonNullAssertion": "error",
+				"noFallthroughSwitchClause": "error",
+				"noFunctionAssign": "error",
+				"noGlobalAssign": "error",
+				"noImportAssign": "error",
+				"noMisleadingCharacterClass": "error",
+				"noMisleadingInstantiator": "error",
+				"noPrototypeBuiltins": "error",
+				"noRedeclare": "error",
+				"noShadowRestrictedNames": "error",
+				"noUnsafeDeclarationMerging": "error",
+				"noUnsafeNegation": "error",
+				"useGetterReturn": "error",
+				"useValidTypeof": "error"
+			}
+		},
+		"include": [
+			"./src/**/*.ts"
+		],
+		"ignore": [
+			"./src/entry.*.ts"
+		]
+	},
+	"formatter": {
+		"enabled": true,
+		"lineWidth": 120,
+		"indentStyle": "space",
+		"indentWidth": 2,
+		"lineEnding": "lf",
+		"ignore": [
+			"**/*.log",
+			"**/.DS_Store",
+			"**/*.",
+			".vscode/settings.json",
+			"**/.history",
+			"**/.yarn",
+			"**/bazel-*",
+			"**/bazel-bin",
+			"**/bazel-out",
+			"**/bazel-qwik",
+			"**/bazel-testlogs",
+			"**/dist",
+			"**/dist-dev",
+			"**/lib",
+			"**/lib-types",
+			"**/etc",
+			"**/external",
+			"**/node_modules",
+			"**/temp",
+			"**/tsc-out",
+			"**/tsdoc-metadata.json",
+			"**/target",
+			"**/output",
+			"**/rollup.config.js",
+			"**/build",
+			"**/.cache",
+			"**/.vscode",
+			"**/.rollup.cache",
+			"**/tsconfig.tsbuildinfo",
+			"**/vite.config.ts"
+		]
+	},
+	"overrides": [
+		{
+			"include": [
+				"*.ts",
+				"*.tsx",
+				"*.mts",
+				"*.cts"
+			],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noConstAssign": "off",
+						"noGlobalObjectCalls": "off",
+						"noInvalidConstructorSuper": "off",
+						"noInvalidNewBuiltin": "off",
+						"noNewSymbol": "off",
+						"noSetterReturn": "off",
+						"noUndeclaredVariables": "off",
+						"noUnreachable": "off",
+						"noUnreachableSuper": "off"
+					},
+					"style": {
+						"noArguments": "error",
+						"noVar": "error",
+						"useConst": "error"
+					},
+					"suspicious": {
+						"noDuplicateClassMembers": "off",
+						"noDuplicateObjectKeys": "off",
+						"noDuplicateParameters": "off",
+						"noFunctionAssign": "off",
+						"noImportAssign": "off",
+						"noRedeclare": "off",
+						"noUnsafeNegation": "off",
+						"useGetterReturn": "off"
+					}
+				}
+			}
+		}
+	],
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"jsxQuoteStyle": "single",
+			"enabled": true,
+			"semicolons": "always"
+		}
+	}
+}

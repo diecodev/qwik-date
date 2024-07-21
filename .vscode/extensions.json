@@ -1,7 +1,6 @@
 {
   "recommendations": [
-    "esbenp.prettier-vscode",
-    "dbaeumer.vscode-eslint",
+    "biomejs.biome",
     "seatonjiang.gitmoji-vscode",
     "vivaxy.vscode-conventional-commits",
     "connor4312.nodejs-testing",
