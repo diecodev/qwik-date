@@ -1,4 +1,4 @@
-:where([data-qwik-date]):where([data-theme="light"]) {
+:where([data-qwik-date][data-theme="light"]) {
   --foreground-color: 0, 0%, 100%;
   --background-color: 0, 0%, 0%;
   --accent-color: 240, 4.8%, 95.9%;
@@ -11,7 +11,7 @@
   --outer-shadow: 0 0 0.25rem hsla(var(--shadow-color), var(--shadow-opacity, 0));
 }
 
-:where([data-qwik-date]):where([data-theme="dark"]) {
+:where([data-qwik-date][data-theme="dark"]) {
   --foreground-color: 0, 0%, 0%;
   --background-color: 240, 4.8%, 95.9%;
   --accent-color: 0, 0%, 20%;
@@ -26,10 +26,10 @@
 
 :where([data-qwik-date]) {
   --padding-inline: 0.75rem;
-  --padding-block: 1rem;
+  --padding-block: 0.75rem;
   --radius: 0.75rem;
   --font-size: 0.875rem;
-  --icon-size: 1.25rem;
+  --icon-size: 1rem;
   --table-row-size: 2rem;
 
   &>* {
@@ -60,88 +60,117 @@
   box-shadow: var(--inset-shadow), var(--outer-shadow);
   background-color: hsla(var(--foreground-color), 1);
 
-  & [data-header] {
+  & header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-inline: calc(var(--padding-inline) / 2);
+    gap: 0.5rem;
 
-    & [data-header-content] {
+    & div {
       font-size: var(--font-size);
       font-weight: 500;
       line-height: 1.25;
       color: hsla(var(--background-color), 1);
     }
 
-    & .arrows-container {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    & [data-header-action] {
+    & button:has(svg) {
       background-color: transparent;
-      outline: none;
       border: none;
       margin: 0;
-      padding-block: calc(var(--padding-block) / 4);
-      padding-inline: 0;
+      padding: 0.25rem;
       display: flex;
       align-items: center;
       justify-content: center;
       color: hsla(var(--background-color), 1);
+      border-radius: calc(var(--radius) - 0.4rem);
 
-      & [data-header-icon] {
+      --shadow-color: 0, 0%, 10%;
+      box-shadow: inset 0 0 0 0.075rem hsla(var(--shadow-color), 0.15);
+
+      @media (prefers-reduced-motion: no-preference) {
+        transition: all 150ms ease-in-out;
+      }
+
+      &:hover {
+        background-color: hsla(var(--accent-color), 1);
+      }
+
+      &:focus-visible,
+      &:focus,
+      &:focus-within {
+        outline: none;
+        box-shadow: inset 0 0 0 0.1rem hsla(var(--background-color), 0.2);
+      }
+
+      & svg {
         width: var(--icon-size);
         height: var(--icon-size);
       }
     }
   }
 
-  & [data-calendar-table] {
+  & table {
     border-collapse: collapse;
 
-    & [data-calendar-weekdays],
-    & [data-calendar-row] {
+    & thead>tr,
+    & tbody>tr {
       display: flex;
 
-      & [data-calendar-weekday],
-      & [data-calendar-cell] {
+      & th,
+      & td {
         width: var(--table-row-size);
         font-size: 0.8rem;
         font-weight: 400;
         text-align: center;
         color: hsl(0, 0%, 50%);
+        padding: 0;
       }
 
-      & [data-calendar-cell]:not([aria-disabled="true"]) {
+      & td {
+        color: hsl(0, 0%, 75%);
+      }
+
+      & td[aria-disabled="false"] {
         color: hsla(var(--background-color), 1);
       }
     }
 
-    &:has([data-calendar-weekdays]) [data-calendar-row]:first-child {
-      margin-top: 0.5rem;
+    &:has(th) tbody>tr:first-child {
+      margin-top: 0.75rem;
     }
 
-    & [data-calendar-row] {
-      & [data-qwik-date-day] {
+    & tbody {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    & tbody>tr {
+
+      & td>button {
         background-color: transparent;
         border: 0;
         padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 100%;
-        height: 100%;
         font-size: var(--font-size);
         width: var(--table-row-size);
         height: var(--table-row-size);
         border-radius: var(--radius);
         background-color: hsla(var(--foreground-color), 0);
         line-height: 1;
+        color: inherit;
+        outline: none;
 
         @media (prefers-reduced-motion: no-preference) {
-          transition: all 150ms ease-in-out;
+          transition: background-color 150ms ease-in-out, color 150ms ease-in-out;
+        }
+
+        &:focus-visible,
+        &:focus,
+        &:focus-within {
+          box-shadow: inset 0 0 0 0.1rem hsla(var(--background-color), 0.2);
         }
 
         &[data-preselected],
@@ -153,7 +182,13 @@
           background-color: hsla(var(--background-color), 1);
           color: hsla(var(--foreground-color), 1);
         }
+      }
 
+      & td:has(span) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: hsl(0, 0%, 50%);
       }
     }
   }
