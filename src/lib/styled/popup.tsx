@@ -5,7 +5,7 @@ import { Calendar } from './icons';
 import { CalendarInline, type CalendarInlineProps } from './inline';
 import styles from './style.css?inline';
 
-interface DatePickerProps extends CalendarInlineProps {
+export interface DatePickerProps extends CalendarInlineProps {
   mode?: 'inline' | 'popup';
   // trigger stuffs
   triggerProps?: PropsOf<'button'>;
