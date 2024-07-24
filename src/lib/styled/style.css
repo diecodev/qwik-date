@@ -48,7 +48,6 @@
 
 :where([data-qwik-date]):not([popover]),
 :where([data-qwik-date]):popover-open {
-  font-family: inherit;
 
   padding-inline: var(--padding-inline);
   padding-block: var(--padding-block);
@@ -192,7 +191,6 @@
 }
 
 :where([data-qwik-wrapper]) {
-  font-family: inherit;
   display: contents;
 
   --icon-size: 1rem;
@@ -204,7 +202,6 @@
   & button[popovertarget] {
     width: min(100%, var(--min-width));
     height: 2.25rem;
-    font: inherit;
     anchor-name: --anchor-trigger;
 
     display: flex;

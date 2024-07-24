@@ -70,6 +70,7 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
         containerProps={{
           id: `qwik-date-${id}`,
           popover: 'auto',
+          ...props.containerProps,
         }}
       />
     </div>
