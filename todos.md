@@ -1,0 +1,18 @@
+- [x] date selection
+- [ ] range date selection
+- [ ] month and year navigation
+- [x] Customizable date format
+- [x] Disable date(s)
+- [x] Keyboard navigation
+- [x] Responsive design
+- [x] Customize styles and/or classes
+- [x] Date validation
+- [x] Date formatter
+- [x] Event handlers
+- [x] Accessibility (aria roles and labels)
+- [x] Headless version
+- [ ] Custom date ranges (last 7 days, next 30d)
+- [x] Inline mode
+- [x] pop-up mode
+- [ ] Fancy animations (styled version)
+- [ ] Docs: easy to read, understand and implement.
