@@ -1,5 +1,5 @@
 import { $, type Component, type PropsOf, component$, useId, useOnWindow, useStyles$ } from '@builder.io/qwik';
-import { autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom';
+import { autoPlacement, autoUpdate, computePosition, offset, shift } from '@floating-ui/dom';
 import { TRIGGER_LABELS } from '../core';
 import { Calendar } from './icons';
 import { CalendarInline, type CalendarInlineProps } from './inline';
@@ -34,7 +34,13 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
       const update = () => {
         computePosition(btn, popover, {
           placement: 'bottom',
-          middleware: [offset(8), flip(), shift({ padding: 0 })],
+          middleware: [
+            offset(8),
+            autoPlacement({
+              allowedPlacements: ['bottom', 'top'],
+            }),
+            shift({ padding: 0 }),
+          ],
         }).then(({ x, y }) => {
           Object.assign(popover.style, {
             left: `${x}px`,
