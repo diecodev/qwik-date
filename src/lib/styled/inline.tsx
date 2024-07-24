@@ -6,9 +6,10 @@ import {
   type Signal,
   component$,
   useComputed$,
+  useOnDocument,
   useSignal,
   useStyles$,
-  useVisibleTask$,
+  useTask$,
 } from '@builder.io/qwik';
 import { ARIA_LABELS, type Locale, MONTHS_LG, type Month, WEEKDAYS, daysArrGenerator, getWeekNumber } from '../core';
 import { ChevronLeft, ChevronRight } from './icons';
@@ -110,6 +111,9 @@ export const CalendarInline = component$<CalendarInlineProps>(
     const yearToRender = useSignal<number>(+defaultDate.value.split('-')[0]);
     const dateToFocus = useSignal<LocalDate>(defaultDate.value);
 
+    // refs
+    const focusElRef = useSignal<HTMLButtonElement>();
+
     // computed
     const labelSignal = useComputed$(() => {
       if (!activeDate.value) return labelStr;
@@ -129,22 +133,29 @@ export const CalendarInline = component$<CalendarInlineProps>(
     if (!regex.test(defaultDate.value))
       throw new Error('Invalid date format in Calendar. Please use YYYY-MM-DD format.');
 
+    useOnDocument(
+      'customEvent',
+      $(() => console.log('customEvent fired')),
+    );
+
     // taks
-    useVisibleTask$(({ track, cleanup }) => {
-      track(() => datesArray.value);
+    useTask$(({ track, cleanup }) => {
+      track(() => focusElRef.value);
 
-      if (dateToFocus.value === defaultDate.value) return;
+      if (!focusElRef.value) return;
 
-      if (datesArray.value.flat().includes(dateToFocus.value)) {
-        const btn = document.querySelector(`button[data-value="${dateToFocus.value}"]`) as HTMLButtonElement | null;
-        btn?.focus();
-        btn?.setAttribute('tabindex', '0');
+      const btn = focusElRef.value;
+      const date = btn.getAttribute('data-value') as LocalDate;
+
+      if (datesArray.value.flat().includes(date)) {
+        focusElRef.value.setAttribute('tabindex', '0');
+        // @ts-expect-error focusVisible is not on types
+        focusElRef.value.focus({ preventScroll: true, focusVisible: true });
       }
 
       cleanup(() => {
-        const btn = document.querySelector(`button[data-value="${dateToFocus.value}"]`) as HTMLButtonElement | null;
-        btn?.setAttribute('tabindex', '-1');
-        btn?.blur();
+        focusElRef.value?.setAttribute('tabindex', '-1');
+        focusElRef.value?.blur();
       });
     });
 
@@ -181,9 +192,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
     const updateDateFocused = $((e: KeyboardEvent, tbody: HTMLTableSectionElement) => {
       if (!ACTION_KEYS.includes(e.key.toLowerCase() as (typeof ACTION_KEYS)[number])) return;
 
-      const elFocus = document.activeElement;
-
-      if (elFocus?.tagName.toLowerCase() !== 'button') return;
+      if (document.activeElement !== focusElRef.value) return;
 
       const buttons = Array.from(tbody.getElementsByTagName('button'));
 
@@ -199,7 +208,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
         return newIdx;
       };
 
-      const idx = buttons.indexOf(elFocus as HTMLButtonElement);
+      const idx = buttons.indexOf(focusElRef.value);
 
       // local helpers
       let localIdx: number = idx;
@@ -209,7 +218,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
         case 'arrowup': {
           localIdx = getNewIndex({ currentIdx: idx, step: -7 });
           if (idx === localIdx) {
-            const d = new Date(elFocus.getAttribute('data-value') as LocalDate);
+            const d = new Date(focusElRef.value.getAttribute('data-value') as LocalDate);
             newDate = new Date(d.setDate(d.getDate() - 7)).toISOString().split('T')[0] as LocalDate;
 
             decreaseDate();
@@ -219,7 +228,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
         case 'arrowdown': {
           localIdx = getNewIndex({ currentIdx: idx, step: 7 });
           if (idx === localIdx) {
-            const d = new Date(elFocus.getAttribute('data-value') as LocalDate);
+            const d = new Date(focusElRef.value.getAttribute('data-value') as LocalDate);
             newDate = new Date(d.setDate(d.getDate() + 7)).toISOString().split('T')[0] as LocalDate;
 
             increaseDate();
@@ -230,7 +239,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
         case 'arrowleft': {
           localIdx = getNewIndex({ currentIdx: idx, step: -1 });
           if (idx === localIdx) {
-            const d = new Date(elFocus.getAttribute('data-value') as LocalDate);
+            const d = new Date(focusElRef.value.getAttribute('data-value') as LocalDate);
             newDate = new Date(d.setDate(d.getDate() - 1)).toISOString().split('T')[0] as LocalDate;
 
             decreaseDate();
@@ -240,7 +249,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
         case 'arrowright': {
           localIdx = getNewIndex({ currentIdx: idx, step: 1 });
           if (idx === localIdx) {
-            const d = new Date(elFocus.getAttribute('data-value') as LocalDate);
+            const d = new Date(focusElRef.value.getAttribute('data-value') as LocalDate);
             newDate = new Date(d.setDate(d.getDate() + 1)).toISOString().split('T')[0] as LocalDate;
 
             increaseDate();
@@ -250,10 +259,10 @@ export const CalendarInline = component$<CalendarInlineProps>(
       }
 
       dateToFocus.value = newDate ?? (buttons[localIdx].getAttribute('data-value') as LocalDate);
-      elFocus.setAttribute('tabindex', '-1');
-      buttons[localIdx].setAttribute('tabindex', '0');
-      // @ts-expect-error
-      buttons[localIdx].focus({ preventScroll: true, focusVisible: true });
+      // elFocus.setAttribute('tabindex', '-1');
+      // buttons[localIdx].setAttribute('tabindex', '0');
+      // // @ts-expect-error
+      // buttons[localIdx].focus({ preventScroll: true, focusVisible: true });
     });
 
     return (
@@ -345,6 +354,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
                             aria-label={label}
                             disabled={disabled}
                             tabIndex={day === dateToFocus.value ? 0 : -1}
+                            ref={day === dateToFocus.value ? focusElRef : undefined}
                             {...dayButtonProps}
                             onClick$={[
                               $(() => {
