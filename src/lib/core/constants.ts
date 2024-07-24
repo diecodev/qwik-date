@@ -53,3 +53,8 @@ export const WEEKDAYS = {
   en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
   es: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
 } as const satisfies Record<Locale, string[]>;
+
+export const TRIGGER_LABELS = {
+  en: 'Select a date',
+  es: 'Seleccionar una fecha',
+} as const;

@@ -1,30 +1,52 @@
 import {
   $,
   type Component,
-  component$,
   type PropsOf,
+  type QRL,
   type Signal,
+  component$,
   useComputed$,
   useSignal,
   useStyles$,
   useVisibleTask$,
 } from '@builder.io/qwik';
-import { isServer } from '@builder.io/qwik/build';
-import { ARIA_LABELS, MONTHS_LG, WEEKDAYS, daysArrGenerator, getWeekNumber, type Locale } from '../core';
+import { ARIA_LABELS, type Locale, MONTHS_LG, type Month, WEEKDAYS, daysArrGenerator, getWeekNumber } from '../core';
 import { ChevronLeft, ChevronRight } from './icons';
 import styles from './style.css?inline';
 
-const regex = /^\d{4}-(0[1-9]|1[0-2])-\d{2}$/;
-const dateFormatter = (locale: Locale) =>
-  new Intl.DateTimeFormat(locale, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-
 type LocalDate = `${number}-${number}-${number}`;
-type Month = '01' | '02' | '03' | '04' | '05' | '06' | '07' | '08' | '09' | '10' | '11' | '12';
+
+export interface CalendarInlineProps {
+  locale?: Locale;
+  showWeekNumber?: boolean;
+  fullWeeks?: boolean;
+  date?: LocalDate;
+  'bind:date'?: Signal<LocalDate>; // TODO: validate user is passing a signal
+  showDaysOfWeek?: boolean;
+  unStyled?: boolean;
+  iconLeft?: Component<PropsOf<'svg'>>;
+  iconRight?: Component<PropsOf<'svg'>>;
+  // props to override
+  containerProps?: PropsOf<'div'>;
+  headerProps?: PropsOf<'header'>;
+  actionButtonProps?: PropsOf<'button'>;
+  actionLeftProps?: PropsOf<'button'>;
+  actionRightProps?: PropsOf<'button'>;
+  iconProps?: PropsOf<'svg'>;
+  titleProps?: PropsOf<'div'>;
+  calendarProps?: PropsOf<'table'>;
+  theadProps?: PropsOf<'thead'>;
+  tbodyProps?: PropsOf<'tbody'>;
+  theadRowProps?: PropsOf<'tr'>;
+  tbodyRowProps?: PropsOf<'tr'>;
+  headerCellProps?: PropsOf<'th'>;
+  cellProps?: PropsOf<'td'>;
+  dayButtonProps?: PropsOf<'button'>;
+  weekNumberProps?: PropsOf<'td'>;
+  onDateChange$?: QRL<(date: LocalDate) => void>;
+}
+
+const regex = /^\d{4}-(0[1-9]|1[0-2])-\d{2}$/;
 const ACTION_KEYS = [
   'enter',
   ' ',
@@ -37,47 +59,60 @@ const ACTION_KEYS = [
   'pageup',
   'pagedown',
 ] as const;
+const dateFormatter = (locale: Locale) =>
+  new Intl.DateTimeFormat(locale, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
-interface QwikCalendarProps extends PropsOf<'div'> {
-  locale?: Locale;
-  showWeekNumber?: boolean;
-  fullWeeks?: boolean;
-  date?: LocalDate;
-  'bind:date'?: Signal<LocalDate>;
-  showDaysOfWeek?: boolean;
-  unStyled?: boolean;
-  iconLeft?: Component<PropsOf<'svg'>>;
-  iconRight?: Component<PropsOf<'svg'>>;
-}
-
-const QwikCalendar = component$<QwikCalendarProps>(
+export const CalendarInline = component$<CalendarInlineProps>(
   ({
     date: dateProp,
     fullWeeks = false,
     locale = 'en',
     showWeekNumber = false,
     showDaysOfWeek = true,
-    unStyled = false,
     iconLeft,
     iconRight,
+    containerProps = {},
+    headerProps = {},
+    actionButtonProps = {},
+    actionLeftProps = {},
+    actionRightProps = {},
+    calendarProps = {},
+    theadProps = {},
+    tbodyProps = {},
+    theadRowProps = {},
+    tbodyRowProps = {},
+    headerCellProps = {},
+    cellProps = {},
+    dayButtonProps = {},
+    iconProps = {},
+    titleProps = {},
+    weekNumberProps = {},
+    onDateChange$,
+    unStyled,
     ...props
   }) => {
     if (!unStyled) useStyles$(styles);
 
     // root constants
     const date = new Date().toISOString().split('T')[0] as LocalDate;
-    const labelStr = props['aria-label'] ?? ARIA_LABELS[locale].root;
+    const labelStr = containerProps['aria-label'] ?? ARIA_LABELS[locale].root;
 
     // signals
     const dateSignal = useSignal<LocalDate>(dateProp ?? date);
     const defaultDate = props['bind:date'] ?? dateSignal;
-    const activeDate = useSignal<LocalDate>(defaultDate.value);
+    const activeDate = useSignal<LocalDate | null>(null);
     const monthToRender = useSignal<Month>(defaultDate.value.split('-')[1] as Month);
     const yearToRender = useSignal<number>(+defaultDate.value.split('-')[0]);
-    const dateToFocus = useSignal<LocalDate>(activeDate.value);
+    const dateToFocus = useSignal<LocalDate>(defaultDate.value);
 
     // computed
     const labelSignal = useComputed$(() => {
+      if (!activeDate.value) return labelStr;
       const [year, month] = activeDate.value.split('-');
 
       return `${labelStr} ${MONTHS_LG[locale][+month - 1]} ${year}`;
@@ -94,11 +129,38 @@ const QwikCalendar = component$<QwikCalendarProps>(
     if (!regex.test(defaultDate.value))
       throw new Error('Invalid date format in Calendar. Please use YYYY-MM-DD format.');
 
+    // taks
+    useVisibleTask$(({ track, cleanup }) => {
+      track(() => datesArray.value);
+
+      if (dateToFocus.value === defaultDate.value) return;
+
+      if (datesArray.value.flat().includes(dateToFocus.value)) {
+        const btn = document.querySelector(`button[data-value="${dateToFocus.value}"]`) as HTMLButtonElement | null;
+        btn?.focus();
+        btn?.setAttribute('tabindex', '0');
+      }
+
+      cleanup(() => {
+        const btn = document.querySelector(`button[data-value="${dateToFocus.value}"]`) as HTMLButtonElement | null;
+        btn?.setAttribute('tabindex', '-1');
+        btn?.blur();
+      });
+    });
+
     // header utils
     const hMonth = MONTHS_LG[locale][+monthToRender.value - 1];
     const hTitle = `${hMonth} ${yearToRender.value}`;
+
+    // days of the week
+    const daysOfWeek = WEEKDAYS[locale];
+
+    // icons
+    const IconLeft = iconLeft ?? ChevronLeft;
+    const IconRight = iconRight ?? ChevronRight;
+
+    // events handlers
     const decreaseDate = $(() => {
-      console.log('decrease fn');
       if (monthToRender.value === '01') {
         monthToRender.value = '12';
         yearToRender.value -= 1;
@@ -116,15 +178,6 @@ const QwikCalendar = component$<QwikCalendarProps>(
 
       monthToRender.value = String(+monthToRender.value + 1).padStart(2, '0') as Month;
     });
-
-    // days of the week
-    const daysOfWeek = WEEKDAYS[locale];
-
-    // icons
-    const IconLeft = iconLeft ?? ChevronLeft;
-    const IconRight = iconRight ?? ChevronRight;
-
-    // events handlers
     const updateDateFocused = $((e: KeyboardEvent, tbody: HTMLTableSectionElement) => {
       if (!ACTION_KEYS.includes(e.key.toLowerCase() as (typeof ACTION_KEYS)[number])) return;
 
@@ -197,31 +250,15 @@ const QwikCalendar = component$<QwikCalendarProps>(
       }
 
       dateToFocus.value = newDate ?? (buttons[localIdx].getAttribute('data-value') as LocalDate);
-    });
-
-    useVisibleTask$(({ track, cleanup }) => {
-      track(() => dateToFocus.value);
-      track(() => datesArray.value);
-
-      if (isServer) return;
-
-      if (datesArray.value.flat().includes(dateToFocus.value)) {
-        const btn = document.querySelector(`button[data-value="${dateToFocus.value}"]`) as HTMLButtonElement | null;
-        btn?.focus();
-        console.log('focus', btn?.value, btn?.getAttribute('data-value'));
-        btn?.setAttribute('tabindex', '0');
-      }
-
-      cleanup(() => {
-        const btn = document.querySelector(`button[data-value="${dateToFocus.value}"]`) as HTMLButtonElement | null;
-        btn?.setAttribute('tabindex', '-1');
-        btn?.blur();
-      });
+      elFocus.setAttribute('tabindex', '-1');
+      buttons[localIdx].setAttribute('tabindex', '0');
+      // @ts-expect-error
+      buttons[localIdx].focus({ preventScroll: true, focusVisible: true });
     });
 
     return (
-      <div data-qwik-date data-theme='light' aria-label={labelSignal.value} {...props}>
-        <header>
+      <div data-qwik-date data-theme='light' aria-label={labelSignal.value} {...containerProps}>
+        <header {...headerProps}>
           <button
             type='button'
             onClick$={[
@@ -229,13 +266,15 @@ const QwikCalendar = component$<QwikCalendarProps>(
               $(() => {
                 dateToFocus.value = `${yearToRender.value}-${monthToRender.value}-01`;
               }),
+              actionButtonProps.onClick$,
+              actionLeftProps.onClick$,
             ]}
             aria-label={ARIA_LABELS[locale].previous}
           >
-            <IconLeft />
+            <IconLeft {...iconProps} />
           </button>
 
-          <div aria-live='polite' role='presentation' {...props}>
+          <div aria-live='polite' role='presentation' {...titleProps}>
             {hTitle}
           </div>
 
@@ -246,20 +285,22 @@ const QwikCalendar = component$<QwikCalendarProps>(
               $(() => {
                 dateToFocus.value = `${yearToRender.value}-${monthToRender.value}-01`;
               }),
+              actionButtonProps.onClick$,
+              actionRightProps.onClick$,
             ]}
             aria-label={ARIA_LABELS[locale].next}
           >
-            <IconRight />
+            <IconRight {...iconProps} />
           </button>
         </header>
 
-        <table tabIndex={-1} role='grid' aria-labelledby={props['aria-labelledby']} {...props}>
+        <table tabIndex={-1} role='grid' {...calendarProps}>
           {showDaysOfWeek && (
-            <thead {...props}>
-              <tr {...props}>
+            <thead {...theadProps}>
+              <tr {...theadRowProps}>
                 {showWeekNumber && <td />}
                 {daysOfWeek.map((day) => (
-                  <th key={day} scope='col' aria-label={day}>
+                  <th key={day} scope='col' aria-label={day} {...headerCellProps}>
                     {
                       day
                         .slice(0, 2)
@@ -272,18 +313,20 @@ const QwikCalendar = component$<QwikCalendarProps>(
             </thead>
           )}
           <tbody
-            {...props}
+            {...tbodyProps}
+            preventdefault:keydown
             onKeyDown$={[
               $((e: KeyboardEvent, target: HTMLTableSectionElement) => {
                 updateDateFocused(e, target);
               }),
+              tbodyProps.onKeyDown$,
             ]}
           >
             {datesArray.value.map((week) => {
               return (
-                <tr key={week.toString()}>
+                <tr key={week.toString()} {...tbodyRowProps}>
                   {showWeekNumber && (
-                    <td>
+                    <td {...weekNumberProps}>
                       <span>{getWeekNumber(week.filter((day) => day !== null)[0]).toString()}</span>
                     </td>
                   )}
@@ -292,15 +335,24 @@ const QwikCalendar = component$<QwikCalendarProps>(
                     const disabled = day?.split('-')[1] !== monthToRender.value;
 
                     return (
-                      <td key={`${week.toString()}-${day}`} role='presentation' aria-disabled={disabled}>
+                      <td key={`${week.toString()}-${day}`} role='presentation' aria-disabled={disabled} {...cellProps}>
                         {day && (
                           <button
                             type='button'
-                            data-preselected={day === activeDate.value}
+                            data-preselected={day === defaultDate.value}
+                            aria-selected={day === activeDate.value ? 'true' : undefined}
                             data-value={day}
                             aria-label={label}
                             disabled={disabled}
                             tabIndex={day === dateToFocus.value ? 0 : -1}
+                            {...dayButtonProps}
+                            onClick$={[
+                              $(() => {
+                                activeDate.value = day as LocalDate;
+                                // onDateChange$?.(day as LocalDate);
+                              }),
+                              dayButtonProps.onClick$,
+                            ]}
                           >
                             {day.split('-')[2]}
                           </button>
@@ -317,5 +369,3 @@ const QwikCalendar = component$<QwikCalendarProps>(
     );
   },
 );
-
-export { QwikCalendar as Calendar };
