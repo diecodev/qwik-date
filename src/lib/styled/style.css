@@ -48,8 +48,7 @@
 
 :where([data-qwik-date]):not([popover]),
 :where([data-qwik-date]):popover-open {
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial,
-    Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  font-family: inherit;
 
   padding-inline: var(--padding-inline);
   padding-block: var(--padding-block);
@@ -193,8 +192,7 @@
 }
 
 :where([data-qwik-wrapper]) {
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial,
-    Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  font-family: inherit;
   display: contents;
 
   --icon-size: 1rem;
@@ -235,5 +233,6 @@
 
     border: none;
     box-sizing: border-box;
+    position: absolute;
   }
 }
