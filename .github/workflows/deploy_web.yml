@@ -5,7 +5,7 @@ on:
     paths:
       - "website/**"
       - ".github/workflows/deploy_web.yml"
-      - "./src/lib/**"
+      - "src/lib/**"
 
 jobs:
   deploy:
