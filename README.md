@@ -1,47 +1,106 @@
-# Qwik Library ⚡️
+# qwik-date
 
-- [Qwik Docs](https://qwik.dev/)
-- [Discord](https://qwik.dev/chat)
-- [Qwik on GitHub](https://github.com/BuilderIO/qwik)
-- [@QwikDev](https://twitter.com/QwikDev)
-- [Vite](https://vitejs.dev/)
-- [Partytown](https://partytown.builder.io/)
-- [Mitosis](https://github.com/BuilderIO/mitosis)
-- [Builder.io](https://www.builder.io/)
+**Qwik calendar, simple integration**
 
----
+`qwik-date` is an opinionated calendar component designed for the Qwik framework. It offers two main versions: an `inline` calendar and a `popup` date picker, providing flexibility in how you integrate it into your applications.
 
-## Project Structure
+## Installation
 
-Inside your project, you'll see the following directories and files:
+You can install `qwik-date` using any of the following package managers:
 
-```
-├── public/
-│   └── ...
-└── src/
-    ├── components/
-    │   └── ...
-    └── index.ts
+```sh
+npm install -D -E qwik-date
+pnpm add -D -E qwik-date
+bun add -D -E qwik-date
+yarn add -D -E qwik-date
 ```
 
-- `src/components`: Recommended directory for components.
+## Usage
 
-- `index.ts`: The entry point of your component library, make sure all the public components are exported from this file.
+### Inline Calendar
 
-## Development
+The inline calendar can be imported in two ways:
 
-Development mode uses [Vite's development server](https://vitejs.dev/). For Qwik during development, the `dev` command will also server-side render (SSR) the output. The client-side development modules are loaded by the browser.
-
+```ts
+import { Calendar } from 'qwik-date';
+import { CalendarInline } from 'qwik-date/inline';
 ```
-pnpm dev
+
+#### Inline Calendar Example
+
+Here's a basic example of how to use the inline calendar:
+
+```tsx
+import { component$, useSignal } from '@builder.io/qwik';
+import { CalendarInline } from 'qwik-date/inline';
+
+export default component$(() => {
+  const date = useSignal('2023-07-23');
+  
+  return (
+    <CalendarInline 
+      date={date.value} 
+      onDateChange$={(newDate) => console.log({ newDate })} 
+    />
+  );
+});
 ```
 
-> Note: during dev mode, Vite will request many JS files, which does not represent a Qwik production build.
+#### Props
 
-## Production
+- `date`: Initial date to display (default: current date).
+- `fullWeeks`: If true, shows full weeks (default: false).
+- `locale`: Locale for the calendar (default: 'en').
+- `showWeekNumber`: If true, shows week numbers (default: false).
+- `showDaysOfWeek`: If true, shows days of the week ~Mo, Tu, We, etc.~ (default: true).
+- `iconLeft`, `iconRight`: Custom icons for navigation buttons.
+- `containerProps`, `headerProps`, `actionButtonProps`, `actionLeftProps`, `actionRightProps`, `calendarProps`, `theadProps`, `tbodyProps`, `theadRowProps`, `tbodyRowProps`, `headerCellProps`, `cellProps`, `dayButtonProps`, `iconProps`, `titleProps`, `weekNumberProps`: Custom props for various parts of the component.
+- `onDateChange$`: Callback for when the date changes.
+- `unStyled`: If true, removes default styling (default: false).
 
-The production build should generate the production build of your component library in (./lib) and the typescript type definitions in (./lib-types).
+### Popup Date Picker
 
+The popup date picker can be imported in two ways:
+
+```ts
+import { DatePicker } from 'qwik-date';
+import { DatePicker } from 'qwik-date/picker';
 ```
-pnpm build
+
+#### Popup Date Picker Example
+
+Here's a basic example of how to use the popup date picker:
+
+```tsx
+import { component$, useSignal } from '@builder.io/qwik';
+import { DatePicker } from 'qwik-date/picker';
+
+export default component$(() => {
+  const date = useSignal('2023-07-23');
+  
+  return (
+    <DatePicker 
+      date={date.value} 
+      onDateChange$={(newDate) => console.log({ newDate })}
+      triggerLabel="Select Date"
+    />
+  );
+});
 ```
+
+#### Props
+
+- `triggerProps`: Custom props for the trigger button.
+- `triggerLabel`: Label for the trigger button.
+- `triggerIcon`: Custom icon for the trigger button.
+- `mode`: Mode of the date picker (`'popup'` or `'inline'`, default: `'popup'`).
+- All other props from `CalendarInline` can also be used.
+
+## Roadmap
+
+- [ ] Add support for additional locales.
+- [ ] range date selection
+- [ ] month and year navigation
+- [ ] Custom date ranges (last 7 days, next 30d)
+- [ ] Fancy animations (styled version)
+- [ ] website docs: easy to read, understand and implement.
