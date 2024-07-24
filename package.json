@@ -30,24 +30,36 @@
       "node": {
         "import": "./lib/index.qwik.mjs",
         "require": "./lib/index.qwik.cjs",
-        "types": "./lib-types/styled/calendar.d.ts"
+        "types": "./lib-types/index.d.ts"
       },
       "default": {
         "import": "./lib/index.qwik.mjs",
         "require": "./lib/index.qwik.cjs",
-        "types": "./lib-types/styled/calendar.d.ts"
+        "types": "./lib-types/index.d.ts"
       }
     },
-    "./headless": {
+    "./inline": {
       "node": {
-        "import": "./lib/headless.qwik.mjs",
-        "require": "./lib/headless.qwik.cjs",
-        "types": "./lib-types/headless/index.d.ts"
+        "import": "./lib/styled/inline.qwik.mjs",
+        "require": "./lib/styled/inline.qwik.cjs",
+        "types": "./lib-types/styled/inline.d.ts"
       },
       "default": {
-        "import": "./lib/headless.qwik.mjs",
-        "require": "./lib/headless.qwik.cjs",
-        "types": "./lib-types/headless/index.d.ts"
+        "import": "./lib/styled/inline.qwik.mjs",
+        "require": "./lib/styled/inline.qwik.cjs",
+        "types": "./lib-types/styled/inline.d.ts"
+      }
+    },
+    "./picker": {
+      "node": {
+        "import": "./lib/styled/popup.qwik.mjs",
+        "require": "./lib/styled/popup.qwik.cjs",
+        "types": "./lib-types/styled/popup.d.ts"
+      },
+      "default": {
+        "import": "./lib/styled/popup.qwik.mjs",
+        "require": "./lib/styled/popup.qwik.cjs",
+        "types": "./lib-types/styled/popup.d.ts"
       }
     }
   },
@@ -62,30 +74,32 @@
   "type": "module",
   "scripts": {
     "build": "qwik build",
-    "build.lib": "ENTRY=headless vite build --mode lib && ENTRY=styled vite build --mode lib",
+    "build.lib": "vite build --mode lib",
     "build.types": "tsc --emitDeclarationOnly -p ./tsconfig.lib.json",
     "dev": "vite --mode ssr",
     "dev.debug": "node --inspect-brk ./node_modules/vite/bin/vite.js --mode ssr --force",
     "fmt": "prettier --write .",
     "fmt.check": "prettier --check .",
-    "lint": "eslint \"src/**/*.ts*\"",
+    "lint": "biome check --write --unsafe",
     "prepublishOnly": "pnpm build",
     "release": "bumpp --commit --tag --push",
     "start": "vite --open --mode ssr",
     "test": "playwright test",
     "qwik": "qwik"
   },
+  "dependencies": {
+    "@floating-ui/dom": "^1.6.7"
+  },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
     "@builder.io/qwik": "^1.7.1",
-    "@floating-ui/dom": "^1.6.7",
     "@playwright/test": "^1.45.2",
     "@types/node": "^20.14.10",
     "bumpp": "9.4.1",
-    "np": "^10.0.6",
+    "np": "^10.0.7",
     "tsx": "^4.16.2",
     "typescript": "^5.5.3",
-    "undici": "^6.19.2",
+    "undici": "*",
     "vite": "^5.3.4",
     "vite-tsconfig-paths": "^4.3.2"
   }

@@ -3,9 +3,6 @@
   "include": [
     "src/lib"
   ],
-  "exclude": [
-    "src/lib/index.ts"
-  ],
   "compilerOptions": {
     "incremental": false
   }

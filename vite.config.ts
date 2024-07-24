@@ -8,31 +8,35 @@ const makeRegex = (dep) => new RegExp(`^${dep}(/.*)?$`);
 const excludeAll = (obj) => Object.keys(obj).map(makeRegex);
 
 export default defineConfig(({ command }) => {
-  const env = process.env.ENTRY as "styled" | "headless" | undefined;
-
-  if (!env && command === "build") throw new Error("ENTRY env var is required");
-
-  const entry =
-    env === "headless"
-      ? "src/lib/headless/index.ts"
-      : "src/lib/styled/calendar.tsx";
-
   return {
     plugins: [qwikVite(), tsconfigPaths()],
     build: {
-      target: "es2020",
+      target: "esnext",
       outDir: "lib",
       lib: {
-        entry,
-        formats: ["es", "cjs"],
-        fileName: (format) => {
-          const ext = format === "es" ? "mjs" : "cjs";
-          const name = env === "headless" ? "headless" : "index";
+        entry: [
+          "src/lib/styled/inline.tsx",
+          "src/lib/styled/popup.tsx",
+          "src/lib/index.ts",
+        ],
+        fileName: (format, entry) => {
+          const ext = format === 'es' ? 'mjs' : 'cjs';
+          const name = entry;
           return `${name}.qwik.${ext}`;
         },
       },
-      emptyOutDir: env === "headless",
+      emptyOutDir: true,
       rollupOptions: {
+        output:[
+        {
+          format: 'es',
+          preserveModules: true,
+          preserveModulesRoot: 'src/lib',
+        }, {
+          format: 'cjs',
+          preserveModules: true,
+          preserveModulesRoot: 'src/lib'
+        }],
         // externalize deps that shouldn't be bundled into the library
         external: [
           /^node:.*/,
