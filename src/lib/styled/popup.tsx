@@ -6,8 +6,6 @@ import { CalendarInline, type CalendarInlineProps } from './inline';
 import styles from './style.css?inline';
 
 export interface DatePickerProps extends CalendarInlineProps {
-  mode?: 'inline' | 'popup';
-  // trigger stuffs
   triggerProps?: PropsOf<'button'>;
   triggerIcon?: Component<PropsOf<'svg'>>;
   triggerLabel?: string;
@@ -24,8 +22,6 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
   useOnWindow(
     'DOMContentLoaded',
     $(() => {
-      if (props.mode !== 'popup') return;
-
       const btn = document.querySelector(`button[popovertarget="qwik-date-${id}"]`) as HTMLButtonElement | null;
       const popover = document.querySelector(`#qwik-date-${id}`) as HTMLDivElement | null;
 
@@ -59,12 +55,10 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
 
   return (
     <div data-qwik-wrapper>
-      {props.mode === 'popup' && (
-        <button type='button' {...triggerProps} popovertarget={`qwik-date-${id}`}>
-          {triggerLabel ?? TRIGGER_LABELS[props.locale ?? 'en']}
-          <TriggerIcon />
-        </button>
-      )}
+      <button type='button' {...triggerProps} popovertarget={`qwik-date-${id}`}>
+        {triggerLabel ?? TRIGGER_LABELS[props.locale ?? 'en']}
+        <TriggerIcon />
+      </button>
       <CalendarInline
         {...props}
         containerProps={{
