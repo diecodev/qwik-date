@@ -6,7 +6,6 @@ import {
   type Signal,
   component$,
   useComputed$,
-  useOnDocument,
   useSignal,
   useStyles$,
   useTask$,
@@ -132,11 +131,6 @@ export const CalendarInline = component$<CalendarInlineProps>(
 
     if (!regex.test(defaultDate.value))
       throw new Error('Invalid date format in Calendar. Please use YYYY-MM-DD format.');
-
-    useOnDocument(
-      'customEvent',
-      $(() => console.log('customEvent fired')),
-    );
 
     // taks
     useTask$(({ track, cleanup }) => {
