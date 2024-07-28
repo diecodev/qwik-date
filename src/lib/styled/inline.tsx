@@ -259,10 +259,6 @@ export const CalendarInline = component$<CalendarInlineProps>(
       }
 
       dateToFocus.value = newDate ?? (buttons[localIdx].getAttribute('data-value') as LocalDate);
-      // elFocus.setAttribute('tabindex', '-1');
-      // buttons[localIdx].setAttribute('tabindex', '0');
-      // // @ts-expect-error
-      // buttons[localIdx].focus({ preventScroll: true, focusVisible: true });
     });
 
     return (
@@ -359,7 +355,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
                             onClick$={[
                               $(() => {
                                 activeDate.value = day as LocalDate;
-                                // onDateChange$?.(day as LocalDate);
+                                onDateChange$?.(day as LocalDate);
                               }),
                               dayButtonProps.onClick$,
                             ]}
