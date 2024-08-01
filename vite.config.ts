@@ -27,16 +27,10 @@ export default defineConfig(({ command }) => {
       },
       emptyOutDir: true,
       rollupOptions: {
-        output:[
-        {
-          format: 'es',
+        output: {
           preserveModules: true,
           preserveModulesRoot: 'src/lib',
-        }, {
-          format: 'cjs',
-          preserveModules: true,
-          preserveModulesRoot: 'src/lib'
-        }],
+        },
         // externalize deps that shouldn't be bundled into the library
         external: [
           /^node:.*/,

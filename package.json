@@ -88,19 +88,19 @@
     "qwik": "qwik"
   },
   "dependencies": {
-    "@floating-ui/dom": "^1.6.7"
+    "@floating-ui/dom": "^1.6.8"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
-    "@builder.io/qwik": "^1.7.1",
-    "@playwright/test": "^1.45.2",
-    "@types/node": "^20.14.10",
+    "@builder.io/qwik": "^1.7.3",
+    "@playwright/test": "^1.45.3",
+    "@types/node": "^22.0.2",
     "bumpp": "9.4.1",
     "np": "^10.0.7",
-    "tsx": "^4.16.2",
-    "typescript": "^5.5.3",
-    "undici": "*",
-    "vite": "^5.3.4",
+    "tsx": "^4.16.3",
+    "typescript": "^5.5.4",
+    "undici": "^6.19.5",
+    "vite": "^5.3.5",
     "vite-tsconfig-paths": "^4.3.2"
   }
 }
