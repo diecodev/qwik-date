@@ -1,12 +1,12 @@
-import { component$ } from "@builder.io/qwik";
+import { component$ } from '@builder.io/qwik'
 
 export const Footer = component$(() => {
   return (
     <footer class="mt-24 border-t bg-neutral-50">
-      <div class="mx-auto flex max-w-screen-sm items-center justify-between px-4 py-8 text-sm text-neutral-900">
+      <div class="mx-auto flex max-w-screen-sm items-center justify-between px-4 py-8 text-neutral-900 text-sm">
         <p>
           <span>
-            Made by{" "}
+            Made by{' '}
             <a
               href="https://twitter.com/diecodev"
               target="_blank"
@@ -53,5 +53,5 @@ export const Footer = component$(() => {
         </nav>
       </div>
     </footer>
-  );
-});
+  )
+})

@@ -1,83 +1,103 @@
-import { $, component$, useSignal } from "@builder.io/qwik";
-import type { DocumentHead } from "@builder.io/qwik-city";
-import { Calendar } from "qwik-date";
-import { toast, Toaster } from "qwik-sonner";
-import { Customize } from "~/components/customize";
+import { component$, useSignal } from '@builder.io/qwik'
+import type { DocumentHead } from '@builder.io/qwik-city'
+import { Calendar as CalendarInline } from 'qwik-date'
+import { ScriptCode } from '~/components/script'
 
-import "@fontsource-variable/onest";
-import { ScriptCode } from "~/components/script";
-import { Docs } from "~/components/docs";
-import { Footer } from "~/components/footer";
+import '@fontsource-variable/onest'
+import { toast } from 'qwik-sonner'
+import { Demo } from '~/components/demo'
+import { Docs } from '~/components/docs'
+import { Footer } from '~/components/footer'
 
 export default component$(() => {
-  const theme = useSignal<"light" | "dark">("light");
-  const locale = useSignal<"en" | "es">("en");
-  const edgeArrows = useSignal<boolean>(false);
-  const onDateSelectSig = useSignal<boolean>(false);
-  const completeWeeks = useSignal<boolean>(false);
-  const format = useSignal<any>("yyyy-mm-dd");
-  const separator = useSignal<any>("-");
-  const dir = useSignal<"ltr" | "rtl">("ltr");
-  const id = useSignal<string>("date-id");
-
-  const onDateSelect$ = $((date: string) => {
-    toast("Date selected", {
-      description: `The selected date is ${date}`,
-      id: id.value,
-    });
-  });
+  const date = useSignal<`${number}-${number}-${number}`>('2024-08-01')
 
   return (
     <>
-      <Toaster theme={theme.value} />
-      <main class="mx-auto flex max-w-screen-sm flex-col gap-12 px-4 pb-8 pt-24">
+      <main class="mx-auto flex max-w-screen-sm flex-col gap-12 px-4 pt-24 pb-8">
         <header>
-          <h1 class="text-center text-5xl font-bold leading-snug dark:text-white">
+          <h1 class="text-center font-bold text-5xl leading-snug dark:text-white">
             Qwik Date
           </h1>
           <p class="text-center text-lg dark:text-neutral-400">
             Qwik calendar, simple integration.
           </p>
         </header>
-        <section class="flex justify-center">
-          <Calendar
-            theme={theme.value}
-            defaultDate={new Date().toISOString()}
-            onDateSelect$={onDateSelectSig.value ? onDateSelect$ : undefined}
-            completeWeeks={completeWeeks}
-            edgeArrows={edgeArrows.value}
-            locale={locale}
-            format={format.value}
-            separator={separator.value}
-            dir={dir.value}
-          />
-        </section>
-        <section>
-          <Customize
-            theme={theme}
-            locale={locale}
-            edgeArrows={edgeArrows}
-            onDateSelectSig={onDateSelectSig}
-            completeWeeks={completeWeeks}
-            format={format}
-            separator={separator}
-            dir={dir}
+        <section class="flex justify-center gap-8">
+          <CalendarInline
+            bind:date={date}
+            containerProps={{}}
+            fullWeeks
+            onDateChange$={(date) => {
+              toast('Date selected successfully', {
+                description: date,
+              })
+            }}
           />
         </section>
         <ScriptCode />
+        <Demo />
         <Docs />
       </main>
       <Footer />
     </>
-  );
-});
+  )
+})
 
 export const head: DocumentHead = {
-  title: "Welcome to Qwik",
+  title: 'Qwik Date',
   meta: [
     {
-      name: "description",
-      content: "Qwik site description",
+      name: 'description',
+      content: 'An opinionated date picker component for Qwik.',
+    },
+    {
+      name: 'og:description',
+      content: 'An opinionated date picker component for Qwik.',
+    },
+    {
+      name: 'og:title',
+      content: 'Qwik Date',
+    },
+    {
+      name: 'og:image',
+      content: 'https://qwik-date.deno.dev/og.png',
+    },
+    {
+      name: 'og:url',
+      content: 'https://qwik-date.deno.dev',
+    },
+    {
+      name: 'twitter:card',
+      content: 'summary_large_image',
+    },
+    {
+      name: 'twitter:title',
+      content: 'Qwik Date',
+    },
+    {
+      name: 'twitter:description',
+      content: 'An opinionated date picker component for Qwik.',
+    },
+    {
+      name: 'twitter:image',
+      content: 'https://qwik-date.deno.dev/og.png',
+    },
+    {
+      name: 'twitter:url',
+      content: 'https://qwik-date.deno.dev',
+    },
+    {
+      name: 'theme-color',
+      content: '#ffffff',
+    },
+    {
+      name: 'color-scheme',
+      content: 'light dark',
+    },
+    {
+      name: 'msapplication-TileColor',
+      content: '#ffffff',
     },
   ],
-};
+}

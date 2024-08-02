@@ -1,128 +1,220 @@
-import { component$ } from "@builder.io/qwik";
+import { component$ } from '@builder.io/qwik'
 
-const props = [
+const calendarInlinePropsInfo = [
   {
-    name: "defaultDate",
-    description: `The default date to display (use ISO string or 'yyyy-mm-dd')`,
-    default: "today",
+    name: 'date',
+    description: 'Default date to be used in the calendar',
+    defaultValue: 'today',
   },
   {
-    name: "minDate",
-    description: `The minimum date to display`,
-    default: "-100 years",
+    name: 'fullWeeks',
+    description: 'Displays full weeks in the calendar',
+    defaultValue: 'false',
   },
   {
-    name: "maxDate",
-    description: `The maximum date to display`,
-    default: "+100 years",
+    name: 'locale',
+    description: 'Locale and regional settings for the calendar',
+    defaultValue: "'en'",
   },
   {
-    name: "theme",
-    description: `The theme of the calendar`,
-    default: "system",
+    name: 'showWeekNumber',
+    description: 'Displays the week number in the calendar',
+    defaultValue: 'false',
   },
   {
-    name: "locale",
-    description: `The locale of the calendar`,
-    default: "en",
+    name: 'showDaysOfWeek',
+    description: 'Displays the days of the week in the calendar',
+    defaultValue: 'true',
   },
   {
-    name: "showWeekNumbers",
-    description: `Show the week numbers`,
-    default: "false",
+    name: 'iconLeft',
+    description: 'Icon to display on the left side of the calendar',
+    defaultValue: 'undefined',
   },
   {
-    name: "showWeekdays",
-    description: `Show the weekdays`,
-    default: "true",
+    name: 'iconRight',
+    description: 'Icon to display on the right side of the calendar',
+    defaultValue: 'undefined',
   },
   {
-    name: "onDateSelect$",
-    description: `The callback function to call when a date is selected`,
-    default: "-",
+    name: 'containerProps',
+    description: "Props to be passed to the calendar's container",
+    defaultValue: '-',
   },
   {
-    name: "prevButtonProps",
-    description: `The props for the previous button`,
-    default: "-",
+    name: 'headerProps',
+    description: "Props to be passed to the calendar's header",
+    defaultValue: '-',
   },
   {
-    name: "nextButtonProps",
-    description: `The props for the next button`,
-    default: "-",
+    name: 'actionButtonProps',
+    description: 'Props for action buttons in the calendar',
+    defaultValue: '-',
   },
   {
-    name: "headerProps",
-    description: `The props for the header`,
-    default: "-",
+    name: 'actionLeftProps',
+    description: 'Props for the left action',
+    defaultValue: '-',
   },
   {
-    name: "dateButtonProps",
-    description: `The props for the date button`,
-    default: "-",
+    name: 'actionRightProps',
+    description: 'Props for the right action',
+    defaultValue: '-',
   },
   {
-    name: "format",
-    description: `The format of the date`,
-    default: "yyyy-mm-dd",
+    name: 'calendarProps',
+    description: "Props to be passed to the calendar's container",
+    defaultValue: '-',
   },
   {
-    name: "separator",
-    description: `The separator of the date`,
-    default: "-",
+    name: 'theadProps',
+    description: 'Props to be passed to the thead element of the calendar',
+    defaultValue: '-',
   },
   {
-    name: "edgeArrows",
-    description: `Show the edge arrows`,
-    default: "false",
+    name: 'tbodyProps',
+    description: 'Props to be passed to the tbody element of the calendar',
+    defaultValue: '-',
   },
   {
-    name: "arrowLeftIcon",
-    description: `The icon for the left arrow`,
-    default: "-",
+    name: 'theadRowProps',
+    description: 'Props to be passed to the rows of the thead',
+    defaultValue: '-',
   },
   {
-    name: "arrowRightIcon",
-    description: `The icon for the right arrow`,
-    default: "-",
+    name: 'tbodyRowProps',
+    description: 'Props to be passed to the rows of the tbody',
+    defaultValue: '-',
   },
   {
-    name: "completeWeeks",
-    description: `Show the complete weeks`,
-    default: "false",
+    name: 'headerCellProps',
+    description: 'Props to be passed to the header cells',
+    defaultValue: '-',
   },
   {
-    name: "dir",
-    description: `The direction of the calendar`,
-    default: "ltr",
+    name: 'cellProps',
+    description: 'Props to be passed to the body cells of the calendar',
+    defaultValue: '-',
   },
-];
+  {
+    name: 'dayButtonProps',
+    description: 'Props for the buttons representing each day in the calendar',
+    defaultValue: '-',
+  },
+  {
+    name: 'iconProps',
+    description: 'Props to be passed to the icons of the calendar',
+    defaultValue: '-',
+  },
+  {
+    name: 'titleProps',
+    description: "Props to be passed to the calendar's title",
+    defaultValue: '-',
+  },
+  {
+    name: 'weekNumberProps',
+    description: 'Props to be passed to the week numbers in the calendar',
+    defaultValue: '-',
+  },
+  {
+    name: 'onDateChange$',
+    description:
+      'Callback function triggered when the date changes in the calendar',
+    defaultValue: 'undefined',
+  },
+  {
+    name: 'unStyled',
+    description: 'Disables default styling',
+    defaultValue: 'false',
+  },
+  {
+    name: 'bind:date',
+    description: 'Signal with the default date',
+    defaultValue: 'undefined',
+  },
+] as const
+
+const datePickerProps = [
+  {
+    name: 'triggerProps',
+    description: 'Props to be passed to the trigger button',
+    defaultValue: 'undefined',
+  },
+  {
+    name: 'triggerIcon',
+    description: 'Icon component to be displayed in the trigger button',
+    defaultValue: 'undefined',
+  },
+  {
+    name: 'triggerLabel',
+    description: 'Label for the trigger button',
+    defaultValue: 'undefined',
+  },
+]
 
 export const Docs = component$(() => {
   return (
-    <table class="border-collapse border border-neutral-200 text-sm leading-none">
-      <thead>
-        <tr class="dark:text-white">
-          <th class="border border-neutral-200 p-3 pl-4 text-left">Property</th>
-          <th class="border border-neutral-200 p-3">Description</th>
-          <th class="border border-neutral-200 p-3 pr-4 text-right">Default</th>
-        </tr>
-      </thead>
-      <tbody class="text-neutral-800 dark:text-neutral-300">
-        {props.map((prop) => (
-          <tr key={prop.name}>
-            <td class="border border-neutral-200 p-2 px-4 ">{prop.name}</td>
-            <td class="border border-neutral-200 p-2 text-center leading-relaxed">
-              {prop.description}
-            </td>
-            <td class="w-32 border border-neutral-200 p-2 pr-4 text-right text-neutral-500">
-              <div class="ml-auto w-fit rounded-md bg-neutral-100 px-2 py-1 text-right font-mono text-xs dark:bg-neutral-800 dark:text-neutral-300">
-                {prop.default}
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-});
+    <section class="space-y-3">
+      <h3 class="text-center font-medium">
+        {'> '}API Reference{' <'}
+      </h3>
+      <h4 class="text-center font-medium">~Inline mode~</h4>
+      <div class="overflow-clip rounded-lg border ">
+        <table class="min-w-full table-auto border-collapse text-sm">
+          <thead class="bg-neutral-100">
+            <tr>
+              <th class="border-r border-b px-4 py-2 text-left">Prop</th>
+              <th class="border-b px-4 py-2 text-left">Description</th>
+              <th class="border-b border-l px-4 py-2 text-left">Default</th>
+            </tr>
+          </thead>
+          <tbody>
+            {calendarInlinePropsInfo.map((prop, index) => (
+              <tr key={index} class="border-b text-neutral-700 last:border-b-0">
+                <td class="border-r px-4 py-2 font-semibold">{prop.name}</td>
+                <td class="px-4 py-2">{prop.description}</td>
+                <td class="border-l px-2 py-1.5">
+                  <span class="rounded-lg bg-neutral-100 px-2 py-0.5 font-mono text-xs">
+                    {prop.defaultValue}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="!mt-12 space-y-2">
+        <h4 class="text-center font-medium">~Popup mode~</h4>
+        <p class="text-balance text-center text-neutral-600 text-sm">
+          Got the same props as the inline mode, but also accepts the following
+          props:
+        </p>
+      </div>
+      <div class="overflow-clip rounded-lg border ">
+        <table class="min-w-full table-auto border-collapse text-sm">
+          <thead class="bg-neutral-100">
+            <tr>
+              <th class="border-r border-b px-4 py-2 text-left">Prop</th>
+              <th class="border-b px-4 py-2 text-left">Description</th>
+              <th class="border-b border-l px-4 py-2 text-left">Default</th>
+            </tr>
+          </thead>
+          <tbody>
+            {datePickerProps.map((prop, index) => (
+              <tr key={index} class="border-b text-neutral-700 last:border-b-0">
+                <td class="border-r px-4 py-2 font-semibold">{prop.name}</td>
+                <td class="px-4 py-2">{prop.description}</td>
+                <td class="border-l px-2 py-1.5">
+                  <span class="rounded-lg bg-neutral-100 px-2 py-0.5 font-mono text-xs">
+                    {prop.defaultValue}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )
+})
