@@ -3,11 +3,15 @@ import { routeLoader$ } from '@builder.io/qwik-city'
 import type { RequestHandler } from '@builder.io/qwik-city'
 import { Toaster } from 'qwik-sonner'
 
-export const onGet: RequestHandler = async ({ cacheControl, redirect, url }) => {
-  const {host} = url;
+export const onGet: RequestHandler = async ({
+  cacheControl,
+  redirect,
+  url,
+}) => {
+  const { host } = url
   // redirect to custom domain
   if (host === 'qwik-date.deno.dev') {
-    throw redirect(301, "https://qwik-date.dieco.dev");
+    throw redirect(301, 'https://qwik-date.dieco.dev')
   }
 
   // Control caching for this request for best performance and to reduce hosting costs:
