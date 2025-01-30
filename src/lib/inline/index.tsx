@@ -1,4 +1,4 @@
-import { $, component$, useComputed$, useSignal, useStyles$, useVisibleTask$ } from '@builder.io/qwik';
+import { $, component$, isSignal, useComputed$, useSignal, useStyles$, useVisibleTask$ } from '@builder.io/qwik';
 import {
   ARIA_LABELS,
   DATE_REGEX,
@@ -32,7 +32,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
     showWeekNumber = false,
     fullWeeks = false,
     date: dateProp,
-    'bind:date': boundDate,
+    'bind:date': bindDate,
     showDaysOfWeek = true,
     iconLeft: IconLeftProp,
     iconRight: IconRightProp,
@@ -54,12 +54,13 @@ export const CalendarInline = component$<CalendarInlineProps>(
     weekNumberProps = {},
     onDateChange$,
     unStyled,
-    ...rest
   }) => {
     if (!unStyled) useStyles$(styles);
 
     // Signals
-    const defaultDate = useSignal<LocalDate>(dateProp || (new Date().toISOString().split('T')[0] as LocalDate));
+    const defaultDate = isSignal(bindDate)
+      ? bindDate
+      : useSignal<LocalDate>(dateProp || (new Date().toISOString().split('T')[0] as LocalDate));
     const activeDate = useSignal<LocalDate | null>(null);
     const monthToRender = useSignal<Month>((defaultDate.value.split('-')[1] || '01') as Month);
     const yearToRender = useSignal<number>(Number.parseInt(defaultDate.value.split('-')[0], 10));
@@ -136,7 +137,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
     const IconRight = IconRightProp || ChevronRight;
 
     return (
-      <div data-qwik-date data-theme='light' aria-label={ARIA_LABELS[locale].root} {...containerProps} {...rest}>
+      <div data-qwik-date data-theme='light' aria-label={ARIA_LABELS[locale].root} {...containerProps}>
         {/* Header with navigation controls */}
         <header {...headerProps} class='calendar-header'>
           <button

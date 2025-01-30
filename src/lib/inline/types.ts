@@ -28,8 +28,11 @@ export interface CalendarInlineProps {
   cellProps?: PropsOf<'td'>;
   dayButtonProps?: PropsOf<'button'>;
   weekNumberProps?: PropsOf<'td'>;
+  theme?: Theme;
   onDateChange$?: QRL<(date: LocalDate) => void>;
 }
 
 /** Supported locale codes */
 export type Locale = 'en' | 'es'; // Extend with more locales as needed
+/** Supported themes */
+export type Theme = 'dark' | 'light' | 'auto';
