@@ -9,3 +9,6 @@ export type DateFormat =
 
 export type Locale = 'en' | 'es';
 export type Month = '01' | '02' | '03' | '04' | '05' | '06' | '07' | '08' | '09' | '10' | '11' | '12';
+
+/** Date string in YYYY-MM-DD format */
+export type LocalDate = `${number}-${number}-${number}`;

@@ -1,0 +1,27 @@
+name: 🚀 pkg-pr-new
+on:
+  push:
+  pull_request:
+    branches-ignore: main
+    paths-ignore:
+      - "website/*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - run: npx pkg-pr-new publish

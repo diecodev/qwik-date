@@ -1,8 +1,8 @@
 import { $, type Component, type PropsOf, component$, useId, useOnWindow, useStyles$ } from '@builder.io/qwik';
 import { autoPlacement, autoUpdate, computePosition, offset, shift } from '@floating-ui/dom';
 import { TRIGGER_LABELS } from '../core';
+import { Calendar as CalendarInline, type CalendarInlineProps } from '../index';
 import { Calendar } from './icons';
-import { CalendarInline, type CalendarInlineProps } from './inline';
 import styles from './style.css?inline';
 
 export interface DatePickerProps extends CalendarInlineProps {

@@ -1,5 +1,6 @@
 import type { Locale } from './types';
 
+/** Full month names by locale */
 export const MONTHS_LG = {
   en: [
     'January',
@@ -36,6 +37,7 @@ export const MONTHS_SM = {
   es: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
 } as const;
 
+/** Accessibility labels for screen readers */
 export const ARIA_LABELS = {
   en: {
     previous: 'go to previous month',
@@ -49,6 +51,7 @@ export const ARIA_LABELS = {
   },
 } as const;
 
+/** Weekday names by locale starting from Sunday */
 export const WEEKDAYS = {
   en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
   es: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
@@ -58,3 +61,20 @@ export const TRIGGER_LABELS = {
   en: 'Select a date',
   es: 'Seleccionar una fecha',
 } as const;
+
+/** Regex pattern for YYYY-MM-DD date validation */
+export const DATE_REGEX = /^\d{4}-(0[1-9]|1[0-2])-\d{2}$/;
+
+/** Keyboard keys used for calendar navigation */
+export const ACTION_KEYS = [
+  'enter',
+  ' ',
+  'arrowup',
+  'arrowdown',
+  'arrowleft',
+  'arrowright',
+  'home',
+  'end',
+  'pageup',
+  'pagedown',
+];

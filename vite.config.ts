@@ -11,15 +11,16 @@ export default defineConfig(({ command }) => {
   return {
     plugins: [qwikVite(), tsconfigPaths()],
     build: {
+      minify: true,
       target: "esnext",
       outDir: "lib",
       lib: {
         entry: [
-          "src/lib/styled/inline.tsx",
-          "src/lib/styled/popup.tsx",
+          "src/lib/inline/index.tsx",
           "src/lib/index.ts",
         ],
         fileName: (format, entry) => {
+          console.log({entry})
           const ext = format === 'es' ? 'mjs' : 'cjs';
           const name = entry;
           return `${name}.qwik.${ext}`;
