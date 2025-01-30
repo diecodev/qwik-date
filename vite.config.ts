@@ -20,7 +20,6 @@ export default defineConfig(({ command }) => {
           "src/lib/index.ts",
         ],
         fileName: (format, entry) => {
-          console.log({entry})
           const ext = format === 'es' ? 'mjs' : 'cjs';
           const name = entry;
           return `${name}.qwik.${ext}`;

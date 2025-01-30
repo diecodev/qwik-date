@@ -37,7 +37,6 @@ const generatePartialWeeks = (year: number, month: number) => {
   const firstDayOfMonth = new Date(year, month - 1, 1);
   // Fix: Handle Sunday (0) by converting it to 7, otherwise use the day number
   const firstDayOfWeek = firstDayOfMonth.getDay();
-  console.log({ firstDayOfWeek, firstDayOfMonth });
   const daysInMonth = new Date(year, month, 0).getDate();
 
   const previousDays = Array(firstDayOfWeek).fill(null);
