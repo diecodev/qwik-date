@@ -1,5 +1,7 @@
+import { parseLocalDate } from './local-date';
+
 export const getWeekNumber = (dateString: string) => {
-  const date = new Date(dateString);
+  const date = parseLocalDate(dateString);
   const target = new Date(date.valueOf());
   const dayNumber = (date.getDay() + 6) % 7; // Make Monday=0, Tuesday=1, ..., Sunday=6
   target.setDate(target.getDate() - dayNumber + 3); // Set to nearest Thursday
