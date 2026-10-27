@@ -10,7 +10,16 @@ import {
   useStyles$,
   useVisibleTask$,
 } from '@qwik.dev/core';
-import { ARIA_LABELS, type Locale, MONTHS_LG, type Month, WEEKDAYS, daysArrGenerator, getWeekNumber } from '../core';
+import {
+  ARIA_LABELS,
+  type Locale,
+  MONTHS_LG,
+  type Month,
+  WEEKDAYS,
+  daysArrGenerator,
+  getWeekNumber,
+  toLocalDateString,
+} from '../core';
 import { ChevronLeft, ChevronRight } from './icons';
 import styles from './style.css?inline';
 
@@ -99,7 +108,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
     if (!unStyled) useStyles$(styles);
 
     // root constants
-    const date = new Date().toISOString().split('T')[0] as LocalDate;
+    const date = toLocalDateString(new Date()) as LocalDate;
     const labelStr = containerProps['aria-label'] ?? ARIA_LABELS[locale].root;
 
     // signals
