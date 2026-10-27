@@ -9,6 +9,7 @@ import {
   useComputed$,
   useSignal,
   useStyles$,
+  useTask$,
   useVisibleTask$,
 } from '@qwik.dev/core';
 import {
@@ -142,6 +143,19 @@ export const CalendarInline = component$<CalendarInlineProps>(
 
     if (!regex.test(defaultDate.value))
       throw new Error('Invalid date format in Calendar. Please use YYYY-MM-DD format.');
+
+    // follow the date when it changes from outside (e.g. a parent writes to `bind:date`)
+    useTask$(({ track }) => {
+      const value = track(() => defaultDate.value);
+      if (!regex.test(value)) return;
+
+      const [year, month] = value.split('-');
+      monthToRender.value = month as Month;
+      yearToRender.value = +year;
+      dateToFocus.value = value;
+      // a selection made before the external change no longer matches the date
+      if (activeDate.value && activeDate.value !== value) activeDate.value = null;
+    });
 
     // taks
     useVisibleTask$(({ track, cleanup }) => {
@@ -436,6 +450,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
                             onClick$={[
                               $(() => {
                                 activeDate.value = day as LocalDate;
+                                defaultDate.value = day as LocalDate;
                                 onDateChange$?.(day as LocalDate);
                               }),
                               dayButtonProps.onClick$,
