@@ -119,6 +119,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
     const monthToRender = useSignal<Month>(defaultDate.value.split('-')[1] as Month);
     const yearToRender = useSignal<number>(+defaultDate.value.split('-')[0]);
     const dateToFocus = useSignal<LocalDate>(defaultDate.value);
+    const hasNavigated = useSignal(false);
 
     // computed
     const labelSignal = useComputed$(() => {
@@ -143,7 +144,9 @@ export const CalendarInline = component$<CalendarInlineProps>(
     useVisibleTask$(({ track, cleanup }) => {
       track(() => datesArray.value);
 
-      // if (dateToFocus.value === defaultDate.value) return;
+      // the first run happens as soon as the calendar is visible: only move the focus
+      // once the user has changed the month, otherwise the page loads with a focused day
+      if (!hasNavigated.value) return;
 
       if (datesArray.value.flat().includes(dateToFocus.value)) {
         const btn = document.querySelector(`button[data-value="${dateToFocus.value}"]`) as HTMLButtonElement | null;
@@ -171,6 +174,8 @@ export const CalendarInline = component$<CalendarInlineProps>(
 
     // events handlers
     const decreaseDate = $(() => {
+      hasNavigated.value = true;
+
       if (monthToRender.value === '01') {
         monthToRender.value = '12';
         yearToRender.value -= 1;
@@ -180,6 +185,8 @@ export const CalendarInline = component$<CalendarInlineProps>(
       monthToRender.value = String(+monthToRender.value - 1).padStart(2, '0') as Month;
     });
     const increaseDate = $(() => {
+      hasNavigated.value = true;
+
       if (monthToRender.value === '12') {
         monthToRender.value = '01';
         yearToRender.value += 1;
