@@ -248,7 +248,12 @@ export const CalendarInline = component$<CalendarInlineProps>(
       let localIdx: number = idx;
       let newDate: LocalDate | null = null;
 
-      switch (e.key.toLowerCase()) {
+      // in right-to-left layouts the rows are mirrored, so left/right follow the visual direction
+      const key = e.key.toLowerCase();
+      const mirrored: Record<string, string> = { arrowleft: 'arrowright', arrowright: 'arrowleft' };
+      const isRtl = getComputedStyle(tbody).direction === 'rtl';
+
+      switch (isRtl ? mirrored[key] ?? key : key) {
         case 'arrowup': {
           localIdx = getNewIndex({ currentIdx: idx, step: -7 });
           if (idx === localIdx) {
