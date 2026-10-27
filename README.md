@@ -99,7 +99,6 @@ export default component$(() => {
 - `triggerProps`: Custom props for the trigger button.
 - `triggerLabel`: Label for the trigger button.
 - `triggerIcon`: Custom icon for the trigger button.
-- `mode`: Mode of the date picker (`'popup'` or `'inline'`, default: `'popup'`).
 - All other props from `CalendarInline` can also be used.
 
 ## Roadmap
