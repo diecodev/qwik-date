@@ -58,7 +58,7 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
   );
 
   return (
-    <div data-qwik-wrapper>
+    <div data-qwik-wrapper data-unstyled={props.unStyled}>
       <button type='button' {...triggerProps} popovertarget={popoverId}>
         {triggerLabel ?? TRIGGER_LABELS[props.locale ?? 'en']}
         <TriggerIcon />

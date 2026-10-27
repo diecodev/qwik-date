@@ -339,7 +339,14 @@ export const CalendarInline = component$<CalendarInlineProps>(
     });
 
     return (
-      <div data-qwik-date data-theme='light' aria-label={labelSignal.value} {...containerProps} ref={rootRef}>
+      <div
+        data-qwik-date
+        data-unstyled={unStyled}
+        data-theme='light'
+        aria-label={labelSignal.value}
+        {...containerProps}
+        ref={rootRef}
+      >
         <header {...headerProps}>
           <button
             type='button'

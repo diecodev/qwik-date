@@ -1,4 +1,5 @@
-:where([data-qwik-date][data-theme="light"]) {
+/* every rule skips `unStyled` instances: the stylesheet is global, so other calendars on the page would style them */
+:where([data-qwik-date]:not([data-unstyled])[data-theme="light"]) {
   --foreground-color: 0, 0%, 100%;
   --background-color: 0, 0%, 0%;
   --accent-color: 240, 4.8%, 95.9%;
@@ -11,7 +12,7 @@
   --outer-shadow: 0 0 0.25rem hsla(var(--shadow-color), var(--shadow-opacity, 0));
 }
 
-:where([data-qwik-date][data-theme="dark"]) {
+:where([data-qwik-date]:not([data-unstyled])[data-theme="dark"]) {
   --foreground-color: 0, 0%, 0%;
   --background-color: 240, 4.8%, 95.9%;
   --accent-color: 0, 0%, 20%;
@@ -24,7 +25,7 @@
   --outer-shadow: 0 0 0.25rem hsla(var(--shadow-color), 0);
 }
 
-:where([data-qwik-date]) {
+:where([data-qwik-date]:not([data-unstyled])) {
   --padding-inline: 0.75rem;
   --padding-block: 0.75rem;
   --radius: 0.75rem;
@@ -40,14 +41,14 @@
 }
 
 :where(html[dir='rtl']),
-:where([data-qwik-date][dir='rtl']) {
+:where([data-qwik-date]:not([data-unstyled])[dir='rtl']) {
   [data-header-action] {
     transform: rotate(180deg);
   }
 }
 
-:where([data-qwik-date]):not([popover]),
-:where([data-qwik-date]):popover-open {
+:where([data-qwik-date]:not([data-unstyled])):not([popover]),
+:where([data-qwik-date]:not([data-unstyled])):popover-open {
 
   padding-inline: var(--padding-inline);
   padding-block: var(--padding-block);
@@ -191,7 +192,7 @@
   }
 }
 
-:where([data-qwik-wrapper]) {
+:where([data-qwik-wrapper]:not([data-unstyled])) {
   display: contents;
 
   --icon-size: 1rem;
