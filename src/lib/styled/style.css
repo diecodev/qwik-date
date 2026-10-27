@@ -3,6 +3,7 @@
   --foreground-color: 0, 0%, 100%;
   --background-color: 0, 0%, 0%;
   --accent-color: 240, 4.8%, 95.9%;
+  --muted-color: 0, 0%, 45%; /* 4.7:1 on white, WCAG AA for the weekday names and week numbers */
 
   --shadow-opacity: 0.25;
   --shadow-color: 0, 0%, 43%;
@@ -16,6 +17,7 @@
   --foreground-color: 0, 0%, 0%;
   --background-color: 240, 4.8%, 95.9%;
   --accent-color: 0, 0%, 20%;
+  --muted-color: 0, 0%, 50%; /* 5.3:1 on black */
 
   --shadow-opacity: 0.25;
   --shadow-color: 0, 0%, 100%;
@@ -121,7 +123,7 @@
         font-size: 0.8rem;
         font-weight: 400;
         text-align: center;
-        color: hsl(0, 0%, 50%);
+        color: hsla(var(--muted-color), 1);
         padding: 0;
       }
 
@@ -186,7 +188,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: hsl(0, 0%, 50%);
+        color: hsla(var(--muted-color), 1);
       }
     }
   }
