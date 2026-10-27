@@ -18,6 +18,7 @@ import {
   WEEKDAYS,
   daysArrGenerator,
   getWeekNumber,
+  parseLocalDate,
   toLocalDateString,
 } from '../core';
 import { ChevronLeft, ChevronRight } from './icons';
@@ -218,8 +219,8 @@ export const CalendarInline = component$<CalendarInlineProps>(
         case 'arrowup': {
           localIdx = getNewIndex({ currentIdx: idx, step: -7 });
           if (idx === localIdx) {
-            const d = new Date(elFocus.getAttribute('data-value') as LocalDate);
-            newDate = new Date(d.setDate(d.getDate() - 7)).toISOString().split('T')[0] as LocalDate;
+            const d = parseLocalDate(elFocus.getAttribute('data-value') as LocalDate);
+            newDate = toLocalDateString(new Date(d.setDate(d.getDate() - 7))) as LocalDate;
 
             decreaseDate();
           }
@@ -228,8 +229,8 @@ export const CalendarInline = component$<CalendarInlineProps>(
         case 'arrowdown': {
           localIdx = getNewIndex({ currentIdx: idx, step: 7 });
           if (idx === localIdx) {
-            const d = new Date(elFocus.getAttribute('data-value') as LocalDate);
-            newDate = new Date(d.setDate(d.getDate() + 7)).toISOString().split('T')[0] as LocalDate;
+            const d = parseLocalDate(elFocus.getAttribute('data-value') as LocalDate);
+            newDate = toLocalDateString(new Date(d.setDate(d.getDate() + 7))) as LocalDate;
 
             increaseDate();
           }
@@ -239,8 +240,8 @@ export const CalendarInline = component$<CalendarInlineProps>(
         case 'arrowleft': {
           localIdx = getNewIndex({ currentIdx: idx, step: -1 });
           if (idx === localIdx) {
-            const d = new Date(elFocus.getAttribute('data-value') as LocalDate);
-            newDate = new Date(d.setDate(d.getDate() - 1)).toISOString().split('T')[0] as LocalDate;
+            const d = parseLocalDate(elFocus.getAttribute('data-value') as LocalDate);
+            newDate = toLocalDateString(new Date(d.setDate(d.getDate() - 1))) as LocalDate;
 
             decreaseDate();
           }
@@ -249,8 +250,8 @@ export const CalendarInline = component$<CalendarInlineProps>(
         case 'arrowright': {
           localIdx = getNewIndex({ currentIdx: idx, step: 1 });
           if (idx === localIdx) {
-            const d = new Date(elFocus.getAttribute('data-value') as LocalDate);
-            newDate = new Date(d.setDate(d.getDate() + 1)).toISOString().split('T')[0] as LocalDate;
+            const d = parseLocalDate(elFocus.getAttribute('data-value') as LocalDate);
+            newDate = toLocalDateString(new Date(d.setDate(d.getDate() + 1))) as LocalDate;
 
             increaseDate();
           }
@@ -263,16 +264,16 @@ export const CalendarInline = component$<CalendarInlineProps>(
         }
         case 'pageup': {
           const localDate = elFocus.getAttribute('data-value') as LocalDate;
-          const d = new Date(localDate);
-          newDate = new Date(d.setMonth(d.getMonth() - 1)).toISOString().split('T')[0] as LocalDate;
+          const d = parseLocalDate(localDate);
+          newDate = toLocalDateString(new Date(d.setMonth(d.getMonth() - 1))) as LocalDate;
 
           decreaseDate();
           break;
         }
         case 'pagedown': {
           const localDate = elFocus.getAttribute('data-value') as LocalDate;
-          const d = new Date(localDate);
-          newDate = new Date(d.setMonth(d.getMonth() + 1)).toISOString().split('T')[0] as LocalDate;
+          const d = parseLocalDate(localDate);
+          newDate = toLocalDateString(new Date(d.setMonth(d.getMonth() + 1))) as LocalDate;
 
           increaseDate();
           break;
