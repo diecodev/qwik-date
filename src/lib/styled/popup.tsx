@@ -42,7 +42,12 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
             shift({ padding: 0 }),
           ],
         }).then(({ x, y }) => {
+          // the browser's [popover] defaults (inset: 0, margin: auto) would center it, so the
+          // placement styles are set here instead of relying on the stylesheet (absent with unStyled)
           Object.assign(popover.style, {
+            position: 'absolute',
+            inset: 'auto',
+            margin: '0',
             left: `${x}px`,
             top: `${y}px`,
           });
