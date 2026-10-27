@@ -109,3 +109,6 @@ export default component$(() => {
 - [ ] Custom date ranges (last 7 days, next 30d)
 - [ ] Fancy animations (styled version)
 - [ ] website docs: easy to read, understand and implement.
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the development setup and how to run the tests.

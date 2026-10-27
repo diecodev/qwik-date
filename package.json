@@ -61,7 +61,9 @@
     "prepublishOnly": "pnpm build",
     "release": "bumpp --commit --tag --push",
     "start": "vite --open --mode ssr",
-    "test": "playwright test",
+    "test": "pnpm test.unit && pnpm test.e2e",
+    "test.unit": "vitest run",
+    "test.e2e": "playwright test",
     "qwik": "qwik"
   },
   "dependencies": {
@@ -72,7 +74,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
-    "@playwright/test": "^1.45.3",
+    "@playwright/test": "^1.64.1",
     "@qwik.dev/core": "2.0.0-rc.4",
     "@qwik.dev/router": "2.0.0-rc.4",
     "@types/node": "^22.12.0",
@@ -81,6 +83,7 @@
     "tsx": "^4.16.3",
     "typescript": "^5.9.3",
     "undici": "^6.19.5",
-    "vite": "^8.3.5"
+    "vite": "^8.3.5",
+    "vitest": "^4.1.12"
   }
 }

@@ -40,3 +40,7 @@ bun.lockb
 # Yarn
 .yarn/*
 !.yarn/releases
+
+# Tests
+playwright-report
+test-results
