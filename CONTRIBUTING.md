@@ -16,7 +16,10 @@ pnpm exec playwright install --with-deps chromium webkit # browsers for the e2e 
 pnpm dev # playground at http://localhost:5173, rendering the library straight from src/lib
 ```
 
-The playground page is `src/routes/index.tsx`.
+The playground is a catalog of manual checks, one case per e2e test: what to try, what should happen,
+and readouts for what the eye can't see (the focused element, attributes, the value `onDateChange$`
+received). The page is `src/routes/index.tsx`; the cases live in `src/playground/<area>.tsx`, one file
+per spec in `tests/e2e`.
 
 ## Tests
 
@@ -31,8 +34,9 @@ The e2e suite starts its own dev server on port 5180 and opens the fixture pages
 To run part of it: `pnpm exec playwright test --project=chromium tests/e2e/keyboard.spec.ts`, or add
 `--ui` for Playwright's UI mode.
 
-When you change behavior, add or update a test: a section in a fixture page plus a spec. A few things
-that bite in this repo:
+When you change behavior, add or update a test: a section in a fixture page plus a spec, and its case in
+the playground catalog (`src/playground/<area>.tsx`, with the test name in `tests`). A few things that
+bite in this repo:
 
 - Prefer auto-waiting assertions (`toBeFocused`, `toHaveText`, `expect.poll`) over fixed timeouts.
 - Qwik loads each event handler lazily and doesn't order handlers of different elements: wait for one
