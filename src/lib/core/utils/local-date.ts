@@ -18,3 +18,11 @@ export const addMonths = (date: Date, months: number) => {
   target.setDate(Math.min(date.getDate(), daysInTarget));
   return target;
 };
+
+// A 'yyyy-mm-dd' string whose day exists in that month (the format alone accepts 2024-02-31)
+export const isValidLocalDate = (value: string) => {
+  if (!/^\d{4}-(0[1-9]|1[0-2])-\d{2}$/.test(value)) return false;
+
+  const [year, month, day] = value.split('-').map(Number);
+  return day >= 1 && day <= new Date(year, month, 0).getDate();
+};

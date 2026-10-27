@@ -21,6 +21,7 @@ import {
   addMonths,
   daysArrGenerator,
   getRowWeekNumber,
+  isValidLocalDate,
   parseLocalDate,
   toLocalDateString,
 } from '../core';
@@ -59,7 +60,6 @@ export interface CalendarInlineProps {
   onDateChange$?: QRL<(date: LocalDate) => void>;
 }
 
-const regex = /^\d{4}-(0[1-9]|1[0-2])-\d{2}$/;
 const ACTION_KEYS = [
   'enter',
   ' ',
@@ -142,13 +142,13 @@ export const CalendarInline = component$<CalendarInlineProps>(
       return dates;
     });
 
-    if (!regex.test(defaultDate.value))
-      throw new Error('Invalid date format in Calendar. Please use YYYY-MM-DD format.');
+    if (!isValidLocalDate(defaultDate.value))
+      throw new Error('Invalid date in Calendar. Please use an existing date in YYYY-MM-DD format.');
 
     // follow the date when it changes from outside (e.g. a parent writes to `bind:date`)
     useTask$(({ track }) => {
       const value = track(() => defaultDate.value);
-      if (!regex.test(value)) return;
+      if (!isValidLocalDate(value)) return;
 
       const [year, month] = value.split('-');
       monthToRender.value = month as Month;
