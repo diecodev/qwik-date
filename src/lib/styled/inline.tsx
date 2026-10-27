@@ -7,6 +7,7 @@ import {
   component$,
   sync$,
   useComputed$,
+  useId,
   useSignal,
   useStyles$,
   useTask$,
@@ -125,6 +126,10 @@ export const CalendarInline = component$<CalendarInlineProps>(
     const dateToFocus = useSignal<LocalDate>(defaultDate.value);
     const focusDayOnMonthChange = useSignal(false);
     const rootRef = useSignal<HTMLDivElement>();
+
+    // the grid is named after the month title (`role="grid"` requires a name), keep a custom title id
+    const id = useId();
+    const titleId = titleProps.id ?? `qwik-date-${id}-title`;
 
     // computed
     const labelSignal = useComputed$(() => {
@@ -382,7 +387,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
             <IconLeft {...iconProps} />
           </button>
 
-          <div aria-live='polite' role='presentation' {...titleProps}>
+          <div id={titleId} aria-live='polite' role='presentation' {...titleProps}>
             {hTitle}
           </div>
 
@@ -404,7 +409,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
           </button>
         </header>
 
-        <table tabIndex={-1} role='grid' {...calendarProps}>
+        <table tabIndex={-1} role='grid' aria-labelledby={titleId} {...calendarProps}>
           {showDaysOfWeek && (
             <thead {...theadProps}>
               <tr {...theadRowProps}>
