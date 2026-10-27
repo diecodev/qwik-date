@@ -33,8 +33,8 @@ export const Footer = component$(() => {
               <path d="M9 18c-4.51 2-5-2-7-2"></path>
             </svg>
           </a>
-          <a href="https://diecodev.deno.dev" target="_blank">
-            <span class="sr-only">github repo</span>
+          <a href="https://dieco.dev" target="_blank">
+            <span class="sr-only">personal website</span>
             <svg
               fill="none"
               stroke="currentColor"
