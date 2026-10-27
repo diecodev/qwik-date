@@ -158,6 +158,15 @@ export const CalendarInline = component$<CalendarInlineProps>(
       if (activeDate.value && activeDate.value !== value) activeDate.value = null;
     });
 
+    // without `date` / `bind:date` the default is "today" where the component rendered: with SSR that is
+    // the server's day (frozen at build time with SSG), so switch to the visitor's day on the client
+    useVisibleTask$(() => {
+      if (dateProp || props['bind:date']) return;
+
+      const today = toLocalDateString(new Date()) as LocalDate;
+      if (dateSignal.value !== today) dateSignal.value = today;
+    });
+
     // taks
     useVisibleTask$(({ track, cleanup }) => {
       track(() => datesArray.value);
