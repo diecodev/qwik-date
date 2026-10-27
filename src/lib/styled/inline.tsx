@@ -286,9 +286,10 @@ export const CalendarInline = component$<CalendarInlineProps>(
           break;
         }
         case 'home': {
-          // Find the start of the current row
-          const rowStartIndex = Math.floor(idx / 7) * 7;
-          const startButton = buttons[rowStartIndex];
+          // Find the start of the current row (a row has fewer than 7 buttons when fullWeeks is false)
+          const rowButtons = Array.from(elFocus.closest('tr')?.getElementsByTagName('button') ?? []);
+          const startButton = rowButtons[0];
+          const rowStartIndex = buttons.indexOf(startButton);
           newDate = startButton.getAttribute('data-value') as LocalDate;
 
           // Check if the start of the row is in the previous month
@@ -300,9 +301,10 @@ export const CalendarInline = component$<CalendarInlineProps>(
           break;
         }
         case 'end': {
-          // Find the end of the current row
-          const rowEndIndex = Math.min(Math.ceil((idx + 1) / 7) * 7 - 1, buttons.length - 1);
-          const endButton = buttons[rowEndIndex];
+          // Find the end of the current row (a row has fewer than 7 buttons when fullWeeks is false)
+          const rowButtons = Array.from(elFocus.closest('tr')?.getElementsByTagName('button') ?? []);
+          const endButton = rowButtons[rowButtons.length - 1];
+          const rowEndIndex = buttons.indexOf(endButton);
           newDate = endButton.getAttribute('data-value') as LocalDate;
 
           // Check if the end of the row is in the next month
