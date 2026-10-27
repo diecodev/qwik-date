@@ -351,6 +351,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
         <header {...headerProps}>
           <button
             type='button'
+            data-header-action
             onClick$={[
               $(async () => {
                 focusDayOnMonthChange.value = false;
@@ -371,6 +372,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
 
           <button
             type='button'
+            data-header-action
             onClick$={[
               $(async () => {
                 focusDayOnMonthChange.value = false;
