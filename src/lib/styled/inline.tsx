@@ -120,7 +120,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
     const monthToRender = useSignal<Month>(defaultDate.value.split('-')[1] as Month);
     const yearToRender = useSignal<number>(+defaultDate.value.split('-')[0]);
     const dateToFocus = useSignal<LocalDate>(defaultDate.value);
-    const hasNavigated = useSignal(false);
+    const focusDayOnMonthChange = useSignal(false);
     const rootRef = useSignal<HTMLDivElement>();
 
     // computed
@@ -146,9 +146,10 @@ export const CalendarInline = component$<CalendarInlineProps>(
     useVisibleTask$(({ track, cleanup }) => {
       track(() => datesArray.value);
 
-      // the first run happens as soon as the calendar is visible: only move the focus
-      // once the user has changed the month, otherwise the page loads with a focused day
-      if (!hasNavigated.value) return;
+      // only move the focus when the month changed through keyboard navigation in the grid: not on
+      // the first run (the calendar just became visible, the page would load with a focused day) and
+      // not after the header buttons, which keep the focus so they can be pressed repeatedly
+      if (!focusDayOnMonthChange.value) return;
 
       if (datesArray.value.flat().includes(dateToFocus.value)) {
         const btn = rootRef.value?.querySelector<HTMLButtonElement>(`button[data-value="${dateToFocus.value}"]`);
@@ -176,8 +177,6 @@ export const CalendarInline = component$<CalendarInlineProps>(
 
     // events handlers
     const decreaseDate = $(() => {
-      hasNavigated.value = true;
-
       if (monthToRender.value === '01') {
         monthToRender.value = '12';
         yearToRender.value -= 1;
@@ -187,8 +186,6 @@ export const CalendarInline = component$<CalendarInlineProps>(
       monthToRender.value = String(+monthToRender.value - 1).padStart(2, '0') as Month;
     });
     const increaseDate = $(() => {
-      hasNavigated.value = true;
-
       if (monthToRender.value === '12') {
         monthToRender.value = '01';
         yearToRender.value += 1;
@@ -199,6 +196,8 @@ export const CalendarInline = component$<CalendarInlineProps>(
     });
     const updateDateFocused = $((e: KeyboardEvent, tbody: HTMLTableSectionElement) => {
       if (!ACTION_KEYS.includes(e.key.toLowerCase() as (typeof ACTION_KEYS)[number])) return;
+
+      focusDayOnMonthChange.value = true;
 
       const elFocus = document.activeElement;
 
@@ -328,8 +327,9 @@ export const CalendarInline = component$<CalendarInlineProps>(
           <button
             type='button'
             onClick$={[
-              decreaseDate,
-              $(() => {
+              $(async () => {
+                focusDayOnMonthChange.value = false;
+                await decreaseDate();
                 dateToFocus.value = `${yearToRender.value}-${monthToRender.value}-01`;
               }),
               actionButtonProps.onClick$,
@@ -347,8 +347,9 @@ export const CalendarInline = component$<CalendarInlineProps>(
           <button
             type='button'
             onClick$={[
-              increaseDate,
-              $(() => {
+              $(async () => {
+                focusDayOnMonthChange.value = false;
+                await increaseDate();
                 dateToFocus.value = `${yearToRender.value}-${monthToRender.value}-01`;
               }),
               actionButtonProps.onClick$,
