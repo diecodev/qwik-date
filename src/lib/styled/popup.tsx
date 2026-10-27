@@ -12,7 +12,8 @@ export interface DatePickerProps extends CalendarInlineProps {
 }
 
 const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabel, triggerIcon, ...props }) => {
-  if (!props.unStyled) useStyles$(styles);
+  // always called: hooks can't be conditional, `unStyled` instances are excluded by the stylesheet itself
+  useStyles$(styles);
 
   // identifier: keep a user-provided `containerProps.id`, the trigger has to point at the popover's real id
   const id = useId();

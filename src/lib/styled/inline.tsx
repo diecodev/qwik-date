@@ -109,7 +109,8 @@ export const CalendarInline = component$<CalendarInlineProps>(
     unStyled,
     ...props
   }) => {
-    if (!unStyled) useStyles$(styles);
+    // always called: hooks can't be conditional, `unStyled` instances are excluded by the stylesheet itself
+    useStyles$(styles);
 
     // root constants
     const date = toLocalDateString(new Date()) as LocalDate;
