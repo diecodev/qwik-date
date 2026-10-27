@@ -5,6 +5,7 @@ import {
   type QRL,
   type Signal,
   component$,
+  isSignal,
   sync$,
   useComputed$,
   useId,
@@ -18,6 +19,7 @@ import {
   type Locale,
   MONTHS_LG,
   type Month,
+  type Theme,
   WEEKDAYS,
   addMonths,
   daysArrGenerator,
@@ -39,6 +41,7 @@ export interface CalendarInlineProps {
   'bind:date'?: Signal<LocalDate>; // TODO: validate user is passing a signal
   showDaysOfWeek?: boolean;
   unStyled?: boolean;
+  theme?: Theme | Signal<Theme>;
   iconLeft?: Component<PropsOf<'svg'>>;
   iconRight?: Component<PropsOf<'svg'>>;
   // props to override
@@ -108,6 +111,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
     weekNumberProps = {},
     onDateChange$,
     unStyled,
+    theme = 'light',
     ...props
   }) => {
     // always called: hooks can't be conditional, `unStyled` instances are excluded by the stylesheet itself
@@ -115,6 +119,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
 
     // root constants
     const date = toLocalDateString(new Date()) as LocalDate;
+    const themeValue = isSignal(theme) ? theme.value : theme;
     const labelStr = containerProps['aria-label'] ?? ARIA_LABELS[locale].root;
 
     // signals
@@ -362,7 +367,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
       <div
         data-qwik-date
         data-unstyled={unStyled}
-        data-theme='light'
+        data-theme={themeValue}
         // a generic <div> can't be named (ARIA), the group role lets screen readers read the label
         role='group'
         aria-label={labelSignal.value}

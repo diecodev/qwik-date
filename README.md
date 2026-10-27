@@ -63,6 +63,22 @@ export default component$(() => {
 - `containerProps`, `headerProps`, `actionButtonProps`, `actionLeftProps`, `actionRightProps`, `calendarProps`, `theadProps`, `tbodyProps`, `theadRowProps`, `tbodyRowProps`, `headerCellProps`, `cellProps`, `dayButtonProps`, `iconProps`, `titleProps`, `weekNumberProps`: Custom props for various parts of the component.
 - `onDateChange$`: Callback for when the date changes.
 - `unStyled`: If true, removes default styling (default: false).
+- `theme`: `'light'` (default), `'dark'`, or `'auto'` to follow the operating system's color scheme. It also accepts a `Signal<Theme>` to change it at runtime.
+
+#### Theme
+
+```tsx
+import { component$, useSignal } from '@qwik.dev/core';
+import { Calendar, type Theme } from 'qwik-date';
+
+export default component$(() => {
+  const theme = useSignal<Theme>('auto');
+
+  return <Calendar theme={theme} />;
+});
+```
+
+`auto` is resolved with CSS (`prefers-color-scheme`), so it ships no JavaScript. The `DatePicker` accepts the same prop.
 
 ### Popup Date Picker
 

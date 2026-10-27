@@ -1,5 +1,5 @@
 import { autoPlacement, autoUpdate, computePosition, offset, shift } from '@floating-ui/dom';
-import { type Component, type PropsOf, component$, useId, useStyles$, useVisibleTask$ } from '@qwik.dev/core';
+import { type Component, type PropsOf, component$, isSignal, useId, useStyles$, useVisibleTask$ } from '@qwik.dev/core';
 import { TRIGGER_LABELS } from '../core';
 import { Calendar } from './icons';
 import { CalendarInline, type CalendarInlineProps } from './inline';
@@ -20,6 +20,8 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
   const popoverId = props.containerProps?.id ?? `qwik-date-${id}`;
 
   const TriggerIcon = triggerIcon ?? Calendar;
+  const theme = props.theme ?? 'light';
+  const themeValue = isSignal(theme) ? theme.value : theme;
 
   // The `document-ready` strategy runs on `qinit`, fired by the qwikloader once the container is
   // ready (and replayed for late listeners). `DOMContentLoaded` can fire before the qwikloader wires
@@ -64,7 +66,7 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
   );
 
   return (
-    <div data-qwik-wrapper data-unstyled={props.unStyled}>
+    <div data-qwik-wrapper data-unstyled={props.unStyled} data-theme={themeValue}>
       <button type='button' {...triggerProps} popovertarget={popoverId}>
         {triggerLabel ?? TRIGGER_LABELS[props.locale ?? 'en']}
         <TriggerIcon />

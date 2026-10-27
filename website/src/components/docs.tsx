@@ -128,6 +128,12 @@ const calendarInlinePropsInfo = [
     defaultValue: 'false',
   },
   {
+    name: 'theme',
+    description:
+      "Color theme: 'light', 'dark' or 'auto' (follows the OS). Also accepts a Signal",
+    defaultValue: "'light'",
+  },
+  {
     name: 'bind:date',
     description: 'Signal with the default date',
     defaultValue: 'undefined',

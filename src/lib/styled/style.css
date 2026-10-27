@@ -1,5 +1,6 @@
 /* every rule skips `unStyled` instances: the stylesheet is global, so other calendars on the page would style them */
-:where([data-qwik-date]:not([data-unstyled])[data-theme="light"]) {
+:where([data-qwik-date]:not([data-unstyled])[data-theme="light"]),
+:where([data-qwik-date]:not([data-unstyled])[data-theme="auto"]) {
   --foreground-color: 0, 0%, 100%;
   --background-color: 0, 0%, 0%;
   --accent-color: 240, 4.8%, 95.9%;
@@ -25,6 +26,23 @@
   --inset-shadow: inset 0 0 0 1px hsla(var(--shadow-color), var(--shadow-opacity, 0));
 
   --outer-shadow: 0 0 0.25rem hsla(var(--shadow-color), 0);
+}
+
+/* `auto` follows the OS: the light values above, the dark ones when the OS prefers dark */
+@media (prefers-color-scheme: dark) {
+  :where([data-qwik-date]:not([data-unstyled])[data-theme="auto"]) {
+    --foreground-color: 0, 0%, 0%;
+    --background-color: 240, 4.8%, 95.9%;
+    --accent-color: 0, 0%, 20%;
+    --muted-color: 0, 0%, 50%; /* 5.3:1 on black */
+
+    --shadow-opacity: 0.25;
+    --shadow-color: 0, 0%, 100%;
+
+    --inset-shadow: inset 0 0 0 1px hsla(var(--shadow-color), var(--shadow-opacity, 0));
+
+    --outer-shadow: 0 0 0.25rem hsla(var(--shadow-color), 0);
+  }
 }
 
 :where([data-qwik-date]:not([data-unstyled])) {
@@ -87,8 +105,8 @@
       color: hsla(var(--background-color), 1);
       border-radius: calc(var(--radius) - 0.4rem);
 
-      --shadow-color: 0, 0%, 10%;
-      box-shadow: inset 0 0 0 0.075rem hsla(var(--shadow-color), 0.15);
+      /* the text color of the theme, so the outline also shows on the dark theme */
+      box-shadow: inset 0 0 0 0.075rem hsla(var(--background-color), 0.15);
 
       @media (prefers-reduced-motion: no-preference) {
         transition: all 150ms ease-in-out;
@@ -236,5 +254,16 @@
     border: none;
     box-sizing: border-box;
     position: absolute;
+  }
+}
+
+/* the trigger text sits on the page background: lighten it with the dark theme */
+:where([data-qwik-wrapper]:not([data-unstyled])[data-theme="dark"]) {
+  --shadow-color: 0, 0%, 70%;
+}
+
+@media (prefers-color-scheme: dark) {
+  :where([data-qwik-wrapper]:not([data-unstyled])[data-theme="auto"]) {
+    --shadow-color: 0, 0%, 70%;
   }
 }
