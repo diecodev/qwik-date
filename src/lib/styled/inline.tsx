@@ -5,6 +5,7 @@ import {
   type QRL,
   type Signal,
   component$,
+  sync$,
   useComputed$,
   useSignal,
   useStyles$,
@@ -381,8 +382,25 @@ export const CalendarInline = component$<CalendarInlineProps>(
           )}
           <tbody
             {...tbodyProps}
-            preventdefault:keydown
             onKeyDown$={[
+              // only cancel the default action of the keys the grid handles (same list as ACTION_KEYS:
+              // sync$ code can't reference outer variables), so Tab still moves the focus out and
+              // Escape still closes the DatePicker popover. It must be sync$: a $ handler runs too late.
+              sync$((e: KeyboardEvent) => {
+                const keys = [
+                  'enter',
+                  ' ',
+                  'arrowup',
+                  'arrowdown',
+                  'arrowleft',
+                  'arrowright',
+                  'home',
+                  'end',
+                  'pageup',
+                  'pagedown',
+                ];
+                if (keys.includes(e.key.toLowerCase())) e.preventDefault();
+              }),
               $((e: KeyboardEvent, target: HTMLTableSectionElement) => {
                 updateDateFocused(e, target);
               }),
