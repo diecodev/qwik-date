@@ -14,8 +14,9 @@ export interface DatePickerProps extends CalendarInlineProps {
 const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabel, triggerIcon, ...props }) => {
   if (!props.unStyled) useStyles$(styles);
 
-  // identifier
+  // identifier: keep a user-provided `containerProps.id`, the trigger has to point at the popover's real id
   const id = useId();
+  const popoverId = props.containerProps?.id ?? `qwik-date-${id}`;
 
   const TriggerIcon = triggerIcon ?? Calendar;
 
@@ -25,8 +26,8 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
   useOnDocument(
     'qinit',
     $(() => {
-      const btn = document.querySelector(`button[popovertarget="qwik-date-${id}"]`) as HTMLButtonElement | null;
-      const popover = document.querySelector(`#qwik-date-${id}`) as HTMLDivElement | null;
+      const btn = document.querySelector(`button[popovertarget="${popoverId}"]`) as HTMLButtonElement | null;
+      const popover = document.getElementById(popoverId);
 
       if (!btn || !popover) return;
 
@@ -58,14 +59,14 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
 
   return (
     <div data-qwik-wrapper>
-      <button type='button' {...triggerProps} popovertarget={`qwik-date-${id}`}>
+      <button type='button' {...triggerProps} popovertarget={popoverId}>
         {triggerLabel ?? TRIGGER_LABELS[props.locale ?? 'en']}
         <TriggerIcon />
       </button>
       <CalendarInline
         {...props}
         containerProps={{
-          id: `qwik-date-${id}`,
+          id: popoverId,
           popover: 'auto',
           ...props.containerProps,
         }}
