@@ -175,7 +175,7 @@
           background-color: hsla(var(--accent-color), 1);
         }
 
-        &[aria-selected="true"] {
+        &[data-selected] {
           background-color: hsla(var(--background-color), 1);
           color: hsla(var(--foreground-color), 1);
         }

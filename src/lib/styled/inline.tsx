@@ -436,12 +436,17 @@ export const CalendarInline = component$<CalendarInlineProps>(
                     const disabled = day?.split('-')[1] !== monthToRender.value;
 
                     return (
-                      <td key={`${week.toString()}-${day}`} role='presentation' aria-disabled={disabled} {...cellProps}>
+                      <td
+                        key={`${week.toString()}-${day}`}
+                        aria-selected={day && day === activeDate.value ? 'true' : undefined}
+                        aria-disabled={disabled}
+                        {...cellProps}
+                      >
                         {day && (
                           <button
                             type='button'
                             data-preselected={day === defaultDate.value}
-                            aria-selected={day === activeDate.value ? 'true' : undefined}
+                            data-selected={day === activeDate.value}
                             data-value={day}
                             aria-label={label}
                             disabled={disabled}
