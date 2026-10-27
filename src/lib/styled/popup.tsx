@@ -1,5 +1,5 @@
 import { autoPlacement, autoUpdate, computePosition, offset, shift } from '@floating-ui/dom';
-import { $, type Component, type PropsOf, component$, useId, useOnDocument, useStyles$ } from '@qwik.dev/core';
+import { type Component, type PropsOf, component$, useId, useStyles$, useVisibleTask$ } from '@qwik.dev/core';
 import { TRIGGER_LABELS } from '../core';
 import { Calendar } from './icons';
 import { CalendarInline, type CalendarInlineProps } from './inline';
@@ -21,12 +21,13 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
 
   const TriggerIcon = triggerIcon ?? Calendar;
 
-  // `qinit` is fired by the qwikloader once the container is ready (and replayed for
-  // late listeners). `DOMContentLoaded` can fire before the qwikloader wires the
-  // listener in some engines (WebKit), so the popover would never be positioned.
-  useOnDocument(
-    'qinit',
-    $(() => {
+  // The `document-ready` strategy runs on `qinit`, fired by the qwikloader once the container is
+  // ready (and replayed for late listeners). `DOMContentLoaded` can fire before the qwikloader wires
+  // the listener in some engines (WebKit), and the default strategy waits for the element to be
+  // visible, which a closed popover never is. Unlike a plain `qinit` listener, a task can register a
+  // cleanup, so floating-ui stops watching once the DatePicker is removed.
+  useVisibleTask$(
+    ({ cleanup }) => {
       const btn = document.querySelector(`button[popovertarget="${popoverId}"]`) as HTMLButtonElement | null;
       const popover = document.getElementById(popoverId);
 
@@ -55,12 +56,11 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
         });
       };
 
-      const cleanup = autoUpdate(btn, popover, update);
+      cleanup(autoUpdate(btn, popover, update));
 
       update();
-
-      return cleanup;
-    }),
+    },
+    { strategy: 'document-ready' },
   );
 
   return (
