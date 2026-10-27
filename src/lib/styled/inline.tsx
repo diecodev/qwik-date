@@ -16,6 +16,7 @@ import {
   MONTHS_LG,
   type Month,
   WEEKDAYS,
+  addMonths,
   daysArrGenerator,
   getWeekNumber,
   parseLocalDate,
@@ -272,16 +273,14 @@ export const CalendarInline = component$<CalendarInlineProps>(
         }
         case 'pageup': {
           const localDate = elFocus.getAttribute('data-value') as LocalDate;
-          const d = parseLocalDate(localDate);
-          newDate = toLocalDateString(new Date(d.setMonth(d.getMonth() - 1))) as LocalDate;
+          newDate = toLocalDateString(addMonths(parseLocalDate(localDate), -1)) as LocalDate;
 
           decreaseDate();
           break;
         }
         case 'pagedown': {
           const localDate = elFocus.getAttribute('data-value') as LocalDate;
-          const d = parseLocalDate(localDate);
-          newDate = toLocalDateString(new Date(d.setMonth(d.getMonth() + 1))) as LocalDate;
+          newDate = toLocalDateString(addMonths(parseLocalDate(localDate), 1)) as LocalDate;
 
           increaseDate();
           break;
