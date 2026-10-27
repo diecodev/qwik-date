@@ -129,9 +129,9 @@ export const CalendarInline = component$<CalendarInlineProps>(
     // computed
     const labelSignal = useComputed$(() => {
       if (!activeDate.value) return labelStr;
-      const [year, month] = activeDate.value.split('-');
 
-      return `${labelStr} ${MONTHS_LG[locale][+month - 1]} ${year}`;
+      const selected = dateFormatter(locale).format(parseLocalDate(activeDate.value));
+      return `${labelStr}, ${ARIA_LABELS[locale].selected} ${selected}`;
     });
     const datesArray = useComputed$(() => {
       const dates = daysArrGenerator({
@@ -344,6 +344,8 @@ export const CalendarInline = component$<CalendarInlineProps>(
         data-qwik-date
         data-unstyled={unStyled}
         data-theme='light'
+        // a generic <div> can't be named (ARIA), the group role lets screen readers read the label
+        role='group'
         aria-label={labelSignal.value}
         {...containerProps}
         ref={rootRef}

@@ -40,12 +40,14 @@ export const ARIA_LABELS = {
   en: {
     previous: 'go to previous month',
     next: 'go to next month',
-    root: 'Actual Date is:',
+    root: 'Calendar',
+    selected: 'selected date:',
   },
   es: {
     previous: 'Ir al mes anterior',
     next: 'Ir al siguiente mes',
-    root: 'La fecha actual es:',
+    root: 'Calendario',
+    selected: 'fecha seleccionada:',
   },
 } as const;
 
