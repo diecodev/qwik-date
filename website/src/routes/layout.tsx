@@ -3,17 +3,7 @@ import { routeLoader$ } from '@qwik.dev/router'
 import type { RequestHandler } from '@qwik.dev/router'
 import { Toaster } from 'qwik-sonner'
 
-export const onGet: RequestHandler = async ({
-  cacheControl,
-  redirect,
-  url,
-}) => {
-  const { host } = url
-  // redirect to custom domain
-  if (host === 'qwik-date.deno.dev') {
-    throw redirect(301, 'https://qwik-date.dieco.dev')
-  }
-
+export const onGet: RequestHandler = async ({ cacheControl }) => {
   // Control caching for this request for best performance and to reduce hosting costs:
   // https://qwik.dev/docs/caching/
   cacheControl({

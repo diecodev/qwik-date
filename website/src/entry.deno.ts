@@ -3,6 +3,11 @@
  *
  * It's the entry point for the Deno HTTP server when building for production.
  *
+ * Deno Deploy serves the prerendered `dist/` folder as a static app (see
+ * `deno.json` at the repo root), so this server is only needed to run the
+ * production build locally (`pnpm serve`) or to switch the app to the
+ * "Dynamic" runtime in the Deno Deploy dashboard.
+ *
  * Learn more about the Deno integration here:
  * - https://qwik.dev/docs/deployments/deno/
  * - https://docs.deno.com/runtime/tutorials/http_server

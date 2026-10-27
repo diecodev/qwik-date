@@ -61,11 +61,11 @@ export const head: DocumentHead = {
     },
     {
       name: 'og:image',
-      content: 'https://qwik-date.deno.dev/og.png',
+      content: 'https://qwik-date.dieco.dev/og.png',
     },
     {
       name: 'og:url',
-      content: 'https://qwik-date.deno.dev',
+      content: 'https://qwik-date.dieco.dev',
     },
     {
       name: 'twitter:card',
@@ -81,11 +81,11 @@ export const head: DocumentHead = {
     },
     {
       name: 'twitter:image',
-      content: 'https://qwik-date.deno.dev/og.png',
+      content: 'https://qwik-date.dieco.dev/og.png',
     },
     {
       name: 'twitter:url',
-      content: 'https://qwik-date.deno.dev',
+      content: 'https://qwik-date.dieco.dev',
     },
     {
       name: 'theme-color',
