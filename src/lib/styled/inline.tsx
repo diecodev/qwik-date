@@ -120,6 +120,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
     const yearToRender = useSignal<number>(+defaultDate.value.split('-')[0]);
     const dateToFocus = useSignal<LocalDate>(defaultDate.value);
     const hasNavigated = useSignal(false);
+    const rootRef = useSignal<HTMLDivElement>();
 
     // computed
     const labelSignal = useComputed$(() => {
@@ -149,13 +150,13 @@ export const CalendarInline = component$<CalendarInlineProps>(
       if (!hasNavigated.value) return;
 
       if (datesArray.value.flat().includes(dateToFocus.value)) {
-        const btn = document.querySelector(`button[data-value="${dateToFocus.value}"]`) as HTMLButtonElement | null;
+        const btn = rootRef.value?.querySelector<HTMLButtonElement>(`button[data-value="${dateToFocus.value}"]`);
         btn?.focus();
         btn?.setAttribute('tabindex', '0');
       }
 
       cleanup(() => {
-        const btn = document.querySelector(`button[data-value="${dateToFocus.value}"]`) as HTMLButtonElement | null;
+        const btn = rootRef.value?.querySelector<HTMLButtonElement>(`button[data-value="${dateToFocus.value}"]`);
         btn?.setAttribute('tabindex', '-1');
         btn?.blur();
       });
@@ -323,7 +324,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
     });
 
     return (
-      <div data-qwik-date data-theme='light' aria-label={labelSignal.value} {...containerProps}>
+      <div data-qwik-date data-theme='light' aria-label={labelSignal.value} {...containerProps} ref={rootRef}>
         <header {...headerProps}>
           <button
             type='button'
