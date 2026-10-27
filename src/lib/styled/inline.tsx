@@ -20,7 +20,7 @@ import {
   WEEKDAYS,
   addMonths,
   daysArrGenerator,
-  getWeekNumber,
+  getRowWeekNumber,
   parseLocalDate,
   toLocalDateString,
 } from '../core';
@@ -428,7 +428,7 @@ export const CalendarInline = component$<CalendarInlineProps>(
                 <tr key={week.toString()} {...tbodyRowProps}>
                   {showWeekNumber && (
                     <td {...weekNumberProps}>
-                      <span>{getWeekNumber(week.filter((day) => day !== null)[0]).toString()}</span>
+                      <span>{getRowWeekNumber(week).toString()}</span>
                     </td>
                   )}
                   {week.map((day) => {
