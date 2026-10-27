@@ -1,6 +1,6 @@
-import { Slot, component$ } from '@builder.io/qwik'
-import { routeLoader$ } from '@builder.io/qwik-city'
-import type { RequestHandler } from '@builder.io/qwik-city'
+import { Slot, component$ } from '@qwik.dev/core'
+import { routeLoader$ } from '@qwik.dev/router'
+import type { RequestHandler } from '@qwik.dev/router'
 import { Toaster } from 'qwik-sonner'
 
 export const onGet: RequestHandler = async ({

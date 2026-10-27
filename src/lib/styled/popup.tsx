@@ -1,5 +1,5 @@
-import { $, type Component, type PropsOf, component$, useId, useOnWindow, useStyles$ } from '@builder.io/qwik';
 import { autoPlacement, autoUpdate, computePosition, offset, shift } from '@floating-ui/dom';
+import { $, type Component, type PropsOf, component$, useId, useOnDocument, useStyles$ } from '@qwik.dev/core';
 import { TRIGGER_LABELS } from '../core';
 import { Calendar } from './icons';
 import { CalendarInline, type CalendarInlineProps } from './inline';
@@ -19,8 +19,11 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
 
   const TriggerIcon = triggerIcon ?? Calendar;
 
-  useOnWindow(
-    'DOMContentLoaded',
+  // `qinit` is fired by the qwikloader once the container is ready (and replayed for
+  // late listeners). `DOMContentLoaded` can fire before the qwikloader wires the
+  // listener in some engines (WebKit), so the popover would never be positioned.
+  useOnDocument(
+    'qinit',
     $(() => {
       const btn = document.querySelector(`button[popovertarget="qwik-date-${id}"]`) as HTMLButtonElement | null;
       const popover = document.querySelector(`#qwik-date-${id}`) as HTMLDivElement | null;

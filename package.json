@@ -27,40 +27,16 @@
   "types": "./lib-types/index.d.ts",
   "exports": {
     ".": {
-      "node": {
-        "import": "./lib/index.qwik.mjs",
-        "require": "./lib/index.qwik.cjs",
-        "types": "./lib-types/index.d.ts"
-      },
-      "default": {
-        "import": "./lib/index.qwik.mjs",
-        "require": "./lib/index.qwik.cjs",
-        "types": "./lib-types/index.d.ts"
-      }
+      "types": "./lib-types/index.d.ts",
+      "import": "./lib/index.qwik.mjs"
     },
     "./inline": {
-      "node": {
-        "import": "./lib/styled/inline.qwik.mjs",
-        "require": "./lib/styled/inline.qwik.cjs",
-        "types": "./lib-types/styled/inline.d.ts"
-      },
-      "default": {
-        "import": "./lib/styled/inline.qwik.mjs",
-        "require": "./lib/styled/inline.qwik.cjs",
-        "types": "./lib-types/styled/inline.d.ts"
-      }
+      "types": "./lib-types/styled/inline.d.ts",
+      "import": "./lib/styled/inline.qwik.mjs"
     },
     "./picker": {
-      "node": {
-        "import": "./lib/styled/popup.qwik.mjs",
-        "require": "./lib/styled/popup.qwik.cjs",
-        "types": "./lib-types/styled/popup.d.ts"
-      },
-      "default": {
-        "import": "./lib/styled/popup.qwik.mjs",
-        "require": "./lib/styled/popup.qwik.cjs",
-        "types": "./lib-types/styled/popup.d.ts"
-      }
+      "types": "./lib-types/styled/popup.d.ts",
+      "import": "./lib/styled/popup.qwik.mjs"
     }
   },
   "files": [
@@ -68,7 +44,7 @@
     "lib-types"
   ],
   "engines": {
-    "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "private": false,
   "type": "module",
@@ -88,19 +64,22 @@
     "qwik": "qwik"
   },
   "dependencies": {
-    "@floating-ui/dom": "^1.6.8"
+    "@floating-ui/dom": "^1.7.4"
+  },
+  "peerDependencies": {
+    "@qwik.dev/core": "^2.0.0-rc.4"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
-    "@builder.io/qwik": "^1.7.3",
     "@playwright/test": "^1.45.3",
-    "@types/node": "^22.0.2",
+    "@qwik.dev/core": "2.0.0-rc.4",
+    "@qwik.dev/router": "2.0.0-rc.4",
+    "@types/node": "^22.12.0",
     "bumpp": "9.4.1",
     "np": "^10.0.7",
     "tsx": "^4.16.3",
-    "typescript": "^5.5.4",
+    "typescript": "^5.9.3",
     "undici": "^6.19.5",
-    "vite": "^5.3.5",
-    "vite-tsconfig-paths": "^4.3.2"
+    "vite": "^8.3.5"
   }
 }

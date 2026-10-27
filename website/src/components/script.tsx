@@ -1,4 +1,4 @@
-import { $, component$ } from '@builder.io/qwik'
+import { $, component$ } from '@qwik.dev/core'
 import { toast } from 'qwik-sonner'
 
 export const ScriptCode = component$(() => {

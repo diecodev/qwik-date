@@ -4,6 +4,12 @@
 
 `qwik-date` is an opinionated calendar component designed for the Qwik framework. It offers two main versions: an `inline` calendar and a `popup` date picker, providing flexibility in how you integrate it into your applications.
 
+## Requirements
+
+`qwik-date` 2.x targets **Qwik v2** (`@qwik.dev/core`), which is a peer dependency. It ships ESM only.
+
+If your app is still on Qwik v1 (`@builder.io/qwik`), stay on `qwik-date@1`.
+
 ## Installation
 
 You can install `qwik-date` using any of the following package managers:
@@ -31,7 +37,7 @@ import { CalendarInline } from 'qwik-date/inline';
 Here's a basic example of how to use the inline calendar:
 
 ```tsx
-import { component$, useSignal } from '@builder.io/qwik';
+import { component$, useSignal } from '@qwik.dev/core';
 import { CalendarInline } from 'qwik-date/inline';
 
 export default component$(() => {
@@ -72,7 +78,7 @@ import { DatePicker } from 'qwik-date/picker';
 Here's a basic example of how to use the popup date picker:
 
 ```tsx
-import { component$, useSignal } from '@builder.io/qwik';
+import { component$, useSignal } from '@qwik.dev/core';
 import { DatePicker } from 'qwik-date/picker';
 
 export default component$(() => {

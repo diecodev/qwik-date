@@ -9,7 +9,7 @@ import {
   useSignal,
   useStyles$,
   useVisibleTask$,
-} from '@builder.io/qwik';
+} from '@qwik.dev/core';
 import { ARIA_LABELS, type Locale, MONTHS_LG, type Month, WEEKDAYS, daysArrGenerator, getWeekNumber } from '../core';
 import { ChevronLeft, ChevronRight } from './icons';
 import styles from './style.css?inline';

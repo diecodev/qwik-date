@@ -1,5 +1,5 @@
-import { component$, useSignal } from '@builder.io/qwik'
-import type { DocumentHead } from '@builder.io/qwik-city'
+import { component$, useSignal } from '@qwik.dev/core'
+import type { DocumentHead } from '@qwik.dev/router'
 import { Calendar as CalendarInline } from 'qwik-date'
 import { ScriptCode } from '~/components/script'
 
