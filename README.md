@@ -59,7 +59,7 @@ export default component$(() => {
 - `prevIcon`, `nextIcon`: Custom icons for the previous and next month buttons.
 - `containerProps`, `headerProps`, `navButtonProps` (both month buttons), `prevButtonProps`, `nextButtonProps`, `calendarProps`, `theadProps`, `tbodyProps`, `theadRowProps`, `tbodyRowProps`, `headerCellProps`, `cellProps`, `dayButtonProps`, `iconProps`, `titleProps`, `weekNumberProps`: Custom props for various parts of the component.
 - `onDateChange$`: Callback for when the date changes.
-- `unStyled`: If true, removes default styling (default: false).
+- `unstyled`: If true, removes default styling (default: false).
 - `theme`: `'light'` (default), `'dark'`, or `'auto'` to follow the operating system's color scheme. It also accepts a `Signal<Theme>` to change it at runtime.
 
 #### Theme

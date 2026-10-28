@@ -39,7 +39,7 @@ export interface CalendarProps {
   date?: LocalDate;
   'bind:date'?: Signal<LocalDate>; // TODO: validate user is passing a signal
   showDaysOfWeek?: boolean;
-  unStyled?: boolean;
+  unstyled?: boolean;
   theme?: Theme | Signal<Theme>;
   prevIcon?: Component<PropsOf<'svg'>>;
   nextIcon?: Component<PropsOf<'svg'>>;
@@ -110,11 +110,11 @@ export const Calendar = component$<CalendarProps>(
     titleProps = {},
     weekNumberProps = {},
     onDateChange$,
-    unStyled,
+    unstyled,
     theme = 'light',
     ...props
   }) => {
-    // always called: hooks can't be conditional, `unStyled` instances are excluded by the stylesheet itself
+    // always called: hooks can't be conditional, `unstyled` instances are excluded by the stylesheet itself
     useStyles$(styles);
 
     // root constants
@@ -366,7 +366,7 @@ export const Calendar = component$<CalendarProps>(
     return (
       <div
         data-qwik-date
-        data-unstyled={unStyled}
+        data-unstyled={unstyled}
         data-theme={themeValue}
         // a generic <div> can't be named (ARIA), the group role lets screen readers read the label
         role='group'

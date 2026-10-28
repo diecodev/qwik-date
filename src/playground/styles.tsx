@@ -3,7 +3,7 @@ import { Calendar, DatePicker } from '../lib';
 import { Case, Demo, Probe, Steps, calendarOf, contrastRatio, selectedCell } from './ui';
 
 export const StylesCases = component$(() => {
-  const unStyled = useSignal(true);
+  const unstyled = useSignal(true);
 
   return (
     <>
@@ -104,15 +104,15 @@ export const StylesCases = component$(() => {
         </Demo>
       </Case>
 
-      <Case id='styles-unstyled-toggle' title='unStyled at runtime' tests={['unStyled can change at runtime']}>
+      <Case id='styles-unstyled-toggle' title='unstyled at runtime' tests={['unstyled can change at runtime']}>
         <Steps>
           <li>
-            <p>Look at the calendar, rendered with unStyled=&#123;true&#125;.</p>
+            <p>Look at the calendar, rendered with unstyled=&#123;true&#125;.</p>
             <p>A plain table with browser buttons: no card, no shadow.</p>
           </li>
           <li>
             <p>
-              Click <b>Toggle unStyled</b>.
+              Click <b>Toggle unstyled</b>.
             </p>
             <p>The library styles apply: a rounded card with a shadow.</p>
           </li>
@@ -124,7 +124,7 @@ export const StylesCases = component$(() => {
           </li>
           <li>
             <p>
-              Click <b>Toggle unStyled</b> again.
+              Click <b>Toggle unstyled</b> again.
             </p>
             <p>
               Plain again. "Uncaught errors" in the focus bar stays at <b>0</b> all along.
@@ -136,14 +136,14 @@ export const StylesCases = component$(() => {
             type='button'
             class='pg-button'
             onClick$={() => {
-              unStyled.value = !unStyled.value;
+              unstyled.value = !unstyled.value;
             }}
           >
-            Toggle unStyled
+            Toggle unstyled
           </button>
-          <Calendar date='2024-08-15' unStyled={unStyled.value} />
+          <Calendar date='2024-08-15' unstyled={unstyled.value} />
           <p class='pg-probe'>
-            unStyled: <output>{String(unStyled.value)}</output>
+            unstyled: <output>{String(unstyled.value)}</output>
           </p>
           <Probe
             label='box-shadow'

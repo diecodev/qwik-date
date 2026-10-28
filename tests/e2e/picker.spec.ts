@@ -44,7 +44,7 @@ test.describe('DatePicker', () => {
     await expect.poll(() => popoverGap(trigger, popover)).toBeLessThan(3);
   });
 
-  test('unStyled gets none of the library styles and is still positioned', async ({ page }) => {
+  test('unstyled gets none of the library styles and is still positioned', async ({ page }) => {
     const trigger = page.locator('#unstyled button[popovertarget]');
     const popover = page.locator('#unstyled [popover]');
     // other, styled calendars on the page inject the stylesheet: it must not reach this one

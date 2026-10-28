@@ -24,7 +24,7 @@ export default component$(() => {
         <DatePicker date='2024-08-15' containerProps={{ id: 'my-picker' }} />
       </section>
       <section id='unstyled'>
-        <DatePicker date='2024-08-15' unStyled />
+        <DatePicker date='2024-08-15' unstyled />
       </section>
       <section id='late'>
         <button

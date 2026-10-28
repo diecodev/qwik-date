@@ -123,7 +123,7 @@ const calendarInlinePropsInfo = [
     defaultValue: 'undefined',
   },
   {
-    name: 'unStyled',
+    name: 'unstyled',
     description: 'Disables default styling',
     defaultValue: 'false',
   },

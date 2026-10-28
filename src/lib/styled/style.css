@@ -1,4 +1,4 @@
-/* every rule skips `unStyled` instances: the stylesheet is global, so other calendars on the page would style them */
+/* every rule skips `unstyled` instances: the stylesheet is global, so other calendars on the page would style them */
 :where([data-qwik-date]:not([data-unstyled])[data-theme="light"]),
 :where([data-qwik-date]:not([data-unstyled])[data-theme="auto"]) {
   --foreground-color: 0, 0%, 100%;

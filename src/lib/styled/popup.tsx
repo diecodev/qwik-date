@@ -12,7 +12,7 @@ export interface DatePickerProps extends CalendarProps {
 }
 
 const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabel, triggerIcon, ...props }) => {
-  // always called: hooks can't be conditional, `unStyled` instances are excluded by the stylesheet itself
+  // always called: hooks can't be conditional, `unstyled` instances are excluded by the stylesheet itself
   useStyles$(styles);
 
   // identifier: keep a user-provided `containerProps.id`, the trigger has to point at the popover's real id
@@ -47,7 +47,7 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
           ],
         }).then(({ x, y }) => {
           // the browser's [popover] defaults (inset: 0, margin: auto) would center it, so the
-          // placement styles are set here instead of relying on the stylesheet (absent with unStyled)
+          // placement styles are set here instead of relying on the stylesheet (absent with unstyled)
           Object.assign(popover.style, {
             position: 'absolute',
             inset: 'auto',
@@ -66,7 +66,7 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
   );
 
   return (
-    <div data-qwik-wrapper data-unstyled={props.unStyled} data-theme={themeValue}>
+    <div data-qwik-wrapper data-unstyled={props.unstyled} data-theme={themeValue}>
       <button type='button' {...triggerProps} popovertarget={popoverId}>
         {triggerLabel ?? TRIGGER_LABELS[props.locale ?? 'en']}
         <TriggerIcon />

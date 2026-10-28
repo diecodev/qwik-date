@@ -178,8 +178,8 @@ export const PickerCases = component$(() => {
 
       <Case
         id='picker-unstyled'
-        title='unStyled'
-        tests={['unStyled gets none of the library styles and is still positioned']}
+        title='unstyled'
+        tests={['unstyled gets none of the library styles and is still positioned']}
       >
         <Steps>
           <li>
@@ -200,7 +200,7 @@ export const PickerCases = component$(() => {
           </li>
         </Steps>
         <Demo>
-          <DatePicker date='2024-08-15' unStyled />
+          <DatePicker date='2024-08-15' unstyled />
           <Probe
             label='box-shadow of the trigger / popup'
             read$={(root) => {
