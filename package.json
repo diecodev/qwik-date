@@ -29,6 +29,10 @@
     ".": {
       "types": "./lib-types/index.d.ts",
       "import": "./lib/index.qwik.mjs"
+    },
+    "./headless": {
+      "types": "./lib-types/headless/index.d.ts",
+      "import": "./lib/headless.qwik.mjs"
     }
   },
   "files": [

@@ -2,7 +2,7 @@
 
 **Qwik calendar, simple integration**
 
-`qwik-date` is an opinionated calendar component designed for the Qwik framework. It does the calendar, with no runtime dependencies; for a date picker, put it in a popover with a trigger of your own: see the [recipes](#date-picker-popover-recipes).
+`qwik-date` is an opinionated calendar component designed for the Qwik framework. It does the calendar, with no runtime dependencies; for a date picker, put it in a popover with a trigger of your own: see the [recipes](#date-picker-popover-recipes). To style it from scratch, use its [headless](#headless) parts.
 
 ## Requirements
 
@@ -134,6 +134,94 @@ export default component$(() => {
 ```
 
 `auto` is resolved with CSS (`prefers-color-scheme`), so it ships no JavaScript.
+
+### Headless
+
+`qwik-date/headless` has the calendar without its styles, in parts you put together and style yourself, as in [Qwik UI](https://qwikui.com) or [QDS](https://www.npmjs.com/package/@qds.dev/ui). The parts keep the accessibility, the keyboard and the state; the markup around them and the looks are yours. The styled `Calendar` is these parts plus a stylesheet.
+
+```tsx
+import { component$, useSignal } from '@qwik.dev/core';
+import { Calendar, type LocalDate } from 'qwik-date/headless';
+
+export default component$(() => {
+  const date = useSignal<LocalDate | null>(null);
+
+  return (
+    <Calendar.Root bind:value={date} min="2024-08-01" class="calendar">
+      <header>
+        <Calendar.PrevButton>‹</Calendar.PrevButton>
+        <Calendar.Title />
+        <Calendar.NextButton>›</Calendar.NextButton>
+      </header>
+      <Calendar.Grid>
+        <Calendar.GridHead cellProps={{ class: 'weekday' }} />
+        <Calendar.GridBody dayProps={{ class: 'day' }} />
+      </Calendar.Grid>
+    </Calendar.Root>
+  );
+});
+```
+
+| Part | Renders | What it does |
+| --- | --- | --- |
+| `Calendar.Root` | `<div role="group">` | Takes the options: the `Calendar` props from `mode` to `showWeekNumber` (`value`, `bind:value`, `onChange$`, `min`, `max`, `name`, `autoFocus`, `locale`, `labels`…). Its name is its `aria-label` (`labels.calendar` by default) followed by the selection. With `name`, it adds the hidden inputs. |
+| `Calendar.PrevButton`, `Calendar.NextButton` | `<button>` | Change the month, with their label, and `aria-disabled` at `min` and `max`. The icon goes inside. |
+| `Calendar.Title` | `<div aria-live="polite">` | The month on show, "August 2024": it names the grid. |
+| `Calendar.Grid` | `<table role="grid">` | The keyboard: arrows, Home/End, PageUp/PageDown, Enter and Space. |
+| `Calendar.GridHead` | `<thead>` | The weekday names. `rowProps` and `cellProps` go to its `<tr>` and its `<th>`s. |
+| `Calendar.GridBody` | `<tbody>` | A row per week and a button per day. `rowProps`, `cellProps`, `dayProps` and `weekNumberProps` go to every `<tr>`, `<td>`, day `<button>` and week number cell. |
+| `Calendar.Cell`, `Calendar.Day` | `<td>`, `<button>` | For rows of your own, see below. |
+
+Style the days by their attributes, the same ones the stylesheet of `Calendar` uses: `data-selected` (the day, or an end of the range), `data-range-start`, `data-range-end`, `data-in-range`, `data-unavailable` (ruled out by `min`, `max` and the disabled days), `aria-current="date"` (today) and `disabled`. Their cells have `aria-selected` and `aria-disabled`. With Tailwind: `dayProps={{ class: 'size-8 rounded data-[selected]:bg-black data-[selected]:text-white' }}`.
+
+The root has no `data-qwik-date`, so the stylesheet of a styled `Calendar` on the same page leaves it alone.
+
+#### Rows of your own: `useCalendar()`
+
+For days with content of your own (a price, a dot for the days with events), render the body yourself. `useCalendar()` gives the state of the root around, and `Calendar.Cell` and `Calendar.Day` keep each day's attributes, the choice and the keyboard. Call it in a component inside the root: Qwik's context only reaches the root's descendants.
+
+```tsx
+import { component$ } from '@qwik.dev/core';
+import { Calendar, useCalendar } from 'qwik-date/headless';
+
+const PriceDays = component$<{ prices: Record<string, number> }>(({ prices }) => {
+  const calendar = useCalendar();
+
+  return (
+    <tbody>
+      {calendar.grids.value[0].weeks.map((week) => (
+        <tr key={week.number}>
+          {week.days.map((day, i) => (
+            <Calendar.Cell key={day?.date ?? i} day={day?.date}>
+              {day && (
+                <Calendar.Day day={day.date}>
+                  {day.date.slice(8)} <small>{prices[day.date]}</small>
+                </Calendar.Day>
+              )}
+            </Calendar.Cell>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  );
+});
+
+<Calendar.Root bind:value={date}>
+  <Calendar.Title />
+  <Calendar.Grid>
+    <Calendar.GridHead />
+    <PriceDays prices={prices} />
+  </Calendar.Grid>
+</Calendar.Root>;
+```
+
+`useCalendar()` returns signals and QRLs only, so handlers can use it. The value takes the type of the mode: `useCalendar<DateRange>()`.
+
+- `value`: the selected value, a signal you can write to: the calendar shows the month of a value written from outside.
+- `month`: the month on show, `{ year, month }`.
+- `grids`: the months on show, each with its `title` and its `weeks`: `{ number, days }`, with a `CalendarDay` per day (`null` for the empty cells): `date`, `label`, `outside`, `unavailable`, `disabled`, `today`, `selected`, `rangeStart`, `rangeEnd`, `inRange` and `tabbable`.
+- `today`, `tabDay` (where Tab enters the grid), `canGoBack`, `canGoForward`, `weekdays` (`{ long, short }` in column order) and `labels`.
+- `select$(day)`: chooses a day as a click on it does (a day that can't be chosen is ignored); `prevMonth$()`, `nextMonth$()`.
 
 ### Date picker (popover) recipes
 
@@ -315,7 +403,7 @@ export const DatePicker = component$<{ 'bind:value': Signal<LocalDate | null>; n
 - [ ] multiple selection
 - [ ] month and year navigation
 - [ ] Custom date ranges (last 7 days, next 30d)
-- [ ] headless version
+- [x] headless version
 - [ ] Fancy animations (styled version)
 - [ ] website docs: easy to read, understand and implement.
 

@@ -212,3 +212,52 @@
     color: #fbbf24;
   }
 }
+
+/* the calendars of qwik-date/headless have no styles: these stand for an app's, by the parts' attributes */
+.pg-headless {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px dashed #d0d7de;
+  font-size: 0.85rem;
+
+  & header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  & [aria-disabled="true"],
+  & button:disabled {
+    opacity: 0.35;
+  }
+
+  & td > button {
+    width: 2rem;
+    height: 2rem;
+    font: inherit;
+    border: 0;
+    background: transparent;
+    color: inherit;
+  }
+
+  & td > button[aria-current="date"] {
+    background: #eaeef2;
+  }
+
+  & td > button[data-in-range] {
+    background: #d0d7de;
+  }
+
+  & td > button[data-selected] {
+    background: #1f2328;
+    color: white;
+  }
+
+  & small {
+    display: block;
+    line-height: 0.5;
+  }
+}

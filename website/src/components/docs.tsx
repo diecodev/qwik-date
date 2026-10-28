@@ -201,6 +201,50 @@ const helpers = [
   },
 ]
 
+const headlessParts = [
+  {
+    name: 'Calendar.Root',
+    description:
+      'Takes the options (the Calendar props from mode to showWeekNumber) and is named after its aria-label and the selection. Adds the hidden inputs with name',
+    renders: '<div role="group">',
+  },
+  {
+    name: 'Calendar.PrevButton / NextButton',
+    description:
+      'Change the month, labelled, with aria-disabled at min and max. The icon goes inside',
+    renders: '<button>',
+  },
+  {
+    name: 'Calendar.Title',
+    description:
+      'The month on show, announced when it changes: it names the grid',
+    renders: '<div aria-live>',
+  },
+  {
+    name: 'Calendar.Grid',
+    description:
+      'The grid and its keyboard: arrows, Home/End, PageUp/PageDown, Enter, Space',
+    renders: '<table role="grid">',
+  },
+  {
+    name: 'Calendar.GridHead',
+    description: 'The weekday names (rowProps, cellProps)',
+    renders: '<thead>',
+  },
+  {
+    name: 'Calendar.GridBody',
+    description:
+      'A row per week, a button per day (rowProps, cellProps, dayProps, weekNumberProps). Style the days by data-selected, data-in-range, data-unavailable, aria-current="date"…',
+    renders: '<tbody>',
+  },
+  {
+    name: 'Calendar.Cell / Day',
+    description:
+      'For rows of your own: a component inside the root reads useCalendar() (value, month, grids, today, tabDay, select$, prevMonth$, nextMonth$…)',
+    renders: '<td> / <button>',
+  },
+]
+
 export const Docs = component$(() => {
   return (
     <section class="space-y-3">
@@ -259,6 +303,40 @@ export const Docs = component$(() => {
                 <td class="border-l px-2 py-1.5">
                   <span class="rounded-lg bg-neutral-100 px-2 py-0.5 font-mono text-xs">
                     {helper.example}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="!mt-12 space-y-2">
+        <h4 class="text-center font-medium">~Headless~</h4>
+        <p class="text-balance text-center text-neutral-600 text-sm">
+          The calendar without its styles, in parts you style yourself:{' '}
+          <code class="rounded bg-neutral-100 px-1 font-mono text-xs">
+            {"import { Calendar, useCalendar } from 'qwik-date/headless'"}
+          </code>
+        </p>
+      </div>
+      <div class="overflow-clip rounded-lg border ">
+        <table class="min-w-full table-auto border-collapse text-sm">
+          <thead class="bg-neutral-100">
+            <tr>
+              <th class="border-r border-b px-4 py-2 text-left">Part</th>
+              <th class="border-b px-4 py-2 text-left">Description</th>
+              <th class="border-b border-l px-4 py-2 text-left">Renders</th>
+            </tr>
+          </thead>
+          <tbody>
+            {headlessParts.map((part, index) => (
+              <tr key={index} class="border-b text-neutral-700 last:border-b-0">
+                <td class="border-r px-4 py-2 font-semibold">{part.name}</td>
+                <td class="px-4 py-2">{part.description}</td>
+                <td class="border-l px-2 py-1.5">
+                  <span class="rounded-lg bg-neutral-100 px-2 py-0.5 font-mono text-xs">
+                    {part.renders}
                   </span>
                 </td>
               </tr>

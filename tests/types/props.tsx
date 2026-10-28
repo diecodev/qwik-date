@@ -2,6 +2,7 @@
 import { component$, useSignal } from '@qwik.dev/core';
 import { Calendar, type DateRange, type Labels, type LocalDate, formatDate, formatDateRange } from '../../src/lib';
 import type * as QwikDate from '../../src/lib';
+import { Calendar as Headless, useCalendar } from '../../src/lib/headless';
 
 // @ts-expect-error: the DatePicker is gone, a popover around the Calendar replaces it (README recipes)
 export type RemovedDatePicker = typeof QwikDate.DatePicker;
@@ -63,5 +64,46 @@ export const Triggers = component$(() => {
       {/* @ts-expect-error: a day is a LocalDate, YYYY-MM-DD */}
       <span>{formatDate('15/08/2024')}</span>
     </>
+  );
+});
+
+// qwik-date/headless: the parts take the same options as Calendar, and useCalendar() gives the state
+export const HeadlessParts = component$(() => {
+  const day = useSignal<LocalDate | null>(null);
+  const range = useSignal<DateRange | null>(null);
+
+  return (
+    <>
+      <Headless.Root bind:value={day} name='due' class='calendar'>
+        <Headless.PrevButton>‹</Headless.PrevButton>
+        <Headless.Title />
+        <Headless.NextButton>›</Headless.NextButton>
+        <Headless.Grid>
+          <Headless.GridHead cellProps={{ class: 'weekday' }} />
+          <Headless.GridBody dayProps={{ class: 'day' }} />
+        </Headless.Grid>
+      </Headless.Root>
+      <Headless.Root mode='range' bind:value={range} onChange$={(value) => value.end} />
+      <Headless.Root locale='fr-FR' labels={fr} />
+      {/* @ts-expect-error: the same modes as Calendar: a range is a { start, end } */}
+      <Headless.Root mode='range' bind:value={day} />
+      {/* @ts-expect-error: a locale without built-in texts needs labels */}
+      <Headless.Root locale='fr-FR' />
+      {/* @ts-expect-error: the day of a cell of your own is a LocalDate */}
+      <Headless.Day day='15/08/2024'>15</Headless.Day>
+    </>
+  );
+});
+
+export const HeadlessState = component$(() => {
+  const calendar = useCalendar<DateRange>();
+  const end: LocalDate | null | undefined = calendar.value.value?.end;
+  // @ts-expect-error: the state is read-only, except the value
+  calendar.month.value = { year: 2024, month: '09' };
+
+  return (
+    <button type='button' onClick$={() => calendar.select$('2024-08-15')}>
+      {end}
+    </button>
   );
 });

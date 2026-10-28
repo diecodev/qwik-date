@@ -3,6 +3,7 @@ import { A11yCases } from '../playground/a11y';
 import { AutoFocusCases } from '../playground/auto-focus';
 import { AvailabilityCases } from '../playground/availability';
 import { FormCases } from '../playground/form';
+import { HeadlessCases } from '../playground/headless';
 import { KeyboardCases } from '../playground/keyboard';
 import { NavigationCases } from '../playground/navigation';
 import styles from '../playground/playground.css?inline';
@@ -30,6 +31,7 @@ const AREAS = [
   { id: 'styles', title: 'Styles', spec: 'styles.spec.ts', Cases: StylesCases },
   { id: 'a11y', title: 'Accessibility', spec: 'a11y.spec.ts', Cases: A11yCases },
   { id: 'theme', title: 'Theme', spec: 'theme.spec.ts', Cases: ThemeCases },
+  { id: 'headless', title: 'Headless', spec: 'headless.spec.ts', Cases: HeadlessCases },
 ];
 
 /** The `pnpm dev` playground: a catalog of manual checks, one case per test of the e2e suite. */
