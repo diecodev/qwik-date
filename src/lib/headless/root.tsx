@@ -19,6 +19,7 @@ import {
   type CalendarValue,
   type CalendarView,
   type DateRange,
+  type Direction,
   type GridKey,
   type Labels,
   type LocalDate,
@@ -55,6 +56,7 @@ import {
   selectionLabel,
   shiftMonth,
   shownMonths,
+  stepDirection,
   tabDayOfMonths,
   toLocalDateString,
   viewTitle,
@@ -169,8 +171,29 @@ interface State {
   view: Signal<CalendarView>;
   /** the focused cell of the months and years grids */
   periodFocus: Signal<YearMonth>;
+  /** where the calendar last moved, for animations */
+  direction: Signal<Direction | null>;
   rootRef: Signal<HTMLDivElement | undefined>;
 }
+
+/**
+ * Shows the months from `first` on, and keeps the direction of the move with it: both change before any render,
+ * so the new grids are created with their direction.
+ */
+const showMonth = (state: State, first: YearMonth) => {
+  const position = ({ year, month }: YearMonth) => year * 12 + +month - 1;
+  const from = { year: state.yearToRender.value, month: state.monthToRender.value };
+  state.direction.value = stepDirection(position(from), position(first)) ?? state.direction.value;
+  state.yearToRender.value = first.year;
+  state.monthToRender.value = first.month;
+};
+
+/** Focuses a cell of the months or years grid, with the direction of the move: a year, or a page of years. */
+const focusPeriod = (state: State, target: YearMonth) => {
+  const position = ({ year }: YearMonth) => (state.view.value === 'years' ? yearPageStart(year) : year);
+  state.direction.value = stepDirection(position(state.periodFocus.value), position(target)) ?? state.direction.value;
+  state.periodFocus.value = target;
+};
 
 const observers = new WeakMap<Element, MutationObserver>();
 /** The time of the last pointer or focus event that set a calendar's preview. */
@@ -220,8 +243,7 @@ const moveMonth = (delta: 1 | -1, state: State, limits: Availability, count: num
   const { year, month } = shown(delta);
   // the month buttons keep the focus, so they can be pressed repeatedly
   state.focusDayOnMonthChange.value = false;
-  state.yearToRender.value = year;
-  state.monthToRender.value = month as Month;
+  showMonth(state, { year, month: month as Month });
   state.dateToFocus.value = `${year}-${month}-01` as LocalDate;
 };
 
@@ -231,11 +253,11 @@ const step = (delta: 1 | -1, state: State, limits: Availability, count: number) 
   if (view.value === 'days') return moveMonth(delta, state, limits, count);
   const { year, month } = periodFocus.value;
   if (view.value === 'months') {
-    if (isYearInLimits(year + delta, limits)) periodFocus.value = clampMonth(year + delta, month, limits);
+    if (isYearInLimits(year + delta, limits)) focusPeriod(state, clampMonth(year + delta, month, limits));
     return;
   }
   if (isPageInLimits(yearPageStart(year) + delta * YEARS_PER_PAGE, limits))
-    periodFocus.value = { year: clampYear(year + delta * YEARS_PER_PAGE, limits), month };
+    focusPeriod(state, { year: clampYear(year + delta * YEARS_PER_PAGE, limits), month });
 };
 
 /** Shows a view: the months and years grids open on the month on show, with the focus on it. */
@@ -249,8 +271,7 @@ const setView = (next: CalendarView, state: State) => {
 /** Back to the days, of the month chosen in the months or years grid: the focus goes to the same day of it. */
 const showDays = (shown: YearMonth, state: State, availability: Availability, count: number) => {
   state.focusDayOnMonthChange.value = false;
-  state.yearToRender.value = shown.year;
-  state.monthToRender.value = shown.month;
+  showMonth(state, shown);
   state.dateToFocus.value = sameDayIn(state.dateToFocus.value, shown);
   state.view.value = 'days';
   // where Tab enters: that day, or the first one of the month that can be chosen
@@ -339,6 +360,8 @@ export const Root = component$<RootProps>(
     const previewDay = useSignal<LocalDate | null>(null);
     const view = useSignal<CalendarView>('days');
     const periodFocus = useSignal<YearMonth>({ year: +initial.split('-')[0], month: initial.split('-')[1] as Month });
+    // where the calendar last moved, for animations: none until the first move
+    const direction = useSignal<Direction | null>(null);
     const state: State = {
       selected,
       chosen,
@@ -348,6 +371,7 @@ export const Root = component$<RootProps>(
       focusDayOnMonthChange,
       view,
       periodFocus,
+      direction,
       rootRef,
     };
     // the grid is named after the month title (`role="grid"` requires a name)
@@ -442,8 +466,7 @@ export const Root = component$<RootProps>(
 
       const first = firstShownFor(day, { year: yearToRender.value, month: monthToRender.value }, months);
       view.value = 'days';
-      monthToRender.value = first.month;
-      yearToRender.value = first.year;
+      showMonth(state, first);
       dateToFocus.value = day;
     });
 
@@ -570,7 +593,7 @@ export const Root = component$<RootProps>(
       const periodKey = (getComputedStyle(grid).direction === 'rtl' ? mirrored[key] ?? key : key) as PeriodKey;
       // stay put past min or max
       const target = periodKeyTarget(current, from, periodKey, availability) ?? from;
-      periodFocus.value = target;
+      focusPeriod(state, target);
       focusWhenReady(rootRef.value, periodSelector(current, target));
     });
     const setPreview$ = $((day: LocalDate | null) => {
@@ -657,13 +680,13 @@ export const Root = component$<RootProps>(
         return;
       }
       // another month: the visible task focuses the day once it's rendered
-      yearToRender.value = next.year;
-      monthToRender.value = next.month;
+      showMonth(state, next);
     });
 
     useContextProvider(CalendarContextId, {
       value: selected,
       mode: modeSignal,
+      direction,
       preview,
       month,
       view,
@@ -703,6 +726,7 @@ export const Root = component$<RootProps>(
         document:onQinit$={autoFocus ? focusTabDay : undefined}
         document:onToggle$={autoFocus ? focusTabDay : undefined}
         data-view={view.value}
+        data-direction={direction.value ?? undefined}
         {...props}
         onKeyDown$={[keepOpen, escape$, onKeyDown$]}
         ref={rootRef}

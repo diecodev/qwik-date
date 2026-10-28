@@ -177,6 +177,57 @@ export default component$(() => {
 
 `auto` is resolved with CSS (`prefers-color-scheme`), so it ships no JavaScript.
 
+#### Animations
+
+The calendar doesn't move by itself: the theme only fades colors, in 150 ms, and not at all with `prefers-reduced-motion`. It gives your CSS the moments to animate:
+
+- `data-direction="next"` or `"prev"`, on the calendar and on the rows of days, after each move: the buttons, the keyboard, a month or a year chosen, or a value written from outside. Before the first move there's none, so nothing moves on load.
+- The rows of days are new for each month (with `months`, in every grid), so an animation on them plays on every change, in the direction they were created with.
+- The months and years grids (`table[data-period]`) are new when their view opens, and their rows for each year or page of years.
+
+```css
+@media (prefers-reduced-motion: no-preference) {
+  [data-qwik-date] table:not([data-period]) > tbody > tr[data-direction='next'] {
+    animation: month-next 200ms ease-out;
+  }
+  [data-qwik-date] table:not([data-period]) > tbody > tr[data-direction='prev'] {
+    animation: month-prev 200ms ease-out;
+  }
+  [data-qwik-date] table[data-period] {
+    animation: view-in 150ms ease-out;
+  }
+}
+
+@keyframes month-next { from { opacity: 0; translate: 1rem 0; } }
+@keyframes month-prev { from { opacity: 0; translate: -1rem 0; } }
+@keyframes view-in { from { opacity: 0; scale: 0.96; } }
+```
+
+With the [headless](#headless) parts and Tailwind, on the rows (`animate-month-next` and `animate-month-prev` take the keyframes above in your Tailwind config), and `useCalendar().direction` for anything else:
+
+```tsx
+<Calendar.GridBody
+  rowProps={{
+    class: 'motion-safe:data-[direction=next]:animate-month-next motion-safe:data-[direction=prev]:animate-month-prev',
+  }}
+/>
+```
+
+And the popover of the [recipes](#date-picker-popover-recipes), as it opens:
+
+```css
+@media (prefers-reduced-motion: no-preference) {
+  [data-qwik-date][popover] {
+    transition: opacity 150ms, translate 150ms, display 150ms allow-discrete, overlay 150ms allow-discrete;
+  }
+  @starting-style {
+    [data-qwik-date][popover]:popover-open { opacity: 0; translate: 0 -4px; }
+  }
+}
+```
+
+View Transitions aren't built in: Qwik doesn't tell when a change of month is on the screen, and these attributes give CSS the same without JavaScript.
+
 ### Headless
 
 `qwik-date/headless` has the calendar without its styles, in parts you put together and style yourself, as in [Qwik UI](https://qwikui.com) or [QDS](https://www.npmjs.com/package/@qds.dev/ui). The parts keep the accessibility, the keyboard and the state; the markup around them and the looks are yours. The styled `Calendar` is these parts plus a stylesheet.
@@ -262,6 +313,7 @@ const PriceDays = component$<{ prices: Record<string, number> }>(({ prices }) =>
 
 - `value`: the selected value, a signal you can write to: the calendar shows the month of a value written from outside.
 - `month`: the month on show, `{ year, month }`.
+- `direction`: `'next'` or `'prev'` after each move, `null` before the first one (as the root's `data-direction`).
 - `mode`, and `preview`: the range a choice of the day under the pointer or the focus would make, while a range has no end (or `null`).
 - `view`: `'days'`, `'months'` or `'years'`, and `title`, the title of the view.
 - `grids`: the months on show, each with its `title` and its `weeks`: `{ number, days }`, with a `CalendarDay` per day (`null` for the empty cells): `date`, `label`, `outside`, `unavailable`, `disabled`, `today`, `selected`, `rangeStart`, `rangeEnd`, `inRange`, `preview` and `tabbable`.
@@ -452,7 +504,7 @@ export const DatePicker = component$<{ 'bind:value': Signal<LocalDate | null>; n
 - [x] month and year navigation
 - [ ] Custom date ranges (last 7 days, next 30d)
 - [x] headless version
-- [ ] Fancy animations (styled version)
+- [x] hooks to animate the changes of month and view (the library itself doesn't move)
 - [ ] website docs: easy to read, understand and implement.
 
 ## Contributing

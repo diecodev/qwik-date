@@ -187,3 +187,10 @@ export const firstShownFor = (day: LocalDate, first: YearMonth, count: number): 
   const { year, month } = shiftMonth(target.year, target.month, 1 - count);
   return { year, month: month as Month };
 };
+
+/** Where the calendar moved: to a later (`next`) or an earlier (`prev`) month, year or page; `null` for nowhere. */
+export type Direction = 'next' | 'prev';
+
+/** The direction from one position to another (months or years as numbers), `null` without a move or a start. */
+export const stepDirection = (from: number | null, to: number): Direction | null =>
+  from === null || from === to ? null : to > from ? 'next' : 'prev';

@@ -8,6 +8,7 @@ export type {
   CalendarGrid,
   CalendarPeriod,
   CalendarView,
+  Direction,
   CalendarWeek,
   DateRange,
   Labels,

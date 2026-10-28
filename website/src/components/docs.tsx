@@ -324,6 +324,22 @@ export const Docs = component$(() => {
       </div>
 
       <div class="!mt-12 space-y-2">
+        <h4 class="text-center font-medium">~Animations~</h4>
+        <p class="text-balance text-center text-neutral-600 text-sm">
+          The calendar doesn't move by itself. After each move, the calendar and
+          the rows of days get{' '}
+          <code class="rounded bg-neutral-100 px-1 font-mono text-xs">
+            data-direction="next" | "prev"
+          </code>{' '}
+          and the rows are new for each month, so a CSS animation on{' '}
+          <code class="rounded bg-neutral-100 px-1 font-mono text-xs">
+            tr[data-direction]
+          </code>{' '}
+          plays on every change. Keep it inside prefers-reduced-motion.
+        </p>
+      </div>
+
+      <div class="!mt-12 space-y-2">
         <h4 class="text-center font-medium">~Headless~</h4>
         <p class="text-balance text-center text-neutral-600 text-sm">
           The calendar without its styles, in parts you style yourself:{' '}

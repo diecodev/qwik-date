@@ -202,9 +202,13 @@ export const GridBody = component$<GridBodyProps>(
     return (
       <tbody {...props}>
         {grid.weeks.map((week) => {
-          const key = week.days.map((day) => day?.date ?? '').join();
+          // new rows for each month (the key has the month: with fullWeeks, two months can share a week), so a CSS
+          // animation on them plays on every change, with the direction of the move, set when they're created (the
+          // root's could change in another render). Not a new <tbody>: a keyed root element breaks Qwik's render
+          // when the days come back from the months view
+          const key = `${grid.year}-${grid.month}:${week.days.map((day) => day?.date ?? '').join()}`;
           return (
-            <tr key={key} {...rowProps}>
+            <tr key={key} data-direction={context.direction.untrackedValue ?? undefined} {...rowProps}>
               {context.showWeekNumber.value && (
                 <td {...weekNumberProps}>
                   <span>{week.number.toString()}</span>
@@ -283,7 +287,12 @@ const periodGrid = (
   >
     <tbody>
       {[0, 3, 6, 9].map((start) => (
-        <tr key={start} {...rowProps}>
+        // new rows for each year or page of years, with the direction of the move, as the days have for each month
+        <tr
+          key={`${cells[0]?.month ? 'months' : 'years'}-${cells[0]?.year}:${start}`}
+          data-direction={context.direction.untrackedValue ?? undefined}
+          {...rowProps}
+        >
           {cells.slice(start, start + 3).map((cell) => (
             <td
               key={cell.label}

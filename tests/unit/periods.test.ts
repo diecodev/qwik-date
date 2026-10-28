@@ -13,6 +13,7 @@ import {
   periodKeyTarget,
   sameDayIn,
   shownMonths,
+  stepDirection,
   tabDayOfMonths,
   viewTitle,
   yearCells,
@@ -178,5 +179,16 @@ describe.each(TIMEZONES)('several months in %s', (tz, offset) => {
     expect(canStep(1, 'days', august, august, { max: '2024-09-20' }, 2)).toBe(false);
     expect(canStep(1, 'days', august, august, { max: '2024-10-01' }, 2)).toBe(true);
     expect(canStep(-1, 'days', august, august, { min: '2024-07-31' }, 2)).toBe(true);
+  });
+});
+
+describe('the direction of a move', () => {
+  it('is next to a later position, prev to an earlier one, and null without a move or a start', () => {
+    const august = 2024 * 12 + 7;
+    expect(stepDirection(august, august + 1)).toBe('next');
+    expect(stepDirection(august, august - 13)).toBe('prev');
+    expect(stepDirection(august, august)).toBeNull();
+    expect(stepDirection(null, august)).toBeNull();
+    expect(stepDirection(yearPageStart(2024), yearPageStart(2030))).toBe('next');
   });
 });

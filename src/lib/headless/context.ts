@@ -1,5 +1,15 @@
 import { type QRL, type Signal, createContextId, useContext } from '@qwik.dev/core';
-import type { CalendarGrid, CalendarPeriod, CalendarView, DateRange, Labels, LocalDate, Mode, Month } from '../core';
+import type {
+  CalendarGrid,
+  CalendarPeriod,
+  CalendarView,
+  DateRange,
+  Direction,
+  Labels,
+  LocalDate,
+  Mode,
+  Month,
+} from '../core';
 
 /** The state and the handlers of a `Calendar.Root`, as `useCalendar()` gives them. Everything in it serializes. */
 export interface CalendarState<V extends LocalDate | DateRange | LocalDate[] = LocalDate | DateRange | LocalDate[]> {
@@ -12,6 +22,11 @@ export interface CalendarState<V extends LocalDate | DateRange | LocalDate[] = L
    * (the days of the grids have `preview`), or `null`
    */
   preview: Readonly<Signal<DateRange | null>>;
+  /**
+   * where the calendar last moved: `next` to a later month (or year, or page of years), `prev` to an earlier one, and
+   * `null` until the first move. The root has it as `data-direction`, to animate the change
+   */
+  direction: Readonly<Signal<Direction | null>>;
   /** the month on show */
   month: Readonly<Signal<{ year: number; month: Month }>>;
   /** the days of the month, the months of a year (a click on the title), or twelve years */

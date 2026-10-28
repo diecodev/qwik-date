@@ -1,5 +1,6 @@
 import { component$, useStyles$ } from '@qwik.dev/core';
 import { A11yCases } from '../playground/a11y';
+import { AnimationCases } from '../playground/animation';
 import { AutoFocusCases } from '../playground/auto-focus';
 import { AvailabilityCases } from '../playground/availability';
 import { FormCases } from '../playground/form';
@@ -40,6 +41,7 @@ const AREAS = [
   { id: 'styles', title: 'Styles', spec: 'styles.spec.ts', Cases: StylesCases },
   { id: 'a11y', title: 'Accessibility', spec: 'a11y.spec.ts', Cases: A11yCases },
   { id: 'theme', title: 'Theme', spec: 'theme.spec.ts', Cases: ThemeCases },
+  { id: 'animation', title: 'Animation', spec: 'animation.spec.ts', Cases: AnimationCases },
   { id: 'headless', title: 'Headless', spec: 'headless.spec.ts', Cases: HeadlessCases },
 ];
 
