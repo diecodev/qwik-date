@@ -3,13 +3,17 @@ import {
   canStep,
   clampMonth,
   clampYear,
+  firstShownFor,
   formatYear,
   isPageInLimits,
+  isShown,
   isYearInLimits,
   monthCells,
   monthName,
   periodKeyTarget,
   sameDayIn,
+  shownMonths,
+  tabDayOfMonths,
   viewTitle,
   yearCells,
   yearPageStart,
@@ -134,5 +138,45 @@ describe('the months of mode="multiple"', () => {
   it('marks the months with a selected day', () => {
     const cells = monthCells({ ...options, value: ['2024-02-10', '2024-08-15', '2025-01-01'] });
     expect(cells.filter((cell) => cell.selected).map((cell) => cell.month)).toEqual(['02', '08']);
+  });
+});
+
+describe.each(TIMEZONES)('several months in %s', (tz, offset) => {
+  useTimezone(tz, offset);
+
+  const december = { year: 2024, month: '12' } as const;
+
+  it('shows the months after the first one, across years', () => {
+    expect(shownMonths(december, 3)).toEqual([
+      { year: 2024, month: '12' },
+      { year: 2025, month: '01' },
+      { year: 2025, month: '02' },
+    ]);
+    expect(isShown('2025-02-28', december, 3)).toBe(true);
+    expect(isShown('2025-03-01', december, 3)).toBe(false);
+    expect(isShown('2024-11-30', december, 3)).toBe(false);
+  });
+
+  it('moves as few months as the focus needs: none inside the months on show', () => {
+    expect(firstShownFor('2025-01-15', december, 2)).toEqual(december);
+    expect(firstShownFor('2025-02-01', december, 2)).toEqual({ year: 2025, month: '01' });
+    expect(firstShownFor('2024-11-30', december, 2)).toEqual({ year: 2024, month: '11' });
+    expect(firstShownFor('2025-06-01', december, 2)).toEqual({ year: 2025, month: '05' });
+    // a single month: the month of the day
+    expect(firstShownFor('2025-01-01', december, 1)).toEqual({ year: 2025, month: '01' });
+  });
+
+  it('has a single Tab stop for all the months', () => {
+    const months = shownMonths(august, 2);
+    expect(tabDayOfMonths(months, '2024-09-12')).toBe('2024-09-12');
+    expect(tabDayOfMonths(months, '2024-10-12')).toBe('2024-08-01');
+    expect(tabDayOfMonths(months, '2024-09-12', { disabledDates: ['2024-09-12'] })).toBe('2024-08-01');
+    expect(tabDayOfMonths(months, '2024-07-01', { min: '2024-09-03' })).toBe('2024-09-03');
+  });
+
+  it('stops the next button at the month after the last one on show', () => {
+    expect(canStep(1, 'days', august, august, { max: '2024-09-20' }, 2)).toBe(false);
+    expect(canStep(1, 'days', august, august, { max: '2024-10-01' }, 2)).toBe(true);
+    expect(canStep(-1, 'days', august, august, { min: '2024-07-31' }, 2)).toBe(true);
   });
 });

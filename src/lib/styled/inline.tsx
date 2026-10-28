@@ -47,6 +47,7 @@ interface CalendarStyleProps {
 /** The headless parts (`qwik-date/headless`) with the library's styles. */
 export const Calendar = component$<CalendarProps>(
   ({
+    months = 1,
     showDaysOfWeek = true,
     unstyled,
     theme = 'light',
@@ -76,51 +77,83 @@ export const Calendar = component$<CalendarProps>(
     const PrevIcon = prevIcon ?? ChevronLeft;
     const NextIcon = nextIcon ?? ChevronRight;
 
+    const prev = (
+      <PrevButton
+        data-header-action
+        {...navButtonProps}
+        {...prevButtonProps}
+        onClick$={[navButtonProps.onClick$, prevButtonProps.onClick$]}
+      >
+        <PrevIcon {...iconProps} />
+      </PrevButton>
+    );
+    const next = (
+      <NextButton
+        data-header-action
+        {...navButtonProps}
+        {...nextButtonProps}
+        onClick$={[navButtonProps.onClick$, nextButtonProps.onClick$]}
+      >
+        <NextIcon {...iconProps} />
+      </NextButton>
+    );
+    const grid = (offset: number) => (
+      // a custom title id still names the first grid
+      <Grid offset={offset} aria-labelledby={offset ? undefined : titleProps.id} {...calendarProps}>
+        {showDaysOfWeek && <GridHead {...theadProps} rowProps={theadRowProps} cellProps={headerCellProps} />}
+        <GridBody
+          {...tbodyProps}
+          rowProps={tbodyRowProps}
+          cellProps={cellProps}
+          dayProps={dayButtonProps}
+          weekNumberProps={weekNumberProps}
+        />
+      </Grid>
+    );
+    // the title's views: the months of a year and twelve years
+    const periods = (
+      <>
+        <MonthGrid data-period />
+        <YearGrid data-period />
+      </>
+    );
+
     return (
       <Root
         {...options}
+        months={months}
         // the stylesheet styles [data-qwik-date]: the headless parts don't have it
         data-qwik-date
         data-unstyled={unstyled}
         data-theme={isSignal(theme) ? theme.value : theme}
         {...containerProps}
       >
-        <header {...headerProps}>
-          <PrevButton
-            data-header-action
-            {...navButtonProps}
-            {...prevButtonProps}
-            onClick$={[navButtonProps.onClick$, prevButtonProps.onClick$]}
-          >
-            <PrevIcon {...iconProps} />
-          </PrevButton>
-
-          <Title {...titleProps} />
-
-          <NextButton
-            data-header-action
-            {...navButtonProps}
-            {...nextButtonProps}
-            onClick$={[navButtonProps.onClick$, nextButtonProps.onClick$]}
-          >
-            <NextIcon {...iconProps} />
-          </NextButton>
-        </header>
-
-        {/* a custom title id still names the grid */}
-        <Grid aria-labelledby={titleProps.id} {...calendarProps}>
-          {showDaysOfWeek && <GridHead {...theadProps} rowProps={theadRowProps} cellProps={headerCellProps} />}
-          <GridBody
-            {...tbodyProps}
-            rowProps={tbodyRowProps}
-            cellProps={cellProps}
-            dayProps={dayButtonProps}
-            weekNumberProps={weekNumberProps}
-          />
-        </Grid>
-        {/* the title's views: the months of a year and twelve years */}
-        <MonthGrid data-period />
-        <YearGrid data-period />
+        {months > 1 ? (
+          // a panel per month, with the buttons at the corners: the panels stack when there's no room
+          <div data-month-panels>
+            {prev}
+            {next}
+            {[...Array(months).keys()].map((offset) => (
+              <div key={offset} data-month-panel>
+                <header {...headerProps}>
+                  <Title {...titleProps} id={offset ? undefined : titleProps.id} offset={offset} />
+                </header>
+                {grid(offset)}
+                {offset === 0 && periods}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            <header {...headerProps}>
+              {prev}
+              <Title {...titleProps} />
+              {next}
+            </header>
+            {grid(0)}
+            {periods}
+          </>
+        )}
       </Root>
     );
   },

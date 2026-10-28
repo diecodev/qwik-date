@@ -48,6 +48,12 @@ const calendarInlinePropsInfo = [
     defaultValue: '[]',
   },
   {
+    name: 'months',
+    description:
+      'How many months show side by side: the buttons move one month, the keyboard goes across the grids, and they stack on narrow screens',
+    defaultValue: '1',
+  },
+  {
     name: 'fullWeeks',
     description: 'Displays full weeks in the calendar',
     defaultValue: 'false',
@@ -223,7 +229,7 @@ const headlessParts = [
   {
     name: 'Calendar.Grid',
     description:
-      'The grid and its keyboard: arrows, Home/End, PageUp/PageDown, Enter, Space',
+      'The grid and its keyboard: arrows, Home/End, PageUp/PageDown, Enter, Space. With months, offset is its month (Calendar.Title too)',
     renders: '<table role="grid">',
   },
   {

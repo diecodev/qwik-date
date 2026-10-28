@@ -5,6 +5,7 @@ import { AvailabilityCases } from '../playground/availability';
 import { FormCases } from '../playground/form';
 import { HeadlessCases } from '../playground/headless';
 import { KeyboardCases } from '../playground/keyboard';
+import { MonthsCases } from '../playground/months';
 import { MultipleCases } from '../playground/multiple';
 import { NavigationCases } from '../playground/navigation';
 import styles from '../playground/playground.css?inline';
@@ -31,6 +32,7 @@ const AREAS = [
   { id: 'form', title: 'Forms', spec: 'form.spec.ts', Cases: FormCases },
   { id: 'navigation', title: 'Navigation', spec: 'navigation.spec.ts', Cases: NavigationCases },
   { id: 'views', title: 'Months and years', spec: 'views.spec.ts', Cases: ViewsCases },
+  { id: 'months', title: 'Several months', spec: 'months.spec.ts', Cases: MonthsCases },
   { id: 'keyboard', title: 'Keyboard', spec: 'keyboard.spec.ts', Cases: KeyboardCases },
   { id: 'auto-focus', title: 'autoFocus', spec: 'auto-focus.spec.ts', Cases: AutoFocusCases },
   { id: 'timezone', title: 'Timezone', spec: 'timezone.spec.ts', Cases: TimezoneCases },

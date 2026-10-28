@@ -99,6 +99,25 @@ export const isValidValue = (value: LocalDate | DateRange | LocalDate[]) =>
       ? value.every(isValidLocalDate)
       : isValidRange(value);
 
+/**
+ * Where Tab enters the months on show: `focusDay` if it's in one of them and can be chosen, or else the first day of
+ * them that can be.
+ */
+export const tabDayOfMonths = (
+  months: { year: number; month: Month }[],
+  focusDay: LocalDate,
+  availability: Availability = {},
+) => {
+  for (const { year, month } of months)
+    if (focusDay.startsWith(`${year}-${month}`) && tabDayOf(year, month, focusDay, availability) === focusDay)
+      return focusDay;
+  for (const { year, month } of months) {
+    const day = tabDayOf(year, month, focusDay, availability);
+    if (day) return day;
+  }
+  return null;
+};
+
 /** Where Tab enters a month: `focusDay` if it's in it and can be chosen, or else its first day that can be. */
 export const tabDayOf = (year: number, month: Month, focusDay: LocalDate, availability: Availability = {}) => {
   const shown = `${year}-${month}`;

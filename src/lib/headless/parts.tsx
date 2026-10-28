@@ -1,4 +1,4 @@
-import { type PropsOf, Slot, component$, sync$, useContext } from '@qwik.dev/core';
+import { type PropsOf, Slot, component$, createContextId, sync$, useContext, useContextProvider } from '@qwik.dev/core';
 import type { CalendarDay, CalendarGrid, CalendarPeriod, LocalDate } from '../core';
 import { type CalendarContext, CalendarContextId } from './context';
 
@@ -44,7 +44,16 @@ export const NextButton = component$<PropsOf<'button'>>(({ onClick$, ...props })
   );
 });
 
+/** The index of the month of a `Grid`, for the `GridBody` inside it. */
+const OffsetContextId = createContextId<number>('qwik-date.offset');
+
+/** The id of the title of a month: it names its grid. */
+const titleIdOf = (context: CalendarContext, offset: number) =>
+  offset ? `${context.titleId}-${offset}` : context.titleId;
+
 export interface TitleProps extends PropsOf<'div'> {
+  /** with `months`, the index of the month: 0 for the first one (the default) */
+  offset?: number;
   /** `false` for a title that's only text, without the months and years views */
   button?: boolean;
   buttonProps?: PropsOf<'button'>;
@@ -54,12 +63,16 @@ export interface TitleProps extends PropsOf<'div'> {
  * The title of the view, "August 2024", "2024" or "2016 – 2027": it names the grid, and screen readers announce it
  * when it changes. Its button shows the months of the year, then the years, then the days again.
  */
-export const Title = component$<TitleProps>(({ id, button = true, buttonProps = {}, ...props }) => {
+export const Title = component$<TitleProps>(({ id, offset = 0, button = true, buttonProps = {}, ...props }) => {
   const context = useContext(CalendarContextId);
+  // the months and years views show one grid, under the first title
+  if (offset && context.view.value !== 'days') return null;
 
   return (
-    <div id={id ?? context.titleId} aria-live='polite' role='presentation' {...props}>
-      {button ? (
+    <div id={id ?? titleIdOf(context, offset)} aria-live='polite' role='presentation' {...props}>
+      {offset ? (
+        context.grids.value[offset]?.title
+      ) : button ? (
         // its name is its text, without an aria-label: the grid takes its name from the title
         <button type='button' data-view-toggle {...buttonProps} onClick$={[context.toggleView$, buttonProps.onClick$]}>
           {context.title.value}
@@ -85,8 +98,9 @@ const preventGridKeys = sync$((e: KeyboardEvent) => {
  * The `<table role="grid">`, named after the title, with the keyboard: arrows, Home/End, PageUp/PageDown, and
  * Enter/Space to choose. Its body can be `GridBody` or rows of your own, with `Cell` and `Day`.
  */
-export const Grid = component$<PropsOf<'table'>>(
+export const Grid = component$<PropsOf<'table'> & { offset?: number }>(
   ({
+    offset = 0,
     'aria-labelledby': labelledBy,
     onKeyDown$,
     onPointerOver$,
@@ -96,6 +110,7 @@ export const Grid = component$<PropsOf<'table'>>(
     ...props
   }) => {
     const context = useContext(CalendarContextId);
+    useContextProvider(OffsetContextId, offset);
     // only the days view: the months and years have their own grids
     if (context.view.value !== 'days') return null;
     // the preview of a range: only `mode="range"` listens to the pointer
@@ -105,14 +120,14 @@ export const Grid = component$<PropsOf<'table'>>(
       <table
         tabIndex={-1}
         role='grid'
-        aria-labelledby={labelledBy ?? context.titleId}
+        aria-labelledby={labelledBy ?? titleIdOf(context, offset)}
         {...props}
         // the handler itself, not a wrapper calling it: one less async hop keeps queued keys in order
         onKeyDown$={[preventGridKeys, context.keyDown$, onKeyDown$]}
-        onPointerOver$={[range ? context.previewTarget$ : undefined, onPointerOver$]}
-        onFocusIn$={[range ? context.previewTarget$ : undefined, onFocusIn$]}
-        onPointerLeave$={[range ? context.previewEnd$ : undefined, onPointerLeave$]}
-        onFocusOut$={[range ? context.previewEnd$ : undefined, onFocusOut$]}
+        onPointerOver$={[range ? context.previewSync$ : undefined, onPointerOver$]}
+        onFocusIn$={[range ? context.previewSync$ : undefined, onFocusIn$]}
+        onPointerLeave$={[range ? context.previewSync$ : undefined, onPointerLeave$]}
+        onFocusOut$={[range ? context.previewSync$ : undefined, onFocusOut$]}
       >
         <Slot />
       </table>
@@ -181,10 +196,12 @@ export interface GridBodyProps extends PropsOf<'tbody'> {
 export const GridBody = component$<GridBodyProps>(
   ({ rowProps, cellProps, dayProps = {}, weekNumberProps, ...props }) => {
     const context = useContext(CalendarContextId);
+    const grid = context.grids.value[useContext(OffsetContextId, 0)];
+    if (!grid) return null;
 
     return (
       <tbody {...props}>
-        {context.grids.value[0].weeks.map((week) => {
+        {grid.weeks.map((week) => {
           const key = week.days.map((day) => day?.date ?? '').join();
           return (
             <tr key={key} {...rowProps}>

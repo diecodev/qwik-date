@@ -123,7 +123,7 @@ export const popupGap = $((root: HTMLElement) => {
 
 /**
  * A value read from the case's DOM (attributes, computed styles), kept up to date while the case changes:
- * on DOM changes, popups opening or closing, and the OS color scheme changing.
+ * on DOM changes, popups opening or closing, the OS color scheme changing, and the window resizing.
  */
 export const Probe = component$<{ label: string; read$: QRL<(root: HTMLElement) => string> }>(({ label, read$ }) => {
   const ref = useSignal<HTMLElement>();
@@ -154,12 +154,14 @@ export const Probe = component$<{ label: string; read$: QRL<(root: HTMLElement) 
     root.addEventListener('toggle', schedule, true);
     const scheme = matchMedia('(prefers-color-scheme: dark)');
     scheme.addEventListener('change', schedule);
+    window.addEventListener('resize', schedule);
     schedule();
 
     cleanup(() => {
       observer.disconnect();
       root.removeEventListener('toggle', schedule, true);
       scheme.removeEventListener('change', schedule);
+      window.removeEventListener('resize', schedule);
       clearTimeout(timer);
     });
   });

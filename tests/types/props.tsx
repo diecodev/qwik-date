@@ -154,3 +154,18 @@ export const Multiple = component$(() => {
     </>
   );
 });
+
+// months: several months side by side, and the offset of each title and grid
+export const Months = component$(() => (
+  <>
+    <Calendar months={2} mode='range' />
+    <Headless.Root months={3}>
+      <Headless.Title offset={2} />
+      <Headless.Grid offset={2}>
+        <Headless.GridBody />
+      </Headless.Grid>
+    </Headless.Root>
+    {/* @ts-expect-error: a number of months */}
+    <Calendar months='2' />
+  </>
+));

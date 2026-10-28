@@ -59,10 +59,8 @@ export interface CalendarContext extends CalendarState {
   showWeekNumber: Readonly<Signal<boolean>>;
   /** the title button: days, months, years, and back */
   toggleView$: QRL<() => void>;
-  /** the grid's pointerover and focusin: the day to preview */
-  previewTarget$: QRL<(event: Event, grid: HTMLElement) => void>;
-  /** the grid's pointerleave and focusout: no preview */
-  previewEnd$: QRL<(event: Event, grid: HTMLElement) => void>;
+  /** the grids' pointer and focus events: the day to preview, from what's hovered or focused */
+  previewSync$: QRL<(event: Event) => void>;
   /** a month or year button's click */
   pickPeriod$: QRL<(event: Event, button: HTMLElement) => void>;
   /** the months and years grids' keys */

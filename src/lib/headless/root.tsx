@@ -35,8 +35,10 @@ import {
   clampMonth,
   clampYear,
   daysArrGenerator,
+  firstShownFor,
   isMonthInLimits,
   isPageInLimits,
+  isShown,
   isUnavailable,
   isValidLocalDate,
   isValidValue,
@@ -52,7 +54,8 @@ import {
   sameDayIn,
   selectionLabel,
   shiftMonth,
-  tabDayOf,
+  shownMonths,
+  tabDayOfMonths,
   toLocalDateString,
   viewTitle,
   weekdayNames,
@@ -107,6 +110,8 @@ interface BaseOptions extends Availability {
   fullWeeks?: boolean;
   /** a column with the ISO week number of each row */
   showWeekNumber?: boolean;
+  /** how many months show side by side (1 by default): the buttons move one month */
+  months?: number;
 }
 
 /** What a calendar does, apart from how it looks: the props of `Calendar.Root`, and of the styled `Calendar`. */
@@ -168,6 +173,8 @@ interface State {
 }
 
 const observers = new WeakMap<Element, MutationObserver>();
+/** The time of the last pointer or focus event that set a calendar's preview. */
+const previewTimes = new WeakMap<Element, number>();
 
 /**
  * Focuses what `selector` finds in `root`, once it's there: a view or a month renders after the handler that shows
@@ -194,18 +201,23 @@ const focusWhenReady = (root: Element | undefined, selector: string) => {
   setTimeout(() => observer.disconnect(), 2000);
 };
 
-/** The day of a month where Tab enters, as a selector: the day itself, the grid may still show the month before. */
-const tabDaySelector = (shown: YearMonth, focus: LocalDate, availability: Availability) =>
-  `[data-value="${tabDayOf(shown.year, shown.month, focus, availability)}"]`;
+/** The day where Tab enters the months on show, as a selector: the day itself, the grid may still show the month before. */
+const tabDaySelector = (first: YearMonth, count: number, focus: LocalDate, availability: Availability) =>
+  `[data-value="${tabDayOfMonths(shownMonths(first, count), focus, availability)}"]`;
 
 /** A cell of the months or years grid. */
 const periodSelector = (view: CalendarView, { year, month }: YearMonth) =>
   view === 'months' ? `[data-month="${year}-${month}"]` : `[data-year="${year}"]`;
 
-/** Shows the month `delta` months away, unless `min` or `max` rule it out: Tab enters on its first day. */
-const moveMonth = (delta: number, state: State, limits: Availability) => {
-  const { year, month } = shiftMonth(state.yearToRender.value, state.monthToRender.value, delta);
-  if (!isMonthInLimits(year, month, limits)) return;
+/**
+ * Shows the months one month away, unless `min` or `max` rule out the new one (forward, the one after the last on
+ * show): Tab enters on the first day.
+ */
+const moveMonth = (delta: 1 | -1, state: State, limits: Availability, count: number) => {
+  const shown = (offset: number) => shiftMonth(state.yearToRender.value, state.monthToRender.value, offset);
+  const coming = shown(delta < 0 ? -1 : count);
+  if (!isMonthInLimits(coming.year, coming.month, limits)) return;
+  const { year, month } = shown(delta);
   // the month buttons keep the focus, so they can be pressed repeatedly
   state.focusDayOnMonthChange.value = false;
   state.yearToRender.value = year;
@@ -214,9 +226,9 @@ const moveMonth = (delta: number, state: State, limits: Availability) => {
 };
 
 /** The previous (`-1`) or next (`1`) button: a month, a year or twelve years away, as the view shows. */
-const step = (delta: 1 | -1, state: State, limits: Availability) => {
+const step = (delta: 1 | -1, state: State, limits: Availability, count: number) => {
   const { view, periodFocus } = state;
-  if (view.value === 'days') return moveMonth(delta, state, limits);
+  if (view.value === 'days') return moveMonth(delta, state, limits, count);
   const { year, month } = periodFocus.value;
   if (view.value === 'months') {
     if (isYearInLimits(year + delta, limits)) periodFocus.value = clampMonth(year + delta, month, limits);
@@ -235,24 +247,24 @@ const setView = (next: CalendarView, state: State) => {
 };
 
 /** Back to the days, of the month chosen in the months or years grid: the focus goes to the same day of it. */
-const showDays = (shown: YearMonth, state: State, availability: Availability) => {
+const showDays = (shown: YearMonth, state: State, availability: Availability, count: number) => {
   state.focusDayOnMonthChange.value = false;
   state.yearToRender.value = shown.year;
   state.monthToRender.value = shown.month;
   state.dateToFocus.value = sameDayIn(state.dateToFocus.value, shown);
   state.view.value = 'days';
   // where Tab enters: that day, or the first one of the month that can be chosen
-  focusWhenReady(state.rootRef.value, tabDaySelector(shown, state.dateToFocus.value, availability));
+  focusWhenReady(state.rootRef.value, tabDaySelector(shown, count, state.dateToFocus.value, availability));
 };
 
-const chooseMonth = (year: number, month: Month, state: State, availability: Availability) => {
-  if (isMonthInLimits(year, month, availability)) showDays({ year, month }, state, availability);
+const chooseMonth = (year: number, month: Month, state: State, availability: Availability, count: number) => {
+  if (isMonthInLimits(year, month, availability)) showDays({ year, month }, state, availability, count);
 };
 
 /** A year shows the same month of it, or the month of the limit it's past. */
-const chooseYear = (year: number, state: State, availability: Availability) => {
+const chooseYear = (year: number, state: State, availability: Availability, count: number) => {
   if (isYearInLimits(year, availability))
-    showDays(clampMonth(year, state.monthToRender.value, availability), state, availability);
+    showDays(clampMonth(year, state.monthToRender.value, availability), state, availability, count);
 };
 
 /** Chooses `day` (the new value, where Tab enters, `onChange$`), unless it can't be chosen. */
@@ -300,6 +312,7 @@ export const Root = component$<RootProps>(
     weekStartsOn = 0,
     fullWeeks = false,
     showWeekNumber = false,
+    months = 1,
     locale = 'en',
     labels: labelsProp,
     'aria-label': ariaLabel,
@@ -350,43 +363,47 @@ export const Root = component$<RootProps>(
         weekStartsOn,
       }),
     );
+    const month = useComputed$(() => ({ year: yearToRender.value, month: monthToRender.value }));
+    // a single Tab stop for all the grids
     const tabDay = useComputed$(() =>
-      tabDayOf(yearToRender.value, monthToRender.value, dateToFocus.value, {
+      tabDayOfMonths(shownMonths(month.value, months), dateToFocus.value, {
         min,
         max,
         disabledDates,
         disabledWeekdays,
       }),
     );
-    const month = useComputed$(() => ({ year: yearToRender.value, month: monthToRender.value }));
     const preview = useComputed$(() =>
       previewRange(selected.value, previewDay.value, { min, max, disabledDates, disabledWeekdays }),
     );
     const modeSignal = useComputed$(() => mode);
     const grids = useComputed$(
-      () => [
-        calendarGrid({
-          year: yearToRender.value,
-          month: monthToRender.value,
-          value: selected.value,
-          today: today.value,
-          tabDay: tabDay.value,
-          locale,
-          weekStartsOn,
-          fullWeeks,
-          availability: { min, max, disabledDates, disabledWeekdays },
-          preview: preview.value,
-        }),
-      ],
+      () =>
+        shownMonths(month.value, months).map(({ year, month }) =>
+          calendarGrid({
+            year,
+            month,
+            value: selected.value,
+            today: today.value,
+            tabDay: tabDay.value,
+            locale,
+            weekStartsOn,
+            fullWeeks,
+            availability: { min, max, disabledDates, disabledWeekdays },
+            preview: preview.value,
+          }),
+        ),
       // the HTML already shows it, and it would weigh ~16 KB in the state: the client computes it when it renders
       { serializationStrategy: 'never' },
     );
     const labels = useComputed$(() => resolveLabels(locale, labelsProp));
     const weekdays = useComputed$(() => weekdayNames(locale, weekStartsOn));
-    const canGoBack = useComputed$(() => canStep(-1, view.value, month.value, periodFocus.value, { min, max }));
-    const canGoForward = useComputed$(() => canStep(1, view.value, month.value, periodFocus.value, { min, max }));
+    const canGoBack = useComputed$(() => canStep(-1, view.value, month.value, periodFocus.value, { min, max }, months));
+    const canGoForward = useComputed$(() =>
+      canStep(1, view.value, month.value, periodFocus.value, { min, max }, months),
+    );
     const title = useComputed$(() => viewTitle(view.value, month.value, periodFocus.value, locale));
-    const months = useComputed$(() =>
+    const monthCellsSignal = useComputed$(() =>
       monthCells({
         focus: periodFocus.value,
         value: selected.value,
@@ -423,10 +440,10 @@ export const Root = component$<RootProps>(
       const day = openingDay(value);
       if (value === null || day === null || value === chosen.value || !isValidValue(value)) return;
 
-      const [year, month] = day.split('-');
+      const first = firstShownFor(day, { year: yearToRender.value, month: monthToRender.value }, months);
       view.value = 'days';
-      monthToRender.value = month as Month;
-      yearToRender.value = +year;
+      monthToRender.value = first.month;
+      yearToRender.value = first.year;
       dateToFocus.value = day;
     });
 
@@ -456,7 +473,8 @@ export const Root = component$<RootProps>(
       // not after the month buttons, which keep the focus so they can be pressed repeatedly
       const root = rootRef.value;
       const date = dateToFocus.value;
-      if (!focusDayOnMonthChange.value || !root || !datesArray.value.flat().includes(date)) return;
+      const first = { year: yearToRender.value, month: monthToRender.value };
+      if (!focusDayOnMonthChange.value || !root || !isShown(date, first, months)) return;
 
       // the days render apart from this task (GridBody, or rows of your own), maybe after it: focus the day once
       // it's there and enabled (with fullWeeks, the month before showed it as a disabled day of the next one)
@@ -497,23 +515,25 @@ export const Root = component$<RootProps>(
         onChange$,
       ),
     );
-    const prev$ = $(() => step(-1, state, { min, max }));
-    const next$ = $(() => step(1, state, { min, max }));
+    const prev$ = $(() => step(-1, state, { min, max }, months));
+    const next$ = $(() => step(1, state, { min, max }, months));
     const setView$ = $((next: CalendarView) => setView(next, state));
     // the title: days, months, years, and back to the days
     const toggleView$ = $(() =>
       setView(view.value === 'days' ? 'months' : view.value === 'months' ? 'years' : 'days', state),
     );
     const chooseMonth$ = $((year: number, month: Month) =>
-      chooseMonth(year, month, state, { min, max, disabledDates, disabledWeekdays }),
+      chooseMonth(year, month, state, { min, max, disabledDates, disabledWeekdays }, months),
     );
-    const chooseYear$ = $((year: number) => chooseYear(year, state, { min, max, disabledDates, disabledWeekdays }));
+    const chooseYear$ = $((year: number) =>
+      chooseYear(year, state, { min, max, disabledDates, disabledWeekdays }, months),
+    );
     // one handler for every month and year button
     const pickPeriod$ = $((_: Event, button: HTMLElement) => {
       const availability = { min, max, disabledDates, disabledWeekdays };
       const month = button.getAttribute('data-month');
-      if (month) chooseMonth(+month.slice(0, 4), month.slice(5, 7) as Month, state, availability);
-      else chooseYear(Number(button.getAttribute('data-year')), state, availability);
+      if (month) chooseMonth(+month.slice(0, 4), month.slice(5, 7) as Month, state, availability, months);
+      else chooseYear(Number(button.getAttribute('data-year')), state, availability, months);
     });
     // the months and years grids: arrows, and Enter or Space to choose
     const periodKeyDown$ = $((e: KeyboardEvent, grid: HTMLElement) => {
@@ -541,8 +561,8 @@ export const Root = component$<RootProps>(
             : focus;
 
       if (key === 'enter' || key === ' ') {
-        if (current === 'months') chooseMonth(from.year, from.month, state, availability);
-        else chooseYear(from.year, state, availability);
+        if (current === 'months') chooseMonth(from.year, from.month, state, availability, months);
+        else chooseYear(from.year, state, availability, months);
         return;
       }
       // in right-to-left layouts the rows are mirrored, so left/right follow the visual direction
@@ -556,18 +576,23 @@ export const Root = component$<RootProps>(
     const setPreview$ = $((day: LocalDate | null) => {
       previewDay.value = day;
     });
-    // the grid's pointerover and focusin: the day under the pointer or the focus (between two days, the last one).
-    // What's hovered or focused now, not the event's target: these handlers load lazily, and an earlier event's
-    // can run after a later one's
-    const previewTarget$ = $((e: Event, grid: HTMLElement) => {
-      const current = e.type === 'focusin' ? document.activeElement : grid.querySelector('[data-value]:hover');
-      const day = current?.closest('[data-value]:not([disabled])')?.getAttribute('data-value');
-      if (day && grid.contains(current)) previewDay.value = day as LocalDate;
-    });
-    // the grid's pointerleave and focusout: no preview, unless the pointer or the focus is still in the grid
-    const previewEnd$ = $((e: Event, grid: HTMLElement) => {
-      const inside = e.type === 'focusout' ? grid.contains(document.activeElement) : grid.matches(':hover');
-      if (!inside) previewDay.value = null;
+    // the grids' pointerover, pointerleave, focusin and focusout: the day to preview is the one under the pointer
+    // (for the pointer's events) or the focused one (for the focus's), or else the other, in any grid of the
+    // calendar; between two days, the pointer keeps the last one. These handlers load lazily, and an earlier
+    // event's (of another grid, maybe) can run after a later one's: the latest event wins, and it reads what's
+    // hovered or focused now
+    const previewSync$ = $((e: Event) => {
+      const root = rootRef.value;
+      if (!root || e.timeStamp < (previewTimes.get(root) ?? 0)) return;
+      previewTimes.set(root, e.timeStamp);
+      const hovered = root.querySelector('[data-value]:not([disabled]):hover')?.getAttribute('data-value');
+      const active = document.activeElement;
+      const focused =
+        active?.matches('[data-value]') && root.contains(active) ? active.getAttribute('data-value') : null;
+      const pointer = e.type.startsWith('pointer');
+      const day = (pointer ? hovered : focused) ?? (pointer ? focused : hovered) ?? null;
+      if (!day && e.type === 'pointerover' && root.querySelector('[role="grid"]:hover')) return;
+      previewDay.value = day as LocalDate | null;
     });
     const escape$ = $((e: KeyboardEvent) => {
       if (e.key !== 'Escape' || view.value === 'days') return;
@@ -578,7 +603,7 @@ export const Root = component$<RootProps>(
       else
         focusWhenReady(
           rootRef.value,
-          tabDaySelector({ year: yearToRender.value, month: monthToRender.value }, dateToFocus.value, {
+          tabDaySelector({ year: yearToRender.value, month: monthToRender.value }, months, dateToFocus.value, {
             min,
             max,
             disabledDates,
@@ -596,9 +621,10 @@ export const Root = component$<RootProps>(
       // the day keeping the focus: the focused button, unless an earlier key moved to a month that isn't
       // rendered yet. Keys pressed back to back (or queued while this handler loads) run before Qwik renders
       // again, so the DOM can lag behind: the state, set synchronously by each key, doesn't
-      const active = grid.contains(document.activeElement) ? document.activeElement?.getAttribute('data-value') : null;
-      const shown = `${yearToRender.value}-${monthToRender.value}`;
-      const from = (active?.startsWith(shown) ? active : dateToFocus.value) as LocalDate;
+      const first = { year: yearToRender.value, month: monthToRender.value };
+      const root = rootRef.value ?? grid;
+      const active = root.contains(document.activeElement) ? document.activeElement?.getAttribute('data-value') : null;
+      const from = (active && isShown(active, first, months) ? active : dateToFocus.value) as LocalDate;
 
       // Enter and Space choose it here, not through a click on its button: the click handler would load and
       // run after the keys that follow
@@ -621,16 +647,18 @@ export const Root = component$<RootProps>(
 
       focusDayOnMonthChange.value = true;
       dateToFocus.value = target;
-      const [year, month] = target.split('-');
-      if (+year === yearToRender.value && month === monthToRender.value) {
+      // as few months away as it takes: a month on show (another grid, maybe) doesn't move the calendar
+      const next = firstShownFor(target, first, months);
+      if (next.year === first.year && next.month === first.month) {
         // focusVisible isn't in the DOM typings yet
         const options = { preventScroll: true, focusVisible: true } as FocusOptions;
-        grid.querySelector<HTMLElement>(`[data-value="${target}"]`)?.focus(options);
+        // enabled: with fullWeeks, the grid next to it shows the day too, disabled
+        root.querySelector<HTMLElement>(`[data-value="${target}"]:not([disabled])`)?.focus(options);
         return;
       }
       // another month: the visible task focuses the day once it's rendered
-      yearToRender.value = +year;
-      monthToRender.value = month as Month;
+      yearToRender.value = next.year;
+      monthToRender.value = next.month;
     });
 
     useContextProvider(CalendarContextId, {
@@ -641,7 +669,7 @@ export const Root = component$<RootProps>(
       view,
       title,
       grids,
-      monthCells: months,
+      monthCells: monthCellsSignal,
       yearCells: years,
       today,
       tabDay,
@@ -658,8 +686,7 @@ export const Root = component$<RootProps>(
       chooseYear$,
       titleId,
       toggleView$,
-      previewTarget$,
-      previewEnd$,
+      previewSync$,
       pickPeriod$,
       periodKeyDown$,
       showWeekNumber: weekNumbers,

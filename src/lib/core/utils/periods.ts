@@ -57,9 +57,11 @@ export const canStep = (
   shown: YearMonth,
   focus: YearMonth,
   limits: Availability,
+  count = 1,
 ) => {
   if (view === 'days') {
-    const target = shiftMonth(shown.year, shown.month, delta);
+    // forward, the month after the last one on show
+    const target = shiftMonth(shown.year, shown.month, delta < 0 ? -1 : count);
     return isMonthInLimits(target.year, target.month, limits);
   }
   if (view === 'months') return isYearInLimits(focus.year + delta, limits);
@@ -156,4 +158,32 @@ export const periodKeyTarget = (
   const index = focus.year * 12 + +focus.month - 1 + step;
   const target = { year: Math.floor(index / 12), month: String((index % 12) + 1).padStart(2, '0') as Month };
   return isMonthInLimits(target.year, target.month, availability) ? target : null;
+};
+
+/** The months a calendar shows side by side, from the first one. */
+export const shownMonths = (first: YearMonth, count: number): YearMonth[] =>
+  Array.from({ length: count }, (_, index) => {
+    const { year, month } = shiftMonth(first.year, first.month, index);
+    return { year, month: month as Month };
+  });
+
+const monthIndex = ({ year, month }: YearMonth) => year * 12 + +month - 1;
+
+/** Whether `day` is in one of the months on show (not as a day of an adjacent month). */
+export const isShown = (day: string, first: YearMonth, count: number) => {
+  const index = +day.slice(0, 4) * 12 + +day.slice(5, 7) - 1;
+  return index >= monthIndex(first) && index < monthIndex(first) + count;
+};
+
+/**
+ * The first month to show for the focus to reach `day`: the same when it's on show, or as few months away as it
+ * takes, so the keyboard goes from one grid to the next without jumps.
+ */
+export const firstShownFor = (day: LocalDate, first: YearMonth, count: number): YearMonth => {
+  const target = { year: +day.slice(0, 4), month: day.slice(5, 7) as Month };
+  if (monthIndex(target) < monthIndex(first)) return target;
+  const last = monthIndex(first) + count - 1;
+  if (monthIndex(target) <= last) return first;
+  const { year, month } = shiftMonth(target.year, target.month, 1 - count);
+  return { year, month: month as Month };
 };

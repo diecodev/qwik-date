@@ -80,6 +80,14 @@ export default component$(() => {
 
 With `name`, each day goes in a hidden input named `days[]`: a Qwik Router action gets them as an array (`{ days: ['2024-08-05', '2024-08-20'] }`); a repeated name without `[]` would keep only the last one. Without days, nothing is sent.
 
+#### Several months
+
+`months={2}` shows two months side by side, each grid named after its month, with the previous and next buttons at the corners: they move one month, and the next one stops when the last month on show reaches `max`. The keyboard goes from one grid to the next without jumps (the calendar only moves when the focus leaves the months on show, by one month), there's a single Tab stop for all of them, and a range and its preview show across them. On narrow screens the months stack. The months and years views show one grid.
+
+```tsx
+<Calendar mode="range" months={2} bind:value={range} />
+```
+
 #### Formatting
 
 `formatDate` and `formatDateRange` turn a value into text for a trigger or a label: a two-digit day and a capitalized month, in any locale (`'en'` by default). A range without an end shows `…`.
@@ -111,6 +119,7 @@ So a trigger is one line:
 - `disabledWeekdays`: Weekdays that can't be chosen, `0` for Sunday: `[0, 6]` disables the weekends. The keyboard skips these days, and a range can't cross them (it ends right before the first one).
 - `onChange$`: Called with the new value when the user chooses a day.
 - `fullWeeks`: If true, shows full weeks (default: false).
+- `months`: How many months show side by side (default: `1`); see [Several months](#several-months).
 - `locale`: `'en'` (default), `'es'`, or any BCP 47 language tag (`'fr-FR'`, `'de'`); see [Languages](#languages).
 - `labels`: The texts `Intl` can't give (`calendar`, `previousMonth`, `nextMonth`, `previousYear`, `nextYear`, `previousYears`, `nextYears`, `selectedDate`, `selectedRange`, `selectedDates`). Optional for `en` and `es`, required for any other locale.
 - `weekStartsOn`: The first day of the week, from `0` (Sunday, the default) to `6`, as in `Date#getDay()`.
@@ -199,8 +208,8 @@ export default component$(() => {
 | --- | --- | --- |
 | `Calendar.Root` | `<div role="group">` | Takes the options: the `Calendar` props from `mode` to `showWeekNumber` (`value`, `bind:value`, `onChange$`, `min`, `max`, `name`, `autoFocus`, `locale`, `labels`…). Its name is its `aria-label` (`labels.calendar` by default) followed by the selection. With `name`, it adds the hidden inputs. |
 | `Calendar.PrevButton`, `Calendar.NextButton` | `<button>` | Change the month, with their label, and `aria-disabled` at `min` and `max`. The icon goes inside. |
-| `Calendar.Title` | `<div aria-live="polite">` | The title of the view, "August 2024", "2024" or "2016 – 2027": it names the grid. Its button shows the months, then the years (`button={false}` for a title without it; `buttonProps` go to the button). |
-| `Calendar.Grid` | `<table role="grid">` | The keyboard: arrows, Home/End, PageUp/PageDown, Enter and Space. |
+| `Calendar.Title` | `<div aria-live="polite">` | The title of the view, "August 2024", "2024" or "2016 – 2027": it names the grid. With `months`, `offset` is its month (0, the first, by default). Its button shows the months, then the years (`button={false}` for a title without it; `buttonProps` go to the button). |
+| `Calendar.Grid` | `<table role="grid">` | The keyboard: arrows, Home/End, PageUp/PageDown, Enter and Space. With `months`, `offset` is its month, and its `GridBody` shows that month. |
 | `Calendar.GridHead` | `<thead>` | The weekday names. `rowProps` and `cellProps` go to its `<tr>` and its `<th>`s. |
 | `Calendar.GridBody` | `<tbody>` | A row per week and a button per day. `rowProps`, `cellProps`, `dayProps` and `weekNumberProps` go to every `<tr>`, `<td>`, day `<button>` and week number cell. |
 | `Calendar.MonthGrid`, `Calendar.YearGrid` | `<table role="grid">` | The months of a year and twelve years, only in their view (the days grid, `Calendar.Grid`, only in its own). `rowProps`, `cellProps` and `buttonProps`. The buttons have `data-month` (`2024-08`) or `data-year`, `data-selected`, `aria-current="date"` and `disabled`. |
