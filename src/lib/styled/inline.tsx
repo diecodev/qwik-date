@@ -15,6 +15,7 @@ import {
   useVisibleTask$,
 } from '@qwik.dev/core';
 import {
+  type Availability,
   type BuiltInLocale,
   type DateRange,
   type GridKey,
@@ -24,16 +25,21 @@ import {
   type Month,
   type Theme,
   type WeekDay,
+  clampDay,
   daysArrGenerator,
   formatMonth,
   getRowWeekNumber,
   isInsideRange,
+  isMonthInLimits,
+  isUnavailable,
   isValidLocalDate,
   isValidRange,
   keyTarget,
+  nearestAvailable,
   nextRange,
   parseLocalDate,
   resolveLabels,
+  shiftMonth,
   toLocalDateString,
   weekdayNames,
 } from '../core';
@@ -69,13 +75,26 @@ type Value = LocalDate | DateRange | null;
 const dayOf = (value: Value) => (value === null || typeof value === 'string' ? value : value.start);
 
 /** The value after choosing `day`: that day, or the range it starts or ends. */
-const nextValue = (mode: 'single' | 'range', value: Value, day: LocalDate) =>
-  mode === 'range' ? nextRange(value as DateRange | null, day) : day;
+const nextValue = (mode: 'single' | 'range', value: Value, day: LocalDate, availability: Availability) =>
+  mode === 'range' ? nextRange(value as DateRange | null, day, availability) : day;
+
+/** Where each grid key looks for a day that can be chosen when it lands on one that can't. */
+const KEY_DIRECTIONS: Record<GridKey, 1 | -1> = {
+  arrowright: 1,
+  arrowdown: 1,
+  pagedown: 1,
+  arrowleft: -1,
+  arrowup: -1,
+  pageup: -1,
+  // towards the day the key was pressed on, inside the row
+  home: 1,
+  end: -1,
+};
 
 const isValidValue = (value: LocalDate | DateRange) =>
   typeof value === 'string' ? isValidLocalDate(value) : isValidRange(value);
 
-interface CalendarBaseProps {
+interface CalendarBaseProps extends Availability {
   /** the first column: 0 for Sunday (the default), 1 for Monday... */
   weekStartsOn?: WeekDay;
   showWeekNumber?: boolean;
@@ -129,6 +148,10 @@ export const Calendar = component$<CalendarProps>(
   ({
     mode = 'single',
     value: valueProp = null,
+    min,
+    max,
+    disabledDates,
+    disabledWeekdays,
     fullWeeks = false,
     locale = 'en',
     labels: labelsProp,
@@ -174,8 +197,10 @@ export const Calendar = component$<CalendarProps>(
     const chosen = useSignal<Value>(null);
     // the day where the component rendered: with SSR that's the server's, the visible task below switches it
     const today = useSignal(toLocalDateString(new Date()) as LocalDate);
-    // the calendar opens on the selected day (the start of a range), or on today without one
-    const initial = dayOf(selected.value) ?? today.value;
+    const availability: Availability = { min, max, disabledDates, disabledWeekdays };
+    // the calendar opens on the selected day (the start of a range), or on today without one (on the limit it's
+    // past, with min or max)
+    const initial = dayOf(selected.value) ?? clampDay(today.value, availability);
     const monthToRender = useSignal<Month>(initial.split('-')[1] as Month);
     const yearToRender = useSignal<number>(+initial.split('-')[0]);
     const dateToFocus = useSignal<LocalDate>(initial);
@@ -204,6 +229,14 @@ export const Calendar = component$<CalendarProps>(
       });
       return dates;
     });
+    // where Tab enters the grid: the day to focus, or the first one of the month that can be chosen
+    const tabDay = useComputed$(() => {
+      const shown = `${yearToRender.value}-${monthToRender.value}`;
+      const days = datesArray.value
+        .flat()
+        .filter((day): day is string => !!day && day.startsWith(shown) && !isUnavailable(day, availability));
+      return days.includes(dateToFocus.value) ? dateToFocus.value : days[0] ?? null;
+    });
 
     if (selected.value !== null && !isValidValue(selected.value))
       throw new Error(
@@ -231,10 +264,11 @@ export const Calendar = component$<CalendarProps>(
 
       today.value = visitorToday;
       if (selected.value) return;
-      const [year, month] = visitorToday.split('-');
+      const opening = clampDay(visitorToday, availability);
+      const [year, month] = opening.split('-');
       monthToRender.value = month as Month;
       yearToRender.value = +year;
-      dateToFocus.value = visitorToday;
+      dateToFocus.value = opening;
     });
 
     // taks
@@ -261,6 +295,10 @@ export const Calendar = component$<CalendarProps>(
 
     // header utils
     const hTitle = formatMonth(yearToRender.value, +monthToRender.value, locale);
+    const before = shiftMonth(yearToRender.value, monthToRender.value, -1);
+    const after = shiftMonth(yearToRender.value, monthToRender.value, 1);
+    const canGoBack = isMonthInLimits(before.year, before.month, availability);
+    const canGoForward = isMonthInLimits(after.year, after.month, availability);
 
     // days of the week
     const daysOfWeek = weekdayNames(locale, weekStartsOn);
@@ -302,7 +340,7 @@ export const Calendar = component$<CalendarProps>(
       // Enter and Space choose it here, not through a click on its button: the click handler would load and
       // run after the keys that follow
       if (key === 'enter' || key === ' ') {
-        const next = nextValue(mode, selected.value, from);
+        const next = nextValue(mode, selected.value, from, availability);
         chosen.value = next;
         selected.value = next;
         (onChange$ as QRL<(value: LocalDate | DateRange) => void> | undefined)?.(next);
@@ -312,7 +350,14 @@ export const Calendar = component$<CalendarProps>(
       // in right-to-left layouts the rows are mirrored, so left/right follow the visual direction
       const mirrored: Record<string, GridKey> = { arrowleft: 'arrowright', arrowright: 'arrowleft' };
       const isRtl = getComputedStyle(tbody).direction === 'rtl';
-      const target = keyTarget(from, (isRtl ? mirrored[key] ?? key : key) as GridKey, { weekStartsOn, fullWeeks });
+      const gridKey = (isRtl ? mirrored[key] ?? key : key) as GridKey;
+      // skip the days that can't be chosen, and stay put when there's none left that way
+      const target =
+        nearestAvailable(
+          keyTarget(from, gridKey, { weekStartsOn, fullWeeks }),
+          KEY_DIRECTIONS[gridKey],
+          availability,
+        ) ?? from;
 
       focusDayOnMonthChange.value = true;
       dateToFocus.value = target;
@@ -344,10 +389,14 @@ export const Calendar = component$<CalendarProps>(
             type='button'
             data-header-action
             aria-label={labels.previousMonth}
+            // aria-disabled, not disabled: a disabled button would drop the focus when it reaches the limit
+            aria-disabled={canGoBack ? undefined : 'true'}
             {...navButtonProps}
             {...prevButtonProps}
             onClick$={[
               $(async () => {
+                const { year, month } = shiftMonth(yearToRender.value, monthToRender.value, -1);
+                if (!isMonthInLimits(year, month, availability)) return;
                 focusDayOnMonthChange.value = false;
                 await decreaseDate();
                 dateToFocus.value = `${yearToRender.value}-${monthToRender.value}-01`;
@@ -367,10 +416,13 @@ export const Calendar = component$<CalendarProps>(
             type='button'
             data-header-action
             aria-label={labels.nextMonth}
+            aria-disabled={canGoForward ? undefined : 'true'}
             {...navButtonProps}
             {...nextButtonProps}
             onClick$={[
               $(async () => {
+                const { year, month } = shiftMonth(yearToRender.value, monthToRender.value, 1);
+                if (!isMonthInLimits(year, month, availability)) return;
                 focusDayOnMonthChange.value = false;
                 await increaseDate();
                 dateToFocus.value = `${yearToRender.value}-${monthToRender.value}-01`;
@@ -432,15 +484,18 @@ export const Calendar = component$<CalendarProps>(
                   )}
                   {week.map((day) => {
                     const label = day ? dateFormatter(locale).format(new Date(`${day}T12:00:00`)) : undefined; // the T12:00:00 is to avoid timezone issues
-                    const disabled = day?.split('-')[1] !== monthToRender.value;
                     // the days of the adjacent months (fullWeeks) are never selected nor today: they're disabled
+                    const outside = day?.split('-')[1] !== monthToRender.value;
+                    // the days min, max, disabledDates and disabledWeekdays rule out
+                    const unavailable = !outside && !!day && isUnavailable(day, availability);
+                    const disabled = outside || unavailable;
                     const value = selected.value;
                     const range = value !== null && typeof value !== 'string' ? value : null;
-                    const isStart = !disabled && day === range?.start;
-                    const isEnd = !disabled && day === range?.end;
-                    const isInside = !disabled && !!day && !!range && isInsideRange(day, range);
+                    const isStart = !outside && day === range?.start;
+                    const isEnd = !outside && day === range?.end;
+                    const isInside = !outside && !!day && !!range && isInsideRange(day, range);
                     // a day, or the ends of a range: the days between them are selected too, but not highlighted
-                    const isSelected = !disabled && (range ? isStart || isEnd : day === value);
+                    const isSelected = !outside && (range ? isStart || isEnd : day === value);
 
                     return (
                       <td
@@ -458,13 +513,14 @@ export const Calendar = component$<CalendarProps>(
                             data-in-range={isInside}
                             data-value={day}
                             aria-label={label}
-                            aria-current={!disabled && day === today.value ? 'date' : undefined}
+                            aria-current={!outside && day === today.value ? 'date' : undefined}
+                            data-unavailable={unavailable}
                             disabled={disabled}
-                            tabIndex={day === dateToFocus.value ? 0 : -1}
+                            tabIndex={day === tabDay.value ? 0 : -1}
                             {...dayButtonProps}
                             onClick$={[
                               $(() => {
-                                const next = nextValue(mode, selected.value, day as LocalDate);
+                                const next = nextValue(mode, selected.value, day as LocalDate, availability);
                                 chosen.value = next;
                                 selected.value = next;
                                 // the type of the value follows `mode`

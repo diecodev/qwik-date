@@ -121,6 +121,13 @@
         box-shadow: inset 0 0 0 0.1rem hsla(var(--background-color), 0.2);
       }
 
+      /* at min or max: still focusable, so the focus doesn't drop when it gets there */
+      &[aria-disabled="true"] {
+        opacity: 0.35;
+        cursor: not-allowed;
+        background-color: transparent;
+      }
+
       & svg {
         width: var(--icon-size);
         height: var(--icon-size);
@@ -194,6 +201,12 @@
         &[aria-current="date"],
         &:hover {
           background-color: hsla(var(--accent-color), 1);
+        }
+
+        /* the days min, max, disabledDates and disabledWeekdays rule out (not the adjacent months' days) */
+        &[data-unavailable] {
+          text-decoration: line-through;
+          cursor: not-allowed;
         }
 
         /* the days between the start and the end of a range: darker than today's grey */

@@ -66,6 +66,9 @@ export default component$(() => {
 - `mode`: `'single'` (default) to select a day, `'range'` to select a start and an end; see [Range](#range).
 - `value`: The selected day (a `DateRange` with `mode="range"`), or `null` for none (default: `null`). The calendar opens on its month, or on today's month without one. Today is marked with `aria-current="date"`.
 - `bind:value`: A signal kept in sync with the value, in both directions.
+- `min`, `max`: The first and the last day that can be chosen (`'YYYY-MM-DD'`). The month buttons stop at their months.
+- `disabledDates`: Days that can't be chosen (`LocalDate[]`).
+- `disabledWeekdays`: Weekdays that can't be chosen, `0` for Sunday: `[0, 6]` disables the weekends. The keyboard skips these days, and a range can't cross them (it ends right before the first one).
 - `onChange$`: Called with the new value when the user chooses a day.
 - `fullWeeks`: If true, shows full weeks (default: false).
 - `locale`: `'en'` (default), `'es'`, or any BCP 47 language tag (`'fr-FR'`, `'de'`); see [Languages](#languages).
@@ -145,7 +148,7 @@ export default component$(() => {
 
 - [x] Add support for additional locales.
 - [x] range date selection
-- [ ] min / max and disabled dates
+- [x] min / max and disabled dates
 - [ ] forms: a hidden input with the value, a text input with a date format
 - [ ] multiple selection
 - [ ] month and year navigation

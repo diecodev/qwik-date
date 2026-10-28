@@ -20,6 +20,22 @@ const calendarInlinePropsInfo = [
     defaultValue: 'undefined',
   },
   {
+    name: 'min / max',
+    description: "First and last day that can be chosen ('YYYY-MM-DD')",
+    defaultValue: 'undefined',
+  },
+  {
+    name: 'disabledDates',
+    description: "Days that can't be chosen",
+    defaultValue: '[]',
+  },
+  {
+    name: 'disabledWeekdays',
+    description:
+      "Weekdays that can't be chosen, 0 for Sunday ([0, 6]: weekends)",
+    defaultValue: '[]',
+  },
+  {
     name: 'fullWeeks',
     description: 'Displays full weeks in the calendar',
     defaultValue: 'false',
