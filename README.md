@@ -67,6 +67,7 @@ export default component$(() => {
 - `value`: The selected day (a `DateRange` with `mode="range"`), or `null` for none (default: `null`). The calendar opens on its month, or on today's month without one. Today is marked with `aria-current="date"`.
 - `bind:value`: A signal kept in sync with the value, in both directions.
 - `name`: Submits the value with the form around the calendar, in a hidden input with this name (`YYYY-MM-DD`, empty without a value). A range submits `name[start]` and `name[end]`.
+- `autoFocus`: Focuses the day where Tab enters the grid (the selected one, or the first that can be chosen) every time the calendar shows up: on load or once mounted if it's visible, and when a popover, dialog or `<details>` around it opens. Without it the calendar never takes the focus on its own. As with the HTML `autofocus` attribute, Chromium drops the focus on load when the URL points at an element (`#id`).
 - `min`, `max`: The first and the last day that can be chosen (`'YYYY-MM-DD'`). The month buttons stop at their months.
 - `disabledDates`: Days that can't be chosen (`LocalDate[]`).
 - `disabledWeekdays`: Weekdays that can't be chosen, `0` for Sunday: `[0, 6]` disables the weekends. The keyboard skips these days, and a range can't cross them (it ends right before the first one).

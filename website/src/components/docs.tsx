@@ -26,6 +26,12 @@ const calendarInlinePropsInfo = [
     defaultValue: 'undefined',
   },
   {
+    name: 'autoFocus',
+    description:
+      'Focuses the day where Tab enters the grid (the selected one, or the first that can be chosen) whenever the calendar shows up: on load, or when a popover, dialog or details around it opens',
+    defaultValue: 'false',
+  },
+  {
     name: 'min / max',
     description: "First and last day that can be chosen ('YYYY-MM-DD')",
     defaultValue: 'undefined',

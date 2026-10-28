@@ -100,6 +100,11 @@ interface CalendarBaseProps extends Availability {
    * without a value); a range submits `name[start]` and `name[end]`
    */
   name?: string;
+  /**
+   * focuses the day where Tab enters the grid every time the calendar shows up: on load or once mounted if it's
+   * visible, and when a popover, dialog or details around it opens
+   */
+  autoFocus?: boolean;
   /** the first column: 0 for Sunday (the default), 1 for Monday... */
   weekStartsOn?: WeekDay;
   showWeekNumber?: boolean;
@@ -141,6 +146,19 @@ const ACTION_KEYS = [
   'pageup',
   'pagedown',
 ] as const;
+
+/**
+ * `autoFocus`: focuses the day where Tab enters the grid once the calendar shows up (`qinit`: on load, or once
+ * mounted), and when a popover, dialog or details around it opens (`toggle` doesn't bubble: the document gets it
+ * while capturing). sync$, so the focus moves along with the opening instead of once a chunk loads, and defined
+ * once: a new handler on each render would fire `qinit` again.
+ */
+const focusTabDay = sync$((event: Event, root: HTMLElement) => {
+  const opened = (event as Event & { newState?: string }).newState === 'open' && (event.target as Node).contains(root);
+  if ((event.type === 'qinit' || opened) && root.checkVisibility())
+    root.querySelector<HTMLButtonElement>('tbody button[tabindex="0"]')?.focus();
+});
+
 const dateFormatter = (locale: Locale) =>
   new Intl.DateTimeFormat(locale, {
     weekday: 'long',
@@ -158,6 +176,7 @@ export const Calendar = component$<CalendarProps>(
     disabledDates,
     disabledWeekdays,
     name,
+    autoFocus,
     fullWeeks = false,
     locale = 'en',
     labels: labelsProp,
@@ -270,6 +289,8 @@ export const Calendar = component$<CalendarProps>(
 
       today.value = visitorToday;
       if (selected.value) return;
+      // a day `autoFocus` focused on load follows the move
+      if (rootRef.value?.querySelector('tbody')?.contains(document.activeElement)) focusDayOnMonthChange.value = true;
       const opening = clampDay(visitorToday, availability);
       const [year, month] = opening.split('-');
       monthToRender.value = month as Month;
@@ -349,6 +370,7 @@ export const Calendar = component$<CalendarProps>(
         const next = nextValue(mode, selected.value, from, availability);
         chosen.value = next;
         selected.value = next;
+        dateToFocus.value = from;
         (onChange$ as QRL<(value: LocalDate | DateRange) => void> | undefined)?.(next);
         return;
       }
@@ -387,6 +409,9 @@ export const Calendar = component$<CalendarProps>(
         // a generic <div> can't be named (ARIA), the group role lets screen readers read the label
         role='group'
         aria-label={labelSignal.value}
+        // only with the prop: without it the calendar gets no listener, and never takes the focus on its own
+        document:onQinit$={autoFocus ? focusTabDay : undefined}
+        document:onToggle$={autoFocus ? focusTabDay : undefined}
         {...containerProps}
         ref={rootRef}
       >
@@ -529,6 +554,8 @@ export const Calendar = component$<CalendarProps>(
                                 const next = nextValue(mode, selected.value, day as LocalDate, availability);
                                 chosen.value = next;
                                 selected.value = next;
+                                // Tab (and autoFocus) enters on the day chosen last
+                                dateToFocus.value = day as LocalDate;
                                 // the type of the value follows `mode`
                                 (onChange$ as QRL<(value: LocalDate | DateRange) => void> | undefined)?.(next);
                               }),

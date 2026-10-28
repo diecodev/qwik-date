@@ -184,7 +184,7 @@ const describeFocus = (el: Element | null) => {
   const name = el.getAttribute('aria-label') ?? el.textContent?.trim();
   const value = el.getAttribute('data-value');
   const what = value ? `day ${value}, "${name}"` : `${el.tagName.toLowerCase()} "${name}"`;
-  const popup = el.closest('[popover]') ? ' in the DatePicker popup' : '';
+  const popup = el.closest('[popover]') ? ' in a popover' : '';
   const where = el.closest('.pg-case')?.querySelector('h3')?.textContent;
   return `${what}${popup}${where ? ` (${where})` : ''}`;
 };

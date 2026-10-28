@@ -208,7 +208,10 @@ export const RenderingCases = component$(() => (
     <Case id='rendering-load-focus' title='No focus on load' tests={['does not move the focus when the page loads']}>
       <Steps>
         <li>
-          <p>Reload the page and wait a couple of seconds without touching anything.</p>
+          <p>
+            Reload the page (without <code>?autofocus</code> in the URL) and wait a couple of seconds without touching
+            anything.
+          </p>
           <p>
             The focus bar reads <b>nothing (the page)</b> and the page doesn't jump to any calendar, although each
             calendar on this page, like the one here, has a selected day it could focus.

@@ -133,7 +133,7 @@ export const PickerCases = component$(() => {
               Click the trigger, <b>Aug 06, 2024</b>, then press <kbd>Tab</kbd> until the focus is on Aug 6: 3 times in
               Chromium, once in WebKit/Safari.
             </p>
-            <p>The focus bar reads day 2024-08-06 in the DatePicker popup.</p>
+            <p>The focus bar reads day 2024-08-06 in a popover.</p>
           </li>
           <li>
             <p>
@@ -177,8 +177,8 @@ export const PickerCases = component$(() => {
         <Steps>
           <li>
             <p>
-              Click the trigger, <b>Aug 06, 2024</b>, then press <kbd>Tab</kbd> until the focus bar shows a day "in the
-              DatePicker popup": 3 times in Chromium (‹, ›, the day), once in WebKit/Safari.
+              Click the trigger, <b>Aug 06, 2024</b>, then press <kbd>Tab</kbd> until the focus bar shows a day "in a
+              popover": 3 times in Chromium (‹, ›, the day), once in WebKit/Safari.
             </p>
             <p>
               The focus is on <b>Aug 6</b>, in the popup.
@@ -223,9 +223,8 @@ export const PickerCases = component$(() => {
               Press <kbd>→</kbd>.
             </p>
             <p>
-              The popup shows <b>August 2024</b> and the focus bar reads{' '}
-              <b>day 2024-08-01, "…" in the DatePicker popup</b>: the focus didn't jump to the Aug 1 of the inline
-              calendar next to it, which shows August too.
+              The popup shows <b>August 2024</b> and the focus bar reads <b>day 2024-08-01, "…" in a popover</b>: the
+              focus didn't jump to the Aug 1 of the inline calendar next to it, which shows August too.
             </p>
           </li>
         </Steps>

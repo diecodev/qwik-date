@@ -1,5 +1,6 @@
 import { component$, useStyles$ } from '@qwik.dev/core';
 import { A11yCases } from '../playground/a11y';
+import { AutoFocusCases } from '../playground/auto-focus';
 import { AvailabilityCases } from '../playground/availability';
 import { FormCases } from '../playground/form';
 import { KeyboardCases } from '../playground/keyboard';
@@ -23,6 +24,7 @@ const AREAS = [
   { id: 'form', title: 'Forms', spec: 'form.spec.ts', Cases: FormCases },
   { id: 'navigation', title: 'Navigation', spec: 'navigation.spec.ts', Cases: NavigationCases },
   { id: 'keyboard', title: 'Keyboard', spec: 'keyboard.spec.ts', Cases: KeyboardCases },
+  { id: 'auto-focus', title: 'autoFocus', spec: 'auto-focus.spec.ts', Cases: AutoFocusCases },
   { id: 'timezone', title: 'Timezone', spec: 'timezone.spec.ts', Cases: TimezoneCases },
   { id: 'picker', title: 'DatePicker', spec: 'picker.spec.ts', Cases: PickerCases },
   { id: 'styles', title: 'Styles', spec: 'styles.spec.ts', Cases: StylesCases },
