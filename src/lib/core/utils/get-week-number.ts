@@ -1,3 +1,4 @@
+import type { WeekDay } from '../types';
 import { parseLocalDate, toLocalDateString } from './local-date';
 
 export const getWeekNumber = (dateString: string) => {
@@ -12,11 +13,13 @@ export const getWeekNumber = (dateString: string) => {
   return weekNumber;
 };
 
-// Calendar rows start on Sunday but ISO weeks start on Monday: number a row after its Monday,
-// which shares the week of six of its seven days (rows keep their nulls, so index = weekday)
-export const getRowWeekNumber = (week: (string | null)[]) => {
+// ISO weeks start on Monday, calendar rows on `weekStartsOn`: number a row after its Monday, which
+// shares the ISO week of most of the row (all of it with Monday-first rows, six days with Sunday-first
+// ones). Rows keep their nulls, so the index of a cell gives its weekday.
+export const getRowWeekNumber = (week: (string | null)[], weekStartsOn: WeekDay = 0) => {
   const index = week.findIndex((day) => day !== null);
+  const mondayIndex = (1 - weekStartsOn + 7) % 7;
   const monday = parseLocalDate(week[index] as string);
-  monday.setDate(monday.getDate() + 1 - index);
+  monday.setDate(monday.getDate() + mondayIndex - index);
   return getWeekNumber(toLocalDateString(monday));
 };

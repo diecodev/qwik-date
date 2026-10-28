@@ -94,11 +94,12 @@ export const PickerCases = component$(() => {
       >
         <Steps>
           <li>
-            <p>Read the four triggers.</p>
+            <p>Read the five triggers.</p>
             <p>
               <b>Aug 06, 2024</b> (value="2024-08-06"), <b>Select a date</b> (no value), <b>Pick a date</b> (no value,
-              placeholder="Pick a date") and <b>01 Ago 2024</b> (value="2024-08-01" with locale="es": two-digit day,
-              capitalized month).
+              placeholder="Pick a date"), <b>01 Ago 2024</b> (value="2024-08-01" with locale="es": two-digit day,
+              capitalized month) and <b>Choisir une date</b> (locale="fr-FR" without value: the placeholder of its
+              labels).
             </p>
           </li>
         </Steps>
@@ -107,6 +108,16 @@ export const PickerCases = component$(() => {
           <DatePicker />
           <DatePicker placeholder='Pick a date' />
           <DatePicker value='2024-08-01' locale='es' />
+          <DatePicker
+            locale='fr-FR'
+            labels={{
+              calendar: 'Calendrier',
+              previousMonth: 'Mois précédent',
+              nextMonth: 'Mois suivant',
+              selectedDate: 'date sélectionnée :',
+              placeholder: 'Choisir une date',
+            }}
+          />
         </Demo>
       </Case>
 

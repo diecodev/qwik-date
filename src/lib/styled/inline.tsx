@@ -15,25 +15,34 @@ import {
   useVisibleTask$,
 } from '@qwik.dev/core';
 import {
-  ARIA_LABELS,
+  type BuiltInLocale,
+  type Labels,
   type LocalDate,
   type Locale,
-  MONTHS_LG,
   type Month,
   type Theme,
-  WEEKDAYS,
+  type WeekDay,
   addMonths,
   daysArrGenerator,
+  formatMonth,
   getRowWeekNumber,
   isValidLocalDate,
   parseLocalDate,
+  resolveLabels,
   toLocalDateString,
+  weekdayNames,
 } from '../core';
 import { ChevronLeft, ChevronRight } from './icons';
 import styles from './style.css?inline';
 
-export interface CalendarProps {
-  locale?: Locale;
+/** `en` and `es` have built-in texts (`labels` overrides some of them); any other locale needs all of them. */
+type LocaleProps = { locale?: BuiltInLocale; labels?: Partial<Labels> } | { locale: Locale; labels: Labels };
+
+export type CalendarProps = CalendarBaseProps & LocaleProps;
+
+interface CalendarBaseProps {
+  /** the first column: 0 for Sunday (the default), 1 for Monday... */
+  weekStartsOn?: WeekDay;
   showWeekNumber?: boolean;
   fullWeeks?: boolean;
   /** the selected day, `null` (the default) for none */
@@ -90,6 +99,8 @@ export const Calendar = component$<CalendarProps>(
     value: valueProp = null,
     fullWeeks = false,
     locale = 'en',
+    labels: labelsProp,
+    weekStartsOn = 0,
     showWeekNumber = false,
     showDaysOfWeek = true,
     prevIcon,
@@ -120,7 +131,8 @@ export const Calendar = component$<CalendarProps>(
 
     // root constants
     const themeValue = isSignal(theme) ? theme.value : theme;
-    const labelStr = containerProps['aria-label'] ?? ARIA_LABELS[locale].root;
+    const labels = resolveLabels(locale, labelsProp);
+    const labelStr = containerProps['aria-label'] ?? labels.calendar;
 
     // signals
     const valueSignal = useSignal<LocalDate | null>(valueProp);
@@ -144,13 +156,14 @@ export const Calendar = component$<CalendarProps>(
       if (!selected.value) return labelStr;
 
       const date = dateFormatter(locale).format(parseLocalDate(selected.value));
-      return `${labelStr}, ${ARIA_LABELS[locale].selected} ${date}`;
+      return `${labelStr}, ${labels.selectedDate} ${date}`;
     });
     const datesArray = useComputed$(() => {
       const dates = daysArrGenerator({
         month: monthToRender.value,
         year: yearToRender.value.toString(),
         fullWeeks,
+        weekStartsOn,
       });
       return dates;
     });
@@ -206,11 +219,10 @@ export const Calendar = component$<CalendarProps>(
     });
 
     // header utils
-    const hMonth = MONTHS_LG[locale][+monthToRender.value - 1];
-    const hTitle = `${hMonth} ${yearToRender.value}`;
+    const hTitle = formatMonth(yearToRender.value, +monthToRender.value, locale);
 
     // days of the week
-    const daysOfWeek = WEEKDAYS[locale];
+    const daysOfWeek = weekdayNames(locale, weekStartsOn);
 
     // icons
     const PrevIcon = prevIcon ?? ChevronLeft;
@@ -384,7 +396,7 @@ export const Calendar = component$<CalendarProps>(
           <button
             type='button'
             data-header-action
-            aria-label={ARIA_LABELS[locale].previous}
+            aria-label={labels.previousMonth}
             {...navButtonProps}
             {...prevButtonProps}
             onClick$={[
@@ -407,7 +419,7 @@ export const Calendar = component$<CalendarProps>(
           <button
             type='button'
             data-header-action
-            aria-label={ARIA_LABELS[locale].next}
+            aria-label={labels.nextMonth}
             {...navButtonProps}
             {...nextButtonProps}
             onClick$={[
@@ -430,13 +442,8 @@ export const Calendar = component$<CalendarProps>(
               <tr {...theadRowProps}>
                 {showWeekNumber && <td />}
                 {daysOfWeek.map((day) => (
-                  <th key={day} scope='col' aria-label={day} {...headerCellProps}>
-                    {
-                      day
-                        .slice(0, 2)
-                        .normalize('NFD')
-                        .replace(/\p{M}/gu, '') // remove accents, special things on letters, etc.
-                    }
+                  <th key={day.long} scope='col' aria-label={day.long} {...headerCellProps}>
+                    {day.short}
                   </th>
                 ))}
               </tr>
@@ -474,7 +481,7 @@ export const Calendar = component$<CalendarProps>(
                 <tr key={week.toString()} {...tbodyRowProps}>
                   {showWeekNumber && (
                     <td {...weekNumberProps}>
-                      <span>{getRowWeekNumber(week).toString()}</span>
+                      <span>{getRowWeekNumber(week, weekStartsOn).toString()}</span>
                     </td>
                   )}
                   {week.map((day) => {

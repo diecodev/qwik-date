@@ -23,6 +23,7 @@ test.describe('DatePicker', () => {
     await expect(page.locator('#empty button[popovertarget]')).toHaveText('Select a date');
     await expect(page.locator('#placeholder button[popovertarget]')).toHaveText('Pick a date');
     await expect(page.locator('#es button[popovertarget]')).toHaveText('01 Ago 2024');
+    await expect(page.locator('#fr button[popovertarget]')).toHaveText('Choisir une date');
   });
 
   test('choosing with the keyboard closes it and returns the focus to the trigger', async ({ page, browserName }) => {

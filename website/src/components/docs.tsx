@@ -20,8 +20,20 @@ const calendarInlinePropsInfo = [
   },
   {
     name: 'locale',
-    description: 'Locale and regional settings for the calendar',
+    description:
+      "'en', 'es' or any BCP 47 language tag ('fr-FR'): month and weekday names come from Intl",
     defaultValue: "'en'",
+  },
+  {
+    name: 'labels',
+    description:
+      'The texts Intl cannot give (calendar, previousMonth, nextMonth, selectedDate, placeholder). Required for locales other than en and es',
+    defaultValue: 'built in for en and es',
+  },
+  {
+    name: 'weekStartsOn',
+    description: 'First day of the week, from 0 (Sunday) to 6',
+    defaultValue: '0',
   },
   {
     name: 'showWeekNumber',

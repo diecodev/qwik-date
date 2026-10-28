@@ -33,5 +33,15 @@ describe.each(TIMEZONES)('week numbers in %s', (tz, offset) => {
       const rows = daysArrGenerator({ month: month as Month, year, fullWeeks });
       expect(rows.map((row) => getRowWeekNumber(row))).toEqual(weeks);
     });
+
+    it.each([
+      // Monday-first rows are whole ISO weeks
+      [1, [31, 32, 33, 34, 35]],
+      // Saturday-first: Saturday and Sunday belong to the previous ISO week, the other five to the Monday's
+      [6, [31, 32, 33, 34, 35, 36]],
+    ] as const)('August 2024 with weekStartsOn=%s', (weekStartsOn, weeks) => {
+      const rows = daysArrGenerator({ month: '08', year: '2024', weekStartsOn });
+      expect(rows.map((row) => getRowWeekNumber(row, weekStartsOn))).toEqual(weeks);
+    });
   });
 });

@@ -1,5 +1,13 @@
 import { $, type PropsOf, component$, useSignal } from '@qwik.dev/core';
-import { Calendar } from '../../../lib';
+import { Calendar, type Labels } from '../../../lib';
+
+const FR: Labels = {
+  calendar: 'Calendrier',
+  previousMonth: 'Mois précédent',
+  nextMonth: 'Mois suivant',
+  selectedDate: 'date sélectionnée :',
+  placeholder: 'Choisir une date',
+};
 
 const ArrowIcon = component$((props: PropsOf<'svg'>) => (
   <svg viewBox='0 0 24 24' width='16' height='16' aria-hidden='true' data-icon='arrow' {...props}>
@@ -35,6 +43,15 @@ export default component$(() => {
       </section>
       <section id='no-weekdays'>
         <Calendar value='2024-08-15' showDaysOfWeek={false} />
+      </section>
+      <section id='fr'>
+        <Calendar value='2024-08-15' locale='fr-FR' labels={FR} />
+      </section>
+      <section id='es-labels'>
+        <Calendar value='2024-08-15' locale='es' labels={{ calendar: 'Fecha de entrega' }} />
+      </section>
+      <section id='monday'>
+        <Calendar value='2024-08-15' weekStartsOn={1} showWeekNumber />
       </section>
       <section id='rtl'>
         <Calendar value='2024-08-15' containerProps={{ dir: 'rtl' }} />

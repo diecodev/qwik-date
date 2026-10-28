@@ -1,16 +1,19 @@
-import type { Month } from '../types';
+import type { Month, WeekDay } from '../types';
 
 export const daysArrGenerator = ({
   month,
   year,
   fullWeeks = false,
+  weekStartsOn = 0,
 }: {
   month: Month;
   year: string;
   fullWeeks?: boolean;
+  weekStartsOn?: WeekDay;
 }) => {
   const date = new Date(+year, +month - 1, 1);
-  const firstDayOfWeek = date.getDay();
+  // the cells of the first row before the 1st
+  const leadingDays = (date.getDay() - weekStartsOn + 7) % 7;
   const daysInMonth = new Date(+year, +month, 0).getDate();
 
   const weeks = [];
@@ -31,12 +34,12 @@ export const daysArrGenerator = ({
     const daysInPrevMonth = new Date(prevYear, prevMonth, 0).getDate();
 
     // Fill the previous month's days
-    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+    for (let i = leadingDays - 1; i >= 0; i--) {
       currentWeek.push(formatDate(prevYear, prevMonth, daysInPrevMonth - i));
     }
   } else {
     // Fill the previous days with nulls
-    for (let i = 0; i < firstDayOfWeek; i++) {
+    for (let i = 0; i < leadingDays; i++) {
       currentWeek.push(null);
     }
   }

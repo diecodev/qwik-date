@@ -49,6 +49,8 @@ test.describe('Home / End', () => {
     ['basic', '2024-08-02', 'Home', '2024-08-01'],
     ['full-weeks', '2024-08-15', 'Home', '2024-08-11'],
     ['full-weeks', '2024-08-15', 'End', '2024-08-17'],
+    ['monday', '2024-08-15', 'Home', '2024-08-12'],
+    ['monday', '2024-08-15', 'End', '2024-08-18'],
   ]) {
     test(`${key} from ${from} (${section}) goes to ${expected}`, async ({ page }) => {
       await press(page, section, from, key);

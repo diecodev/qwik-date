@@ -229,6 +229,35 @@ export const KeyboardCases = component$(() => {
       </Case>
 
       <Case
+        id='keyboard-home-end-monday'
+        title='Home and End with weekStartsOn={1}'
+        tests={['Home from 2024-08-15 (monday) goes to 2024-08-12', 'End from 2024-08-15 (monday) goes to 2024-08-18']}
+      >
+        <Steps>
+          <li>
+            <p>
+              Click <b>Focus Aug 15</b>, press <kbd>Home</kbd>.
+            </p>
+            <p>
+              <b>Aug 12</b>, the Monday that starts the row.
+            </p>
+          </li>
+          <li>
+            <p>
+              Click <b>Focus Aug 15</b>, press <kbd>End</kbd>.
+            </p>
+            <p>
+              <b>Aug 18</b>, the Sunday that ends it.
+            </p>
+          </li>
+        </Steps>
+        <Demo>
+          <Focus on={day('2024-08-15')}>Focus Aug 15</Focus>
+          <Calendar value='2024-08-15' weekStartsOn={1} />
+        </Demo>
+      </Case>
+
+      <Case
         id='keyboard-page'
         title='PageUp and PageDown'
         tests={[

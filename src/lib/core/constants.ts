@@ -1,4 +1,4 @@
-import type { Locale } from './types';
+import type { BuiltInLocale, Labels } from './types';
 
 export const MONTHS_LG = {
   en: [
@@ -36,27 +36,24 @@ export const MONTHS_SM = {
   es: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
 } as const;
 
-export const ARIA_LABELS = {
+export const LABELS = {
   en: {
-    previous: 'go to previous month',
-    next: 'go to next month',
-    root: 'Calendar',
-    selected: 'selected date:',
+    calendar: 'Calendar',
+    previousMonth: 'go to previous month',
+    nextMonth: 'go to next month',
+    selectedDate: 'selected date:',
+    placeholder: 'Select a date',
   },
   es: {
-    previous: 'Ir al mes anterior',
-    next: 'Ir al siguiente mes',
-    root: 'Calendario',
-    selected: 'fecha seleccionada:',
+    calendar: 'Calendario',
+    previousMonth: 'Ir al mes anterior',
+    nextMonth: 'Ir al siguiente mes',
+    selectedDate: 'fecha seleccionada:',
+    placeholder: 'Seleccionar una fecha',
   },
-} as const;
+} as const satisfies Record<BuiltInLocale, Labels>;
 
 export const WEEKDAYS = {
   en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
   es: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-} as const satisfies Record<Locale, string[]>;
-
-export const TRIGGER_LABELS = {
-  en: 'Select a date',
-  es: 'Seleccionar una fecha',
-} as const;
+} as const satisfies Record<BuiltInLocale, string[]>;

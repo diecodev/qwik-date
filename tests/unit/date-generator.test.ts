@@ -53,4 +53,15 @@ describe.each(TIMEZONES)('daysArrGenerator in %s', (tz, offset) => {
   it('starts without padding when the month starts on a Sunday', () => {
     expect(days('09', '2024')[0][0]).toBe('2024-09-01');
   });
+
+  it('starts the rows on weekStartsOn', () => {
+    const monday = (month: Month, fullWeeks = false) =>
+      daysArrGenerator({ month, year: '2024', fullWeeks, weekStartsOn: 1 });
+    expect(monday('08')[0]).toEqual([null, null, null, '2024-08-01', '2024-08-02', '2024-08-03', '2024-08-04']);
+    expect(monday('08', true)[0][0]).toBe('2024-07-29');
+    expect(monday('08', true)[5][6]).toBe('2024-09-08');
+    // September 2024 starts on a Sunday: the last column of a Monday-first row
+    expect(monday('09')[0]).toEqual([null, null, null, null, null, null, '2024-09-01']);
+    expect(daysArrGenerator({ month: '08', year: '2024', weekStartsOn: 4 })[0][0]).toBe('2024-08-01');
+  });
 });

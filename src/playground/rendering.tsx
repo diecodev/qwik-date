@@ -1,6 +1,15 @@
 import { component$ } from '@qwik.dev/core';
-import { Calendar } from '../lib';
-import { Case, Demo, Focus, Probe, Steps, calendarOf, day, selectedCell } from './ui';
+import { Calendar, type Labels } from '../lib';
+import { Case, Demo, Focus, Probe, Steps, calendarOf, day, prevButton, selectedCell } from './ui';
+
+// the texts Intl can't give, required for a locale other than en and es
+const FR: Labels = {
+  calendar: 'Calendrier',
+  previousMonth: 'Mois précédent',
+  nextMonth: 'Mois suivant',
+  selectedDate: 'date sélectionnée :',
+  placeholder: 'Choisir une date',
+};
 
 export const RenderingCases = component$(() => (
   <>
@@ -101,6 +110,77 @@ export const RenderingCases = component$(() => (
       <Demo>
         <Focus on={day('2024-08-15')}>Focus Aug 15</Focus>
         <Calendar value='2024-08-15' locale='es' />
+      </Demo>
+    </Case>
+
+    <Case
+      id='rendering-locale-intl'
+      title='Another locale: locale="fr-FR" with labels'
+      tests={['another locale takes its names from Intl, capitalized, and its texts from labels']}
+    >
+      <Steps>
+        <li>
+          <p>Look at the calendar, rendered with locale="fr-FR" and French labels.</p>
+          <p>
+            The month and weekday names come from Intl, with a capital letter: <b>Août 2024</b>,{' '}
+            <b>Dim. Lun. Mar. Mer. Jeu. Ven. Sam.</b> The days keep two digits (01).
+          </p>
+        </li>
+        <li>
+          <p>
+            Click <b>Focus Aug 15</b>, then <b>Focus ‹</b>.
+          </p>
+          <p>
+            The focus bar reads <b>"jeudi 15 août 2024"</b>, then <b>"Mois précédent"</b>, from the labels. The
+            calendar's name below includes <b>date sélectionnée :</b>.
+          </p>
+        </li>
+      </Steps>
+      <Demo>
+        <p class='pg-row'>
+          <Focus on={day('2024-08-15')}>Focus Aug 15</Focus>
+          <Focus on={prevButton}>Focus ‹</Focus>
+        </p>
+        <Calendar value='2024-08-15' locale='fr-FR' labels={FR} />
+        <Probe label='calendar name' read$={(root) => calendarOf(root)?.getAttribute('aria-label') ?? 'none'} />
+      </Demo>
+    </Case>
+
+    <Case id='rendering-labels' title='labels with a built-in locale' tests={['labels override the built-in texts']}>
+      <Steps>
+        <li>
+          <p>
+            Look at the calendar name below: locale="es" with labels=&#123;&#123; calendar: 'Fecha de entrega'
+            &#125;&#125;.
+          </p>
+          <p>
+            <b>Fecha de entrega, fecha seleccionada: jueves, 15 de agosto de 2024</b>: the given text, the rest built
+            in.
+          </p>
+        </li>
+      </Steps>
+      <Demo>
+        <Calendar value='2024-08-15' locale='es' labels={{ calendar: 'Fecha de entrega' }} />
+        <Probe label='calendar name' read$={(root) => calendarOf(root)?.getAttribute('aria-label') ?? 'none'} />
+      </Demo>
+    </Case>
+
+    <Case
+      id='rendering-week-start'
+      title='weekStartsOn={1}'
+      tests={['weekStartsOn starts the rows, the weekday names and the week numbers on that day']}
+    >
+      <Steps>
+        <li>
+          <p>Look at the calendar, rendered with weekStartsOn=&#123;1&#125; and showWeekNumber.</p>
+          <p>
+            The weeks start on Monday: <b>Mo Tu We Th Fr Sa Su</b>, the 1st under Th (fourth column), and the week
+            numbers <b>31 to 35</b>, each row a whole ISO week.
+          </p>
+        </li>
+      </Steps>
+      <Demo>
+        <Calendar value='2024-08-15' weekStartsOn={1} showWeekNumber />
       </Demo>
     </Case>
 

@@ -10,19 +10,19 @@ import {
   useStyles$,
   useVisibleTask$,
 } from '@qwik.dev/core';
-import { type LocalDate, TRIGGER_LABELS, formatDate } from '../core';
+import { type LocalDate, formatDate, resolveLabels } from '../core';
 import { CalendarIcon } from './icons';
 import { Calendar, type CalendarProps } from './inline';
 import styles from './style.css?inline';
 
-export interface DatePickerProps extends CalendarProps {
+export type DatePickerProps = CalendarProps & {
   triggerProps?: PropsOf<'button'>;
   triggerIcon?: Component<PropsOf<'svg'>>;
   /** what the trigger shows without a value (default: "Select a date") */
   placeholder?: string;
   /** close the popup once a day is chosen (default: true) */
   closeOnSelect?: boolean;
-}
+};
 
 const DatePicker = component$<DatePickerProps>(
   ({ triggerProps = {}, placeholder, triggerIcon, closeOnSelect = true, onChange$, ...props }) => {
@@ -97,7 +97,9 @@ const DatePicker = component$<DatePickerProps>(
     return (
       <div data-qwik-wrapper data-unstyled={props.unstyled} data-theme={themeValue}>
         <button type='button' {...triggerProps} popovertarget={popoverId}>
-          {selected.value ? formatDate(selected.value, locale) : placeholder ?? TRIGGER_LABELS[locale]}
+          {selected.value
+            ? formatDate(selected.value, locale)
+            : placeholder ?? resolveLabels(locale, props.labels).placeholder}
           <TriggerIcon />
         </button>
         <Calendar

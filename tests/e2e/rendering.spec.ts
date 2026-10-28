@@ -39,6 +39,37 @@ test('locale "es" translates the title, the weekdays and the day labels', async 
   await expect(day(calendar, '2024-08-15')).toHaveAttribute('aria-label', 'jueves, 15 de agosto de 2024');
 });
 
+test('another locale takes its names from Intl, capitalized, and its texts from labels', async ({ page }) => {
+  const calendar = calendarIn(page, 'fr');
+  await expect(title(calendar)).toHaveText('Août 2024');
+  await expect(calendar.locator('th')).toHaveText(['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.']);
+  await expect(calendar.locator('th').first()).toHaveAttribute('aria-label', 'Dimanche');
+  await expect(day(calendar, '2024-08-15')).toHaveAttribute('aria-label', 'jeudi 15 août 2024');
+  const section = page.locator('#fr');
+  await expect(section.getByRole('button', { name: 'Mois précédent' })).toBeVisible();
+  await expect(section.getByRole('button', { name: 'Mois suivant' })).toBeVisible();
+  await expect(
+    section.getByRole('group', { name: 'Calendrier, date sélectionnée : jeudi 15 août 2024' }),
+  ).toBeVisible();
+});
+
+test('labels override the built-in texts', async ({ page }) => {
+  await expect(
+    page
+      .locator('#es-labels')
+      .getByRole('group', { name: 'Fecha de entrega, fecha seleccionada: jueves, 15 de agosto de 2024' }),
+  ).toBeVisible();
+  await expect(page.locator('#es-labels').getByRole('button', { name: 'Ir al mes anterior' })).toBeVisible();
+});
+
+test('weekStartsOn starts the rows, the weekday names and the week numbers on that day', async ({ page }) => {
+  const calendar = calendarIn(page, 'monday');
+  await expect(calendar.locator('th')).toHaveText(['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']);
+  // August 1, 2024 is a Thursday: the fourth column
+  await expect(calendar.locator('tbody tr').first().locator('td:not(:has(> span))').nth(3)).toHaveText('01');
+  await expect(calendar.locator('tbody td:has(> span) span')).toHaveText(['31', '32', '33', '34', '35']);
+});
+
 test('showDaysOfWeek={false} hides the weekday row', async ({ page }) => {
   await expect(calendarIn(page, 'no-weekdays').locator('thead')).toHaveCount(0);
 });

@@ -1,5 +1,13 @@
 import { $, component$, useSignal } from '@qwik.dev/core';
-import { Calendar, DatePicker } from '../../../lib';
+import { Calendar, DatePicker, type Labels } from '../../../lib';
+
+const FR: Labels = {
+  calendar: 'Calendrier',
+  previousMonth: 'Mois précédent',
+  nextMonth: 'Mois suivant',
+  selectedDate: 'date sélectionnée :',
+  placeholder: 'Choisir une date',
+};
 
 /** tests/e2e fixture: DatePicker variants, next to an inline calendar showing the same month. */
 export default component$(() => {
@@ -28,6 +36,9 @@ export default component$(() => {
       </section>
       <section id='es'>
         <DatePicker value='2024-08-01' locale='es' />
+      </section>
+      <section id='fr'>
+        <DatePicker locale='fr-FR' labels={FR} />
       </section>
       <section id='keep-open'>
         <DatePicker value='2024-08-15' closeOnSelect={false} />

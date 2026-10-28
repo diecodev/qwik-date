@@ -52,13 +52,33 @@ Dates are `'YYYY-MM-DD'` strings (the `LocalDate` type): a day, without time or 
 - `bind:value`: A `Signal<LocalDate | null>` kept in sync with the selected day, in both directions.
 - `onChange$`: Called with the day the user chooses.
 - `fullWeeks`: If true, shows full weeks (default: false).
-- `locale`: Locale for the calendar (default: 'en').
+- `locale`: `'en'` (default), `'es'`, or any BCP 47 language tag (`'fr-FR'`, `'de'`); see [Languages](#languages).
+- `labels`: The texts `Intl` can't give (`calendar`, `previousMonth`, `nextMonth`, `selectedDate`, `placeholder`). Optional for `en` and `es`, required for any other locale.
+- `weekStartsOn`: The first day of the week, from `0` (Sunday, the default) to `6`, as in `Date#getDay()`.
 - `showWeekNumber`: If true, shows week numbers (default: false).
 - `showDaysOfWeek`: If true, shows days of the week ~Mo, Tu, We, etc.~ (default: true).
 - `prevIcon`, `nextIcon`: Custom icons for the previous and next month buttons.
 - `containerProps`, `headerProps`, `navButtonProps` (both month buttons), `prevButtonProps`, `nextButtonProps`, `calendarProps`, `theadProps`, `tbodyProps`, `theadRowProps`, `tbodyRowProps`, `headerCellProps`, `cellProps`, `dayButtonProps`, `iconProps`, `titleProps`, `weekNumberProps`: Custom props for various parts of the component.
 - `unstyled`: If true, removes default styling (default: false).
 - `theme`: `'light'` (default), `'dark'`, or `'auto'` to follow the operating system's color scheme. It also accepts a `Signal<Theme>` to change it at runtime.
+
+#### Languages
+
+`en` and `es` have built-in texts. Any other language takes its month and weekday names from `Intl`, with a capital letter, and needs the other texts in `labels` (TypeScript asks for them):
+
+```tsx
+import { Calendar, type Labels } from 'qwik-date';
+
+const fr: Labels = {
+  calendar: 'Calendrier',
+  previousMonth: 'Mois précédent',
+  nextMonth: 'Mois suivant',
+  selectedDate: 'date sélectionnée :',
+  placeholder: 'Choisir une date',
+};
+
+<Calendar locale="fr-FR" labels={fr} weekStartsOn={1} />;
+```
 
 #### Theme
 
