@@ -1,6 +1,6 @@
 import { component$, useSignal } from '@qwik.dev/core'
 import type { DocumentHead } from '@qwik.dev/router'
-import { Calendar as CalendarInline } from 'qwik-date'
+import { Calendar } from 'qwik-date'
 import { ScriptCode } from '~/components/script'
 
 import '@fontsource-variable/onest'
@@ -24,7 +24,7 @@ export default component$(() => {
           </p>
         </header>
         <section class="flex justify-center gap-8">
-          <CalendarInline
+          <Calendar
             bind:date={date}
             containerProps={{}}
             fullWeeks

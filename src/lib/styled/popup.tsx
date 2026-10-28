@@ -1,11 +1,11 @@
 import { autoPlacement, autoUpdate, computePosition, offset, shift } from '@floating-ui/dom';
 import { type Component, type PropsOf, component$, isSignal, useId, useStyles$, useVisibleTask$ } from '@qwik.dev/core';
 import { TRIGGER_LABELS } from '../core';
-import { Calendar } from './icons';
-import { CalendarInline, type CalendarInlineProps } from './inline';
+import { CalendarIcon } from './icons';
+import { Calendar, type CalendarProps } from './inline';
 import styles from './style.css?inline';
 
-export interface DatePickerProps extends CalendarInlineProps {
+export interface DatePickerProps extends CalendarProps {
   triggerProps?: PropsOf<'button'>;
   triggerIcon?: Component<PropsOf<'svg'>>;
   triggerLabel?: string;
@@ -19,7 +19,7 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
   const id = useId();
   const popoverId = props.containerProps?.id ?? `qwik-date-${id}`;
 
-  const TriggerIcon = triggerIcon ?? Calendar;
+  const TriggerIcon = triggerIcon ?? CalendarIcon;
   const theme = props.theme ?? 'light';
   const themeValue = isSignal(theme) ? theme.value : theme;
 
@@ -71,7 +71,7 @@ const DatePicker = component$<DatePickerProps>(({ triggerProps = {}, triggerLabe
         {triggerLabel ?? TRIGGER_LABELS[props.locale ?? 'en']}
         <TriggerIcon />
       </button>
-      <CalendarInline
+      <Calendar
         {...props}
         containerProps={{
           id: popoverId,

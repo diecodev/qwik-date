@@ -23,8 +23,6 @@ export default defineConfig(({ command }) => {
         // Entry names map 1:1 to the paths in package.json#exports.
         entry: {
           index: "src/lib/index.ts",
-          "styled/inline": "src/lib/styled/inline.tsx",
-          "styled/popup": "src/lib/styled/popup.tsx",
         },
         // Qwik v2 (@qwik.dev/core) is ESM-only, so there is no CJS output.
         formats: ["es"],

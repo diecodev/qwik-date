@@ -1,9 +1,7 @@
 import { $, component$, useSignal, useVisibleTask$ } from '@qwik.dev/core';
-import { Calendar } from '../lib';
+import { Calendar, type LocalDate } from '../lib';
 import { toLocalDateString } from '../lib/core';
 import { Case, Changes, Demo, Focus, Probe, Steps, day, preselected, selectedCell } from './ui';
-
-type LocalDate = `${number}-${number}-${number}`;
 
 const today = () => `${toLocalDateString(new Date())} (${Intl.DateTimeFormat().resolvedOptions().timeZone})`;
 

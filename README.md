@@ -25,11 +25,8 @@ yarn add -D -E qwik-date
 
 ### Inline Calendar
 
-The inline calendar can be imported in two ways:
-
 ```ts
 import { Calendar } from 'qwik-date';
-import { CalendarInline } from 'qwik-date/inline';
 ```
 
 #### Inline Calendar Example
@@ -38,13 +35,13 @@ Here's a basic example of how to use the inline calendar:
 
 ```tsx
 import { component$, useSignal } from '@qwik.dev/core';
-import { CalendarInline } from 'qwik-date/inline';
+import { Calendar } from 'qwik-date';
 
 export default component$(() => {
   const date = useSignal('2023-07-23');
   
   return (
-    <CalendarInline 
+    <Calendar 
       date={date.value} 
       onDateChange$={(newDate) => console.log({ newDate })} 
     />
@@ -82,11 +79,8 @@ export default component$(() => {
 
 ### Popup Date Picker
 
-The popup date picker can be imported in two ways:
-
 ```ts
 import { DatePicker } from 'qwik-date';
-import { DatePicker } from 'qwik-date/picker';
 ```
 
 #### Popup Date Picker Example
@@ -95,7 +89,7 @@ Here's a basic example of how to use the popup date picker:
 
 ```tsx
 import { component$, useSignal } from '@qwik.dev/core';
-import { DatePicker } from 'qwik-date/picker';
+import { DatePicker } from 'qwik-date';
 
 export default component$(() => {
   const date = useSignal('2023-07-23');
@@ -115,7 +109,7 @@ export default component$(() => {
 - `triggerProps`: Custom props for the trigger button.
 - `triggerLabel`: Label for the trigger button.
 - `triggerIcon`: Custom icon for the trigger button.
-- All other props from `CalendarInline` can also be used.
+- All other props from `Calendar` can also be used.
 
 ## Roadmap
 

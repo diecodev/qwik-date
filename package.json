@@ -29,14 +29,6 @@
     ".": {
       "types": "./lib-types/index.d.ts",
       "import": "./lib/index.qwik.mjs"
-    },
-    "./inline": {
-      "types": "./lib-types/styled/inline.d.ts",
-      "import": "./lib/styled/inline.qwik.mjs"
-    },
-    "./picker": {
-      "types": "./lib-types/styled/popup.d.ts",
-      "import": "./lib/styled/popup.qwik.mjs"
     }
   },
   "files": [

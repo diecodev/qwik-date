@@ -7,6 +7,8 @@ export type DateFormat =
   | `${YearFormats}${Separator}${MonthFormats}${Separator}${DayFormats}`
   | `${MonthFormats}${Separator}${DayFormats}${Separator}${YearFormats}`;
 
+/** A day as `YYYY-MM-DD`, without time or timezone. */
+export type LocalDate = `${number}-${number}-${number}`;
 export type Locale = 'en' | 'es';
 /** `auto` follows the operating system's color scheme (`prefers-color-scheme`). */
 export type Theme = 'light' | 'dark' | 'auto';

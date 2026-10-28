@@ -16,6 +16,7 @@ import {
 } from '@qwik.dev/core';
 import {
   ARIA_LABELS,
+  type LocalDate,
   type Locale,
   MONTHS_LG,
   type Month,
@@ -31,9 +32,7 @@ import {
 import { ChevronLeft, ChevronRight } from './icons';
 import styles from './style.css?inline';
 
-type LocalDate = `${number}-${number}-${number}`;
-
-export interface CalendarInlineProps {
+export interface CalendarProps {
   locale?: Locale;
   showWeekNumber?: boolean;
   fullWeeks?: boolean;
@@ -84,7 +83,7 @@ const dateFormatter = (locale: Locale) =>
     day: 'numeric',
   });
 
-export const CalendarInline = component$<CalendarInlineProps>(
+export const Calendar = component$<CalendarProps>(
   ({
     date: dateProp,
     fullWeeks = false,
