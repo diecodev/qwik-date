@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
 
-/** The inline calendar (not a DatePicker popover) inside the fixture section `#id`. */
+/** The inline calendar (not a popover) inside the fixture section `#id`. */
 export const calendarIn = (page: Page, id: string) => page.locator(`#${id} [data-qwik-date]:not([popover])`).first();
 
 export const day = (calendar: Locator, date: string) => calendar.locator(`button[data-value="${date}"]`);
@@ -15,7 +15,7 @@ export const nextButton = (calendar: Locator) => calendar.locator('header button
 export const focusedDay = (page: Page) =>
   page.evaluate(() => document.activeElement?.getAttribute('data-value') ?? document.activeElement?.tagName);
 
-/** Vertical gap between a DatePicker trigger and its popover (8px offset, above or below). */
+/** Vertical gap between a trigger and its popover (8px offset, above or below). */
 export const popoverGap = async (trigger: Locator, popover: Locator) => {
   const t = await trigger.boundingBox();
   const p = await popover.boundingBox();

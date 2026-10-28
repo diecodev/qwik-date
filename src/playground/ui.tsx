@@ -51,7 +51,7 @@ export const Demo = component$(() => (
   </div>
 ));
 
-/** Selector of a day of the inline calendar in a case (a DatePicker popup is a calendar too). */
+/** Selector of a day of the inline calendar in a case (a calendar popover is a calendar too). */
 export const day = (date: string) => `[data-qwik-date]:not([popover]) button[data-value="${date}"]`;
 
 export const prevButton = '[data-qwik-date]:not([popover]) header button:first-of-type';
@@ -109,7 +109,7 @@ export const contrastRatio = (el: Element | null) => {
   return `${((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)).toFixed(2)}:1`;
 };
 
-/** Where the DatePicker popup of a case sits relative to its trigger (the tests expect an 8px gap). */
+/** Where the popover of a case sits relative to its trigger (the tests expect an 8px gap). */
 export const popupGap = $((root: HTMLElement) => {
   const trigger = root.querySelector('button[popovertarget]');
   const popup = root.querySelector('[popover]');
@@ -137,7 +137,7 @@ export const Probe = component$<{ label: string; read$: QRL<(root: HTMLElement) 
     const update = async () => {
       value.value = await read$(root);
     };
-    // read again a bit later: floating-ui positions the popup asynchronously
+    // read again a bit later: what a change wakes up (lazy handlers, a popup opening) lands after it
     const schedule = () => {
       update();
       clearTimeout(timer);
@@ -209,7 +209,7 @@ export const StatusBar = component$(() => {
         errors.value = [...errors.value, 'message' in event ? event.message : String(event.reason)];
       };
 
-      // the focused element can change its name too (a DatePicker trigger shows the chosen date)
+      // the focused element can change its name too (a popover trigger shows the chosen date)
       const observer = new MutationObserver((records) => {
         const node = (record: MutationRecord) =>
           record.target instanceof Element ? record.target : record.target.parentElement;

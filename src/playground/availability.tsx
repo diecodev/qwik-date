@@ -1,5 +1,5 @@
 import { $, component$, useSignal } from '@qwik.dev/core';
-import { Calendar, DatePicker } from '../lib';
+import { Calendar } from '../lib';
 import { Case, Changes, Demo, Focus, Probe, Steps, calendarOf, day } from './ui';
 
 const unavailableDays = $(
@@ -245,20 +245,6 @@ export const AvailabilityCases = component$(() => {
               calendarOf(root)?.querySelector('button[data-value][tabindex="0"]')?.getAttribute('data-value') ?? 'none'
             }
           />
-        </Demo>
-      </Case>
-
-      <Case id='availability-picker' title='In a DatePicker' tests={['the DatePicker takes them too']}>
-        <Steps>
-          <li>
-            <p>
-              Click the trigger, <b>Aug 15, 2024</b> (min="2024-08-05", max="2024-08-25").
-            </p>
-            <p>The popup shows the same limits: 01–04 and 26–31 struck through, both month buttons faded.</p>
-          </li>
-        </Steps>
-        <Demo>
-          <DatePicker value='2024-08-15' min='2024-08-05' max='2024-08-25' />
         </Demo>
       </Case>
     </>

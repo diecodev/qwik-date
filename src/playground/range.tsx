@@ -1,6 +1,6 @@
 import { $, component$, useSignal } from '@qwik.dev/core';
-import { Calendar, DatePicker, type DateRange } from '../lib';
-import { Case, Demo, Focus, Probe, Steps, calendarOf, day, popupGap } from './ui';
+import { Calendar, type DateRange } from '../lib';
+import { Case, Demo, Focus, Probe, Steps, calendarOf, day } from './ui';
 
 const show = (range: DateRange | null) => (range ? `${range.start} → ${range.end ?? 'null'}` : 'null');
 
@@ -24,7 +24,6 @@ export const RangeCases = component$(() => {
   const later = useSignal<string[]>([]);
   const keyed = useSignal<string[]>([]);
   const bound = useSignal<DateRange | null>({ start: '2024-08-15', end: null });
-  const picked = useSignal<string[]>([]);
 
   return (
     <>
@@ -271,48 +270,6 @@ export const RangeCases = component$(() => {
               Clear the signal
             </button>
           </p>
-        </Demo>
-      </Case>
-
-      <Case
-        id='range-picker'
-        title='A range DatePicker'
-        tests={['the DatePicker shows the range and closes once it has an end']}
-      >
-        <Steps>
-          <li>
-            <p>Read the trigger.</p>
-            <p>
-              <b>Aug 05, 2024 – Aug 12, 2024</b>.
-            </p>
-          </li>
-          <li>
-            <p>
-              Click it, then <b>20</b>.
-            </p>
-            <p>
-              The popup stays open and the trigger reads <b>Aug 20, 2024 – …</b>.
-            </p>
-          </li>
-          <li>
-            <p>
-              Click <b>22</b>.
-            </p>
-            <p>
-              The popup closes: the trigger reads <b>Aug 20, 2024 – Aug 22, 2024</b>.
-            </p>
-          </li>
-        </Steps>
-        <Demo>
-          <DatePicker
-            mode='range'
-            value={{ start: '2024-08-05', end: '2024-08-12' }}
-            onChange$={$((range) => {
-              picked.value = [...picked.value, show(range)];
-            })}
-          />
-          <RangeChanges values={picked.value} />
-          <Probe label='popup' read$={popupGap} />
         </Demo>
       </Case>
     </>

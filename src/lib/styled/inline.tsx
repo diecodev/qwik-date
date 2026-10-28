@@ -484,7 +484,7 @@ export const Calendar = component$<CalendarProps>(
             onKeyDown$={[
               // only cancel the default action of the keys the grid handles (same list as ACTION_KEYS:
               // sync$ code can't reference outer variables), so Tab still moves the focus out and
-              // Escape still closes the DatePicker popover. It must be sync$: a $ handler runs too late.
+              // Escape still closes a popover around the calendar. It must be sync$: a $ handler runs too late.
               sync$((e: KeyboardEvent) => {
                 const keys = [
                   'enter',

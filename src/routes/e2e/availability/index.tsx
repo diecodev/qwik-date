@@ -1,5 +1,5 @@
 import { $, component$, useSignal } from '@qwik.dev/core';
-import { Calendar, DatePicker } from '../../../lib';
+import { Calendar } from '../../../lib';
 
 /** tests/e2e fixture: `min`, `max`, `disabledDates` and `disabledWeekdays`. */
 export default component$(() => {
@@ -38,9 +38,6 @@ export default component$(() => {
       </section>
       <section id='past'>
         <Calendar max='2000-01-20' />
-      </section>
-      <section id='picker'>
-        <DatePicker value='2024-08-15' min='2024-08-05' max='2024-08-25' />
       </section>
     </main>
   );

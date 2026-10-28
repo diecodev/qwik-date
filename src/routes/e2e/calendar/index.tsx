@@ -7,7 +7,6 @@ const FR: Labels = {
   nextMonth: 'Mois suivant',
   selectedDate: 'date sélectionnée :',
   selectedRange: 'période sélectionnée :',
-  placeholder: 'Choisir une date',
 };
 
 const ArrowIcon = component$((props: PropsOf<'svg'>) => (

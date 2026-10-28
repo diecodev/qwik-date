@@ -1,5 +1,5 @@
 import { component$, useSignal } from '@qwik.dev/core';
-import { Calendar, DatePicker, type Theme } from '../../../lib';
+import { Calendar, type Theme } from '../../../lib';
 
 /** tests/e2e fixture: the `theme` prop, as a value and as a Signal. */
 export default component$(() => {
@@ -28,8 +28,11 @@ export default component$(() => {
           toggle theme
         </button>
       </section>
-      <section id='picker' style={{ background: 'black', padding: '16px' }}>
-        <DatePicker value='2024-08-15' theme='dark' />
+      <section id='popover' style={{ background: 'black', padding: '16px' }}>
+        <button type='button' popovertarget='dark-popover'>
+          open
+        </button>
+        <Calendar value='2024-08-15' theme='dark' containerProps={{ id: 'dark-popover', popover: 'auto' }} />
       </section>
     </main>
   );

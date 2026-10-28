@@ -58,9 +58,6 @@
     "test.e2e": "playwright test",
     "qwik": "qwik"
   },
-  "dependencies": {
-    "@floating-ui/dom": "^1.7.4"
-  },
   "peerDependencies": {
     "@qwik.dev/core": "^2.0.0-rc.4"
   },

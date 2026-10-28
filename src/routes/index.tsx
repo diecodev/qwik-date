@@ -5,8 +5,8 @@ import { AvailabilityCases } from '../playground/availability';
 import { FormCases } from '../playground/form';
 import { KeyboardCases } from '../playground/keyboard';
 import { NavigationCases } from '../playground/navigation';
-import { PickerCases } from '../playground/picker';
 import styles from '../playground/playground.css?inline';
+import { PopoverCases } from '../playground/popover';
 import { RangeCases } from '../playground/range';
 import { RenderingCases } from '../playground/rendering';
 import { SelectionCases } from '../playground/selection';
@@ -26,7 +26,7 @@ const AREAS = [
   { id: 'keyboard', title: 'Keyboard', spec: 'keyboard.spec.ts', Cases: KeyboardCases },
   { id: 'auto-focus', title: 'autoFocus', spec: 'auto-focus.spec.ts', Cases: AutoFocusCases },
   { id: 'timezone', title: 'Timezone', spec: 'timezone.spec.ts', Cases: TimezoneCases },
-  { id: 'picker', title: 'DatePicker', spec: 'picker.spec.ts', Cases: PickerCases },
+  { id: 'popover', title: 'Popover recipe', spec: 'popover.spec.ts', Cases: PopoverCases },
   { id: 'styles', title: 'Styles', spec: 'styles.spec.ts', Cases: StylesCases },
   { id: 'a11y', title: 'Accessibility', spec: 'a11y.spec.ts', Cases: A11yCases },
   { id: 'theme', title: 'Theme', spec: 'theme.spec.ts', Cases: ThemeCases },

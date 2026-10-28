@@ -1,5 +1,5 @@
 import { component$, useSignal } from '@qwik.dev/core';
-import { Calendar, DatePicker } from '../../../lib';
+import { Calendar } from '../../../lib';
 
 /** tests/e2e fixture: `name` submits the value with the form. */
 export default component$(() => {
@@ -21,8 +21,8 @@ export default component$(() => {
         <section id='range'>
           <Calendar name='stay' mode='range' value={{ start: '2024-08-05', end: '2024-08-12' }} />
         </section>
-        <section id='picker'>
-          <DatePicker name='picked' />
+        <section id='empty'>
+          <Calendar name='none' />
         </section>
         <button id='submit' type='submit'>
           submit

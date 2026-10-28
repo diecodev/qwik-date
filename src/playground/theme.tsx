@@ -1,5 +1,5 @@
 import { $, component$, useSignal } from '@qwik.dev/core';
-import { Calendar, DatePicker, type Theme } from '../lib';
+import { Calendar, type Theme } from '../lib';
 import { Case, Demo, Probe, Steps, calendarOf, contrastRatio } from './ui';
 
 const themeAndBackground = $((root: HTMLElement) => {
@@ -133,36 +133,33 @@ export const ThemeCases = component$(() => {
         </Demo>
       </Case>
 
-      <Case id='theme-picker' title='A dark DatePicker' tests={['the DatePicker trigger and popover follow the theme']}>
+      <Case
+        id='theme-popover'
+        title='A dark calendar popover'
+        tests={['a calendar that is a popover follows the theme']}
+      >
         <Steps>
           <li>
-            <p>Look at the trigger of the DatePicker, rendered with theme="dark" on a black page.</p>
             <p>
-              Its text is readable on black: contrast of at least <b>4.5:1</b>.
-            </p>
-          </li>
-          <li>
-            <p>
-              Click the trigger, <b>Aug 15, 2024</b>.
+              Click <b>Open</b>: the calendar is a native popover (containerProps.popover="auto") with theme="dark".
             </p>
             <p>
-              The popup is <b>black</b> (rgb(0, 0, 0)).
+              The popup, in the top-left corner (nothing positions it here), is <b>black</b> (rgb(0, 0, 0)) and its
+              title is readable: contrast of at least <b>4.5:1</b>.
             </p>
           </li>
         </Steps>
         <Demo>
-          <div class='pg-dark'>
-            <DatePicker value='2024-08-15' theme='dark' />
-          </div>
+          <button type='button' class='pg-button' popovertarget='pg-theme-popover'>
+            Open
+          </button>
+          <Calendar value='2024-08-15' theme='dark' containerProps={{ id: 'pg-theme-popover', popover: 'auto' }} />
           <Probe
-            label='contrast of the trigger'
-            read$={(root) => contrastRatio(root.querySelector('button[popovertarget]'))}
-          />
-          <Probe
-            label='popup background'
+            label='popup background / contrast of the title'
             read$={(root) => {
               const popup = root.querySelector('[popover]');
-              return popup?.matches(':popover-open') ? getComputedStyle(popup).backgroundColor : 'closed';
+              if (!popup?.matches(':popover-open')) return 'closed';
+              return `${getComputedStyle(popup).backgroundColor} / ${contrastRatio(popup.querySelector('header > div'))}`;
             }}
           />
         </Demo>

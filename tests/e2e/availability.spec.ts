@@ -99,11 +99,3 @@ test('without a value it opens on the limit today is past, and Tab enters on a d
   await expect(title(calendarIn(page, 'past'))).toHaveText('January 2000');
   expect(await focusedDay(page)).not.toMatch(/^\d{4}-/);
 });
-
-test('the DatePicker takes them too', async ({ page }) => {
-  await page.locator('#picker button[popovertarget]').click();
-  const popover = page.locator('#picker [popover]');
-  await expect(popover).toBeVisible();
-  await expect(day(popover, '2024-08-26')).toBeDisabled();
-  await expect(popover.locator('header button').first()).toHaveAttribute('aria-disabled', 'true');
-});

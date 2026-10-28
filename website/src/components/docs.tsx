@@ -61,7 +61,7 @@ const calendarInlinePropsInfo = [
   {
     name: 'labels',
     description:
-      'The texts Intl cannot give (calendar, previousMonth, nextMonth, selectedDate, selectedRange, placeholder). Required for locales other than en and es',
+      'The texts Intl cannot give (calendar, previousMonth, nextMonth, selectedDate, selectedRange). Required for locales other than en and es',
     defaultValue: 'built in for en and es',
   },
   {
@@ -201,38 +201,13 @@ const helpers = [
   },
 ]
 
-const datePickerProps = [
-  {
-    name: 'triggerProps',
-    description: 'Props to be passed to the trigger button',
-    defaultValue: 'undefined',
-  },
-  {
-    name: 'triggerIcon',
-    description: 'Icon component to be displayed in the trigger button',
-    defaultValue: 'undefined',
-  },
-  {
-    name: 'placeholder',
-    description:
-      'What the trigger shows without a value. With one it shows the date',
-    defaultValue: "'Select a date'",
-  },
-  {
-    name: 'closeOnSelect',
-    description:
-      'Close the popup once a day is chosen (a range, once it has an end), and focus the trigger again',
-    defaultValue: 'true',
-  },
-]
-
 export const Docs = component$(() => {
   return (
     <section class="space-y-3">
       <h3 class="text-center font-medium">
         {'> '}API Reference{' <'}
       </h3>
-      <h4 class="text-center font-medium">~Inline mode~</h4>
+      <h4 class="text-center font-medium">~Calendar~</h4>
       <div class="overflow-clip rounded-lg border ">
         <table class="min-w-full table-auto border-collapse text-sm">
           <thead class="bg-neutral-100">
@@ -284,38 +259,6 @@ export const Docs = component$(() => {
                 <td class="border-l px-2 py-1.5">
                   <span class="rounded-lg bg-neutral-100 px-2 py-0.5 font-mono text-xs">
                     {helper.example}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="!mt-12 space-y-2">
-        <h4 class="text-center font-medium">~Popup mode~</h4>
-        <p class="text-balance text-center text-neutral-600 text-sm">
-          Got the same props as the inline mode, but also accepts the following
-          props:
-        </p>
-      </div>
-      <div class="overflow-clip rounded-lg border ">
-        <table class="min-w-full table-auto border-collapse text-sm">
-          <thead class="bg-neutral-100">
-            <tr>
-              <th class="border-r border-b px-4 py-2 text-left">Prop</th>
-              <th class="border-b px-4 py-2 text-left">Description</th>
-              <th class="border-b border-l px-4 py-2 text-left">Default</th>
-            </tr>
-          </thead>
-          <tbody>
-            {datePickerProps.map((prop, index) => (
-              <tr key={index} class="border-b text-neutral-700 last:border-b-0">
-                <td class="border-r px-4 py-2 font-semibold">{prop.name}</td>
-                <td class="px-4 py-2">{prop.description}</td>
-                <td class="border-l px-2 py-1.5">
-                  <span class="rounded-lg bg-neutral-100 px-2 py-0.5 font-mono text-xs">
-                    {prop.defaultValue}
                   </span>
                 </td>
               </tr>

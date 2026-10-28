@@ -19,8 +19,6 @@ export interface Labels {
   selectedDate: string;
   /** the same, for the selected range of `mode="range"` */
   selectedRange: string;
-  /** what the DatePicker trigger shows without a value */
-  placeholder: string;
 }
 /** `auto` follows the operating system's color scheme (`prefers-color-scheme`). */
 export type Theme = 'light' | 'dark' | 'auto';

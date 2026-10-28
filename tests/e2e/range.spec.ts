@@ -96,18 +96,3 @@ test.describe('bind:value', () => {
     await expect(calendar.locator('[aria-selected="true"]')).toHaveCount(0);
   });
 });
-
-test('the DatePicker shows the range and closes once it has an end', async ({ page }) => {
-  const trigger = page.locator('#picker button[popovertarget]');
-  const popover = page.locator('#picker [popover]');
-  await expect(trigger).toHaveText('Aug 05, 2024 – Aug 12, 2024');
-  await trigger.click();
-  await day(popover, '2024-08-20').click();
-  await expect(page.locator('#picked')).toHaveText('2024-08-20/null');
-  await expect(popover).toBeVisible();
-  await expect(trigger).toHaveText('Aug 20, 2024 – …');
-  await day(popover, '2024-08-22').click();
-  await expect(page.locator('#picked')).toHaveText('2024-08-20/null,2024-08-20/2024-08-22');
-  await expect(popover).toBeHidden();
-  await expect(trigger).toHaveText('Aug 20, 2024 – Aug 22, 2024');
-});

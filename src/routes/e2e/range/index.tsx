@@ -1,13 +1,12 @@
 import { $, component$, useSignal } from '@qwik.dev/core';
-import { Calendar, DatePicker, type DateRange } from '../../../lib';
+import { Calendar, type DateRange } from '../../../lib';
 
 const show = (range: DateRange | null) => (range ? `${range.start}/${range.end}` : 'null');
 
-/** tests/e2e fixture: `mode="range"` in the Calendar and the DatePicker. */
+/** tests/e2e fixture: `mode="range"`. */
 export default component$(() => {
   const changes = useSignal<string[]>([]);
   const bound = useSignal<DateRange | null>({ start: '2024-08-15', end: null });
-  const picked = useSignal<string[]>([]);
 
   return (
     <main style={{ display: 'grid', gap: '32px', padding: '32px' }}>
@@ -42,16 +41,6 @@ export default component$(() => {
         >
           clear
         </button>
-      </section>
-      <section id='picker'>
-        <DatePicker
-          mode='range'
-          value={{ start: '2024-08-05', end: '2024-08-12' }}
-          onChange$={$((range) => {
-            picked.value = [...picked.value, show(range)];
-          })}
-        />
-        <output id='picked'>{picked.value.join(',')}</output>
       </section>
     </main>
   );

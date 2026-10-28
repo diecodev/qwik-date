@@ -8,6 +8,7 @@ import { toast } from 'qwik-sonner'
 import { Demo } from '~/components/demo'
 import { Docs } from '~/components/docs'
 import { Footer } from '~/components/footer'
+import { Recipes } from '~/components/recipes'
 
 export default component$(() => {
   const date = useSignal<LocalDate | null>(null)
@@ -38,6 +39,7 @@ export default component$(() => {
         <ScriptCode />
         <Demo />
         <Docs />
+        <Recipes />
       </main>
       <Footer />
     </>

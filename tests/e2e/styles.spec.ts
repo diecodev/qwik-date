@@ -1,17 +1,32 @@
 import { expect, test } from '@playwright/test';
 import { calendarIn, contrastRatio, day } from './helpers';
 
-test('the day numbers and the trigger use the page font', async ({ page }) => {
-  await page.goto('/e2e/picker/');
-  const calendar = calendarIn(page, 'inline');
+test('the title, the weekdays and the day numbers use the page font', async ({ page }) => {
+  await page.goto('/e2e/styles/');
+  const calendar = calendarIn(page, 'font');
   for (const element of [
     calendar.locator('header > div'),
     calendar.locator('th').first(),
     day(calendar, '2024-08-06'),
-    page.locator('#picker button[popovertarget]'),
   ]) {
     await expect(element).toHaveCSS('font-family', 'Georgia, serif');
   }
+});
+
+test('a calendar that is a popover keeps the library styles, without the browser border', async ({ page }) => {
+  await page.goto('/e2e/styles/');
+  const styled = page.locator('#styled-popover');
+  await page.locator('#open-styled').click();
+  await expect(styled).toBeVisible();
+  await expect(styled).not.toHaveCSS('box-shadow', 'none');
+  await expect(styled).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+  await expect(styled).toHaveCSS('border-top-width', '0px');
+  // unstyled, it gets none of them: the browser's popover border stays
+  const unstyled = page.locator('#unstyled-popover');
+  await page.locator('#open-unstyled').click();
+  await expect(unstyled).toBeVisible();
+  await expect(unstyled).toHaveCSS('box-shadow', 'none');
+  await expect(unstyled).not.toHaveCSS('border-top-width', '0px');
 });
 
 test('the weekday names and week numbers meet WCAG AA contrast', async ({ page }) => {

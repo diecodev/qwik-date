@@ -11,7 +11,7 @@ const submit = async (page: import('@playwright/test').Page) => {
 };
 
 test('name submits the value with the form, empty without one', async ({ page }) => {
-  await expect(await submit(page)).toHaveText('day=2024-08-15&stay[start]=2024-08-05&stay[end]=2024-08-12&picked=');
+  await expect(await submit(page)).toHaveText('day=2024-08-15&stay[start]=2024-08-05&stay[end]=2024-08-12&none=');
 });
 
 test('the submitted value follows the choices', async ({ page }) => {
@@ -22,16 +22,5 @@ test('the submitted value follows the choices', async ({ page }) => {
   await expect(page.locator('#range input[name="stay[end]"]')).toHaveValue('');
   await day(range, '2024-08-22').click();
   await expect(page.locator('#range input[name="stay[end]"]')).toHaveValue('2024-08-22');
-  await expect(await submit(page)).toHaveText('day=2024-08-20&stay[start]=2024-08-18&stay[end]=2024-08-22&picked=');
-});
-
-test('a DatePicker submits its value too', async ({ page }) => {
-  await page.locator('#picker button[popovertarget]').click();
-  const popover = page.locator('#picker [popover]');
-  await popover.locator('button[data-value]:not(:disabled)').first().click();
-  await expect(popover).toBeHidden();
-  const input = page.locator('#picker input[type="hidden"]');
-  await expect(input).toHaveValue(/^\d{4}-\d{2}-01$/);
-  const value = await input.inputValue();
-  await expect(await submit(page)).toContainText(`picked=${value}`);
+  await expect(await submit(page)).toHaveText('day=2024-08-20&stay[start]=2024-08-18&stay[end]=2024-08-22&none=');
 });

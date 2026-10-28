@@ -2,7 +2,7 @@
 
 **Qwik calendar, simple integration**
 
-`qwik-date` is an opinionated calendar component designed for the Qwik framework. It offers two main versions: an `inline` calendar and a `popup` date picker, providing flexibility in how you integrate it into your applications.
+`qwik-date` is an opinionated calendar component designed for the Qwik framework. It does the calendar, with no runtime dependencies; for a date picker, put it in a popover with a trigger of your own: see the [recipes](#date-picker-popover-recipes).
 
 ## Requirements
 
@@ -93,7 +93,7 @@ So a trigger is one line:
 - `onChange$`: Called with the new value when the user chooses a day.
 - `fullWeeks`: If true, shows full weeks (default: false).
 - `locale`: `'en'` (default), `'es'`, or any BCP 47 language tag (`'fr-FR'`, `'de'`); see [Languages](#languages).
-- `labels`: The texts `Intl` can't give (`calendar`, `previousMonth`, `nextMonth`, `selectedDate`, `selectedRange`, `placeholder`). Optional for `en` and `es`, required for any other locale.
+- `labels`: The texts `Intl` can't give (`calendar`, `previousMonth`, `nextMonth`, `selectedDate`, `selectedRange`). Optional for `en` and `es`, required for any other locale.
 - `weekStartsOn`: The first day of the week, from `0` (Sunday, the default) to `6`, as in `Date#getDay()`.
 - `showWeekNumber`: If true, shows week numbers (default: false).
 - `showDaysOfWeek`: If true, shows days of the week ~Mo, Tu, We, etc.~ (default: true).
@@ -115,7 +115,6 @@ const fr: Labels = {
   nextMonth: 'Mois suivant',
   selectedDate: 'date sélectionnée :',
   selectedRange: 'période sélectionnée :',
-  placeholder: 'Choisir une date',
 };
 
 <Calendar locale="fr-FR" labels={fr} weekStartsOn={1} />;
@@ -134,36 +133,177 @@ export default component$(() => {
 });
 ```
 
-`auto` is resolved with CSS (`prefers-color-scheme`), so it ships no JavaScript. The `DatePicker` accepts the same prop.
+`auto` is resolved with CSS (`prefers-color-scheme`), so it ships no JavaScript.
 
-### Popup Date Picker
+### Date picker (popover) recipes
 
-```ts
-import { DatePicker } from 'qwik-date';
-```
+There's no `DatePicker` component: as with shadcn/ui (Popover + Calendar), you put the `Calendar` in a popover next to a trigger of your own. The trigger, its format, its placeholder and when the popup closes are yours, and `qwik-date` stays free of runtime dependencies.
 
-#### Popup Date Picker Example
+The recipes below do the same, with full accessibility:
 
-Here's a basic example of how to use the popup date picker:
+- the trigger has `aria-haspopup="dialog"` and `aria-expanded`, and the popup is a dialog (`role="dialog"`, named after the calendar);
+- opening it focuses the selected day, or the first one that can be chosen (`autoFocus`);
+- Escape closes it, and so does a click outside;
+- choosing a day closes it (a range, once it has an end) and the focus goes back to the trigger, as it does after Escape;
+- the trigger shows the value with `formatDate` / `formatDateRange`.
+
+`onToggle$` goes inside `containerProps`, an object: the optimizer only turns `$` props of JSX attributes into QRLs, so wrap it in `$()`.
+
+#### 1. Native popover + CSS anchor positioning
+
+No dependencies and no positioning JavaScript. The calendar is itself the popover (`containerProps.popover`, styled as a card like an inline calendar), the browser closes it on Escape and on clicks outside, and CSS anchor positioning keeps it under the trigger, or above it when there's no room below. Anchor positioning is Baseline since January 2026: Chrome and Edge 125, Safari 26, Firefox 147.
+
+This recipe is tested in this repo: [`src/recipes/popover.tsx`](./src/recipes/popover.tsx), by [`tests/e2e/popover.spec.ts`](./tests/e2e/popover.spec.ts).
 
 ```tsx
-import { component$, useSignal } from '@qwik.dev/core';
-import { DatePicker, type LocalDate } from 'qwik-date';
+import { $, type Signal, component$, useId, useSignal } from '@qwik.dev/core';
+import { Calendar, type LocalDate, formatDate } from 'qwik-date';
 
-export default component$(() => {
-  const date = useSignal<LocalDate | null>(null);
+/** Under the trigger, 8px away, or above it when there's no room below. */
+const placement = (id: string) =>
+  `position-anchor: --${id}; position-area: bottom span-right; position-try-fallbacks: flip-block; margin: 8px 0`;
 
-  return <DatePicker bind:value={date} placeholder="Pick a date" />;
+export const DatePicker = component$<{ 'bind:value': Signal<LocalDate | null>; name?: string }>((props) => {
+  const id = useId();
+  const date = props['bind:value'];
+  const open = useSignal(false);
+  const trigger = useSignal<HTMLButtonElement>();
+
+  return (
+    <>
+      <button
+        ref={trigger}
+        type="button"
+        popovertarget={id}
+        aria-haspopup="dialog"
+        aria-expanded={open.value}
+        style={`anchor-name: --${id}`}
+      >
+        {date.value ? formatDate(date.value) : 'Pick a date'}
+      </button>
+      <Calendar
+        autoFocus
+        bind:value={date}
+        name={props.name}
+        onChange$={() => document.getElementById(id)?.hidePopover()}
+        containerProps={{
+          id,
+          popover: 'auto',
+          role: 'dialog',
+          style: placement(id),
+          onToggle$: $((event, popover) => {
+            open.value = event.newState === 'open';
+            // closed with Escape, a choice or the trigger: the focus goes back to the trigger, unless it went
+            // elsewhere (Safari leaves it on the page, or for a moment on the hidden day)
+            const focused = document.activeElement;
+            if (!open.value && (focused === document.body || popover.contains(focused))) trigger.value?.focus();
+          }),
+        }}
+      />
+    </>
+  );
 });
 ```
 
-#### Props
+```tsx
+const date = useSignal<LocalDate | null>(null);
 
-- `triggerProps`: Custom props for the trigger button.
-- `placeholder`: What the trigger shows without a value (default: "Select a date"). With a value it shows the date, like "Aug 15, 2024", or the range, like "Aug 05, 2024 – Aug 12, 2024".
-- `closeOnSelect`: Close the popup once a day is chosen (a range, once it has an end); the focus goes back to the trigger (default: true).
-- `triggerIcon`: Custom icon for the trigger button.
-- All other props from `Calendar` can also be used.
+<DatePicker bind:value={date} name="due" />;
+```
+
+For a range, `mode="range"`, `formatDateRange` and close it once the range has an end:
+
+```tsx
+<button /* ... */>{range.value ? formatDateRange(range.value) : 'Pick dates'}</button>
+<Calendar
+  autoFocus
+  mode="range"
+  bind:value={range}
+  onChange$={(value) => value.end && document.getElementById(id)?.hidePopover()}
+  containerProps={/* the same */}
+/>
+```
+
+#### 2. Qwik UI Popover
+
+Not yet: Qwik UI doesn't run on Qwik v2. Its latest release, `@qwik-ui/headless` 0.7.7, is built for Qwik v1 (`@builder.io/qwik`). Tried with `@qwik.dev/core` 2.0.0-rc.4, its `Popover` renders nothing in a production build (neither the trigger nor the panel, only its children), its components don't typecheck as Qwik v2 components, and in dev the first opening shows an invisible panel (it stays `hidden`). Until Qwik UI supports Qwik v2, use recipe 1, or recipe 3: Qwik UI's Popover is a native popover placed by floating-ui too.
+
+#### 3. floating-ui
+
+For the browsers without CSS anchor positioning (Safari before 26, Firefox before 147), or for floating-ui's middleware: the same native popover, placed by floating-ui while it's open.
+
+```sh
+npm install @floating-ui/dom
+```
+
+```tsx
+import { autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom';
+import {
+  $,
+  type NoSerialize,
+  type Signal,
+  component$,
+  noSerialize,
+  useId,
+  useSignal,
+  useVisibleTask$,
+} from '@qwik.dev/core';
+import { Calendar, type LocalDate, formatDate } from 'qwik-date';
+
+export const DatePicker = component$<{ 'bind:value': Signal<LocalDate | null>; name?: string }>((props) => {
+  const id = useId();
+  const date = props['bind:value'];
+  const open = useSignal(false);
+  const trigger = useSignal<HTMLButtonElement>();
+  const stopFollowing = useSignal<NoSerialize<() => void>>();
+
+  // stop following the trigger if the picker goes away while it's open
+  useVisibleTask$(({ cleanup }) => cleanup(() => stopFollowing.value?.()));
+
+  return (
+    <>
+      <button ref={trigger} type="button" popovertarget={id} aria-haspopup="dialog" aria-expanded={open.value}>
+        {date.value ? formatDate(date.value) : 'Pick a date'}
+      </button>
+      <Calendar
+        autoFocus
+        bind:value={date}
+        name={props.name}
+        onChange$={() => document.getElementById(id)?.hidePopover()}
+        containerProps={{
+          id,
+          popover: 'auto',
+          role: 'dialog',
+          // floating-ui sets `left` and `top`
+          style: 'inset: auto; margin: 0',
+          onToggle$: $((event, popover) => {
+            open.value = event.newState === 'open';
+            stopFollowing.value?.();
+            stopFollowing.value = undefined;
+            const anchor = trigger.value;
+            if (!anchor) return;
+            if (open.value) {
+              // under the trigger (above it without room), 8px away, while the page scrolls or resizes
+              const place = () =>
+                computePosition(anchor, popover, {
+                  strategy: 'fixed',
+                  placement: 'bottom-start',
+                  middleware: [offset(8), flip(), shift({ padding: 8 })],
+                }).then(({ x, y }) => Object.assign(popover.style, { left: `${x}px`, top: `${y}px` }));
+              stopFollowing.value = noSerialize(autoUpdate(anchor, popover, place));
+              return;
+            }
+            // closed with Escape, a choice or the trigger: the focus goes back to the trigger, unless it went
+            // elsewhere (Safari leaves it on the page, or for a moment on the hidden day)
+            const focused = document.activeElement;
+            if (focused === document.body || popover.contains(focused)) anchor.focus();
+          }),
+        }}
+      />
+    </>
+  );
+});
+```
 
 ## Roadmap
 

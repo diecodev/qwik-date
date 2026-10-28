@@ -40,10 +40,11 @@ test('accepts a Signal and follows its changes', async ({ page }) => {
   await expect(calendar).toHaveCSS('background-color', WHITE);
 });
 
-test('the DatePicker trigger and popover follow the theme', async ({ page }) => {
+test('a calendar that is a popover follows the theme', async ({ page }) => {
   await page.goto('/e2e/theme/');
-  const trigger = page.locator('#picker button[popovertarget]');
-  expect(await contrastRatio(trigger)).toBeGreaterThanOrEqual(4.5);
-  await trigger.click();
-  await expect(page.locator('#picker [popover]')).toHaveCSS('background-color', BLACK);
+  const popover = page.locator('#dark-popover');
+  await page.locator('#popover button[popovertarget]').click();
+  await expect(popover).toBeVisible();
+  await expect(popover).toHaveCSS('background-color', BLACK);
+  expect(await contrastRatio(popover.locator('header > div'))).toBeGreaterThanOrEqual(4.5);
 });

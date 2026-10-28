@@ -1,5 +1,5 @@
 import { component$, useSignal } from '@qwik.dev/core';
-import { Calendar, DatePicker } from '../lib';
+import { Calendar } from '../lib';
 import { Case, Demo, Probe, Steps, calendarOf, contrastRatio, selectedCell } from './ui';
 
 export const StylesCases = component$(() => {
@@ -7,33 +7,82 @@ export const StylesCases = component$(() => {
 
   return (
     <>
-      <Case id='styles-font' title='The page font' tests={['the day numbers and the trigger use the page font']}>
+      <Case
+        id='styles-font'
+        title='The page font'
+        tests={['the title, the weekdays and the day numbers use the page font']}
+      >
         <Steps>
           <li>
-            <p>Look at the calendar and the DatePicker trigger, inside a box with font-family: Georgia, serif.</p>
+            <p>Look at the calendar, inside a box with font-family: Georgia, serif.</p>
             <p>
-              The title, the weekdays, the day numbers and the DatePicker trigger are all in <b>Georgia</b>
-              (serif), unlike the rest of this page.
+              The title, the weekdays and the day numbers are all in <b>Georgia</b> (serif), unlike the rest of this
+              page.
             </p>
           </li>
         </Steps>
         <Demo>
-          <div class='pg-row' style={{ fontFamily: 'Georgia, serif' }}>
+          <div style={{ fontFamily: 'Georgia, serif' }}>
             <Calendar value='2024-08-06' />
-            <DatePicker value='2024-08-06' />
           </div>
           <Probe
-            label='font-family of the title / weekday / day / trigger'
+            label='font-family of the title / weekday / day'
             read$={(root) => {
               const calendar = calendarOf(root);
               return [
                 calendar?.querySelector('header > div'),
                 calendar?.querySelector('th'),
                 calendar?.querySelector('button[data-value="2024-08-06"]'),
-                root.querySelector('button[popovertarget]'),
               ]
                 .map((el) => (el ? getComputedStyle(el).fontFamily : 'not found'))
                 .join(' / ');
+            }}
+          />
+        </Demo>
+      </Case>
+
+      <Case
+        id='styles-popover'
+        title='A calendar that is a popover'
+        tests={['a calendar that is a popover keeps the library styles, without the browser border']}
+      >
+        <Steps>
+          <li>
+            <p>
+              Click <b>Open</b>: the calendar is a native popover (containerProps.popover="auto").
+            </p>
+            <p>
+              The popup, in the top-left corner (nothing positions it here), is the same white card with a shadow as an
+              inline calendar, without the browser's popover border.
+            </p>
+          </li>
+          <li>
+            <p>
+              Press <kbd>Escape</kbd>, then click <b>Open unstyled</b>: the same popover with unstyled.
+            </p>
+            <p>None of the library styles: a plain table inside the browser's popover border, without a shadow.</p>
+          </li>
+        </Steps>
+        <Demo>
+          <button type='button' class='pg-button' popovertarget='pg-styles-popover'>
+            Open
+          </button>
+          <Calendar value='2024-08-15' containerProps={{ id: 'pg-styles-popover', popover: 'auto' }} />
+          <button type='button' class='pg-button' popovertarget='pg-styles-popover-unstyled'>
+            Open unstyled
+          </button>
+          <Calendar
+            value='2024-08-15'
+            unstyled
+            containerProps={{ id: 'pg-styles-popover-unstyled', popover: 'auto' }}
+          />
+          <Probe
+            label='open popup: box-shadow / border'
+            read$={(root) => {
+              const popup = [...root.querySelectorAll('[popover]')].find((el) => el.matches(':popover-open'));
+              if (!popup) return 'closed';
+              const style = getComputedStyle(popup);
+              return `${style.boxShadow} / ${style.borderTopWidth} ${style.borderTopStyle}`;
             }}
           />
         </Demo>

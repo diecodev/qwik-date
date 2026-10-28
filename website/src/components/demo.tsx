@@ -10,11 +10,17 @@ export const Demo = component$(() => {
         <pre class="relative flex cursor-copy flex-col gap-3 rounded-lg bg-neutral-50 p-3 font-thin text-neutral-600 text-sm transition-all dark:bg-neutral-800 dark:text-neutral-200">
           <code class="pointer-events-none">
             {"import { Calendar } from 'qwik-date'"}{' '}
-            <span class="text-neutral-400 text-sm">{'//-> inline mode'}</span>
+            <span class="text-neutral-400 text-sm">{'//-> the calendar'}</span>
           </code>
           <code class="pointer-events-none">
-            {"import { DatePicker } from 'qwik-date'"}{' '}
-            <span class="text-neutral-400 text-sm">{'//-> popup mode'}</span>
+            {"import { formatDate, formatDateRange } from 'qwik-date'"}{' '}
+            <span class="text-neutral-400 text-sm">
+              {'//-> a trigger in one line'}
+            </span>
+          </code>
+          <code class="pointer-events-none">
+            {"import type { DateRange, LocalDate } from 'qwik-date'"}{' '}
+            <span class="text-neutral-400 text-sm">{'//-> the values'}</span>
           </code>
         </pre>
       </div>
