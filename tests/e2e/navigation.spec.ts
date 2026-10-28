@@ -35,6 +35,20 @@ test('after changing month, Tab enters the grid on the 1st', async ({ page, brow
   await expect(day(calendar, '2024-07-01')).toBeFocused();
 });
 
+test('the month buttons take navButtonProps, prevButtonProps, nextButtonProps and custom icons', async ({ page }) => {
+  const calendar = calendarIn(page, 'custom-nav');
+  await expect(prevButton(calendar)).toHaveClass('nav');
+  await expect(prevButton(calendar)).toHaveAttribute('title', 'Previous');
+  await expect(prevButton(calendar)).toHaveAttribute('aria-label', 'go to previous month');
+  // the specific props win over navButtonProps
+  await expect(nextButton(calendar)).toHaveClass('next');
+  await expect(nextButton(calendar)).toHaveAttribute('title', 'Next');
+  await expect(nextButton(calendar).locator('svg[data-icon="arrow"]')).toHaveCount(1);
+  await prevButton(calendar).click();
+  await expect(title(calendar)).toHaveText('July 2024');
+  await expect(page.locator('#nav-clicks')).toHaveText('prev');
+});
+
 test('the month title is a polite live region', async ({ page }) => {
   await expect(title(calendarIn(page, 'basic'))).toHaveAttribute('aria-live', 'polite');
 });

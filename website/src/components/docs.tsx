@@ -27,13 +27,13 @@ const calendarInlinePropsInfo = [
     defaultValue: 'true',
   },
   {
-    name: 'iconLeft',
-    description: 'Icon to display on the left side of the calendar',
+    name: 'prevIcon',
+    description: 'Icon of the previous month button',
     defaultValue: 'undefined',
   },
   {
-    name: 'iconRight',
-    description: 'Icon to display on the right side of the calendar',
+    name: 'nextIcon',
+    description: 'Icon of the next month button',
     defaultValue: 'undefined',
   },
   {
@@ -47,18 +47,18 @@ const calendarInlinePropsInfo = [
     defaultValue: '-',
   },
   {
-    name: 'actionButtonProps',
-    description: 'Props for action buttons in the calendar',
+    name: 'navButtonProps',
+    description: 'Props for both month buttons',
     defaultValue: '-',
   },
   {
-    name: 'actionLeftProps',
-    description: 'Props for the left action',
+    name: 'prevButtonProps',
+    description: 'Props for the previous month button',
     defaultValue: '-',
   },
   {
-    name: 'actionRightProps',
-    description: 'Props for the right action',
+    name: 'nextButtonProps',
+    description: 'Props for the next month button',
     defaultValue: '-',
   },
   {

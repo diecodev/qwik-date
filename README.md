@@ -56,8 +56,8 @@ export default component$(() => {
 - `locale`: Locale for the calendar (default: 'en').
 - `showWeekNumber`: If true, shows week numbers (default: false).
 - `showDaysOfWeek`: If true, shows days of the week ~Mo, Tu, We, etc.~ (default: true).
-- `iconLeft`, `iconRight`: Custom icons for navigation buttons.
-- `containerProps`, `headerProps`, `actionButtonProps`, `actionLeftProps`, `actionRightProps`, `calendarProps`, `theadProps`, `tbodyProps`, `theadRowProps`, `tbodyRowProps`, `headerCellProps`, `cellProps`, `dayButtonProps`, `iconProps`, `titleProps`, `weekNumberProps`: Custom props for various parts of the component.
+- `prevIcon`, `nextIcon`: Custom icons for the previous and next month buttons.
+- `containerProps`, `headerProps`, `navButtonProps` (both month buttons), `prevButtonProps`, `nextButtonProps`, `calendarProps`, `theadProps`, `tbodyProps`, `theadRowProps`, `tbodyRowProps`, `headerCellProps`, `cellProps`, `dayButtonProps`, `iconProps`, `titleProps`, `weekNumberProps`: Custom props for various parts of the component.
 - `onDateChange$`: Callback for when the date changes.
 - `unStyled`: If true, removes default styling (default: false).
 - `theme`: `'light'` (default), `'dark'`, or `'auto'` to follow the operating system's color scheme. It also accepts a `Signal<Theme>` to change it at runtime.

@@ -41,14 +41,15 @@ export interface CalendarProps {
   showDaysOfWeek?: boolean;
   unStyled?: boolean;
   theme?: Theme | Signal<Theme>;
-  iconLeft?: Component<PropsOf<'svg'>>;
-  iconRight?: Component<PropsOf<'svg'>>;
+  prevIcon?: Component<PropsOf<'svg'>>;
+  nextIcon?: Component<PropsOf<'svg'>>;
   // props to override
   containerProps?: PropsOf<'div'>;
   headerProps?: PropsOf<'header'>;
-  actionButtonProps?: PropsOf<'button'>;
-  actionLeftProps?: PropsOf<'button'>;
-  actionRightProps?: PropsOf<'button'>;
+  /** both month buttons; `prevButtonProps` / `nextButtonProps` win over it */
+  navButtonProps?: PropsOf<'button'>;
+  prevButtonProps?: PropsOf<'button'>;
+  nextButtonProps?: PropsOf<'button'>;
   iconProps?: PropsOf<'svg'>;
   titleProps?: PropsOf<'div'>;
   calendarProps?: PropsOf<'table'>;
@@ -90,13 +91,13 @@ export const Calendar = component$<CalendarProps>(
     locale = 'en',
     showWeekNumber = false,
     showDaysOfWeek = true,
-    iconLeft,
-    iconRight,
+    prevIcon,
+    nextIcon,
     containerProps = {},
     headerProps = {},
-    actionButtonProps = {},
-    actionLeftProps = {},
-    actionRightProps = {},
+    navButtonProps = {},
+    prevButtonProps = {},
+    nextButtonProps = {},
     calendarProps = {},
     theadProps = {},
     tbodyProps = {},
@@ -206,8 +207,8 @@ export const Calendar = component$<CalendarProps>(
     const daysOfWeek = WEEKDAYS[locale];
 
     // icons
-    const IconLeft = iconLeft ?? ChevronLeft;
-    const IconRight = iconRight ?? ChevronRight;
+    const PrevIcon = prevIcon ?? ChevronLeft;
+    const NextIcon = nextIcon ?? ChevronRight;
 
     // events handlers
     const decreaseDate = $(() => {
@@ -377,18 +378,20 @@ export const Calendar = component$<CalendarProps>(
           <button
             type='button'
             data-header-action
+            aria-label={ARIA_LABELS[locale].previous}
+            {...navButtonProps}
+            {...prevButtonProps}
             onClick$={[
               $(async () => {
                 focusDayOnMonthChange.value = false;
                 await decreaseDate();
                 dateToFocus.value = `${yearToRender.value}-${monthToRender.value}-01`;
               }),
-              actionButtonProps.onClick$,
-              actionLeftProps.onClick$,
+              navButtonProps.onClick$,
+              prevButtonProps.onClick$,
             ]}
-            aria-label={ARIA_LABELS[locale].previous}
           >
-            <IconLeft {...iconProps} />
+            <PrevIcon {...iconProps} />
           </button>
 
           <div id={titleId} aria-live='polite' role='presentation' {...titleProps}>
@@ -398,18 +401,20 @@ export const Calendar = component$<CalendarProps>(
           <button
             type='button'
             data-header-action
+            aria-label={ARIA_LABELS[locale].next}
+            {...navButtonProps}
+            {...nextButtonProps}
             onClick$={[
               $(async () => {
                 focusDayOnMonthChange.value = false;
                 await increaseDate();
                 dateToFocus.value = `${yearToRender.value}-${monthToRender.value}-01`;
               }),
-              actionButtonProps.onClick$,
-              actionRightProps.onClick$,
+              navButtonProps.onClick$,
+              nextButtonProps.onClick$,
             ]}
-            aria-label={ARIA_LABELS[locale].next}
           >
-            <IconRight {...iconProps} />
+            <NextIcon {...iconProps} />
           </button>
         </header>
 
