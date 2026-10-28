@@ -209,6 +209,13 @@ export const StatusBar = component$(() => {
         errors.value = [...errors.value, 'message' in event ? event.message : String(event.reason)];
       };
 
+      // the focused element can change its name too (a DatePicker trigger shows the chosen date)
+      const observer = new MutationObserver((records) => {
+        const node = (record: MutationRecord) =>
+          record.target instanceof Element ? record.target : record.target.parentElement;
+        if (records.some((record) => !node(record)?.closest('.pg-status'))) onFocus();
+      });
+      observer.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true });
       document.addEventListener('focusin', onFocus);
       document.addEventListener('focusout', onFocus);
       window.addEventListener('scroll', onScroll, { passive: true });
@@ -218,6 +225,7 @@ export const StatusBar = component$(() => {
       onScroll();
 
       cleanup(() => {
+        observer.disconnect();
         document.removeEventListener('focusin', onFocus);
         document.removeEventListener('focusout', onFocus);
         window.removeEventListener('scroll', onScroll);

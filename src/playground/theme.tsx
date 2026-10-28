@@ -143,7 +143,7 @@ export const ThemeCases = component$(() => {
           </li>
           <li>
             <p>
-              Click <b>Select a date</b>.
+              Click the trigger, <b>Aug 15, 2024</b>.
             </p>
             <p>
               The popup is <b>black</b> (rgb(0, 0, 0)).

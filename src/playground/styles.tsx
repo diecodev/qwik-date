@@ -12,7 +12,7 @@ export const StylesCases = component$(() => {
           <li>
             <p>Look at the calendar and the DatePicker trigger, inside a box with font-family: Georgia, serif.</p>
             <p>
-              The title, the weekdays, the day numbers and the "Select a date" trigger are all in <b>Georgia</b>
+              The title, the weekdays, the day numbers and the DatePicker trigger are all in <b>Georgia</b>
               (serif), unlike the rest of this page.
             </p>
           </li>

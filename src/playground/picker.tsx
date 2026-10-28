@@ -46,6 +46,7 @@ const LiveListeners = component$(() => {
 
 export const PickerCases = component$(() => {
   const picked = useSignal<string[]>([]);
+  const keyed = useSignal<string[]>([]);
   const mounted = useSignal(false);
 
   return (
@@ -53,12 +54,12 @@ export const PickerCases = component$(() => {
       <Case
         id='picker-open'
         title='Opening it and choosing a day'
-        tests={['opens next to its trigger and reports the chosen date']}
+        tests={['opens next to its trigger, reports the chosen date and closes']}
       >
         <Steps>
           <li>
             <p>
-              Click <b>Select a date</b>.
+              Click the trigger, <b>Aug 06, 2024</b>.
             </p>
             <p>
               The popup opens right under the trigger, <b>8px below</b> (above it, if there's no room below), not in the
@@ -70,8 +71,7 @@ export const PickerCases = component$(() => {
               Click <b>20</b>.
             </p>
             <p>
-              onChange$ is called with <b>2024-08-20</b>. The popup stays open: the DatePicker doesn't close on select
-              yet.
+              onChange$ is called with <b>2024-08-20</b>, the popup closes and the trigger reads <b>Aug 20, 2024</b>.
             </p>
           </li>
         </Steps>
@@ -87,12 +87,86 @@ export const PickerCases = component$(() => {
         </Demo>
       </Case>
 
+      <Case
+        id='picker-trigger'
+        title='What the trigger shows'
+        tests={['shows the value in the trigger, or a placeholder without one']}
+      >
+        <Steps>
+          <li>
+            <p>Read the four triggers.</p>
+            <p>
+              <b>Aug 06, 2024</b> (value="2024-08-06"), <b>Select a date</b> (no value), <b>Pick a date</b> (no value,
+              placeholder="Pick a date") and <b>01 Ago 2024</b> (value="2024-08-01" with locale="es": two-digit day,
+              capitalized month).
+            </p>
+          </li>
+        </Steps>
+        <Demo>
+          <DatePicker value='2024-08-06' />
+          <DatePicker />
+          <DatePicker placeholder='Pick a date' />
+          <DatePicker value='2024-08-01' locale='es' />
+        </Demo>
+      </Case>
+
+      <Case
+        id='picker-keyboard-choose'
+        title='Choosing with the keyboard'
+        tests={['choosing with the keyboard closes it and returns the focus to the trigger']}
+      >
+        <Steps>
+          <li>
+            <p>
+              Click the trigger, <b>Aug 06, 2024</b>, then press <kbd>Tab</kbd> until the focus is on Aug 6: 3 times in
+              Chromium, once in WebKit/Safari.
+            </p>
+            <p>The focus bar reads day 2024-08-06 in the DatePicker popup.</p>
+          </li>
+          <li>
+            <p>
+              Press <kbd>→</kbd>, then <kbd>Enter</kbd>.
+            </p>
+            <p>
+              onChange$ receives <b>2024-08-07</b>, the popup closes and the focus is back on the trigger, which reads{' '}
+              <b>Aug 07, 2024</b>.
+            </p>
+          </li>
+        </Steps>
+        <Demo>
+          <DatePicker
+            value='2024-08-06'
+            onChange$={$((date) => {
+              keyed.value = [...keyed.value, date];
+            })}
+          />
+          <Changes values={keyed.value} />
+        </Demo>
+      </Case>
+
+      <Case id='picker-keep-open' title='closeOnSelect={false}' tests={['closeOnSelect={false} keeps it open']}>
+        <Steps>
+          <li>
+            <p>
+              Click the trigger, <b>Aug 15, 2024</b>, then <b>20</b>.
+            </p>
+            <p>
+              The trigger reads <b>Aug 20, 2024</b> and the popup stays open.
+            </p>
+          </li>
+        </Steps>
+        <Demo>
+          <DatePicker value='2024-08-15' closeOnSelect={false} />
+          <Probe label='popup' read$={popupGap} />
+        </Demo>
+      </Case>
+
       <Case id='picker-escape' title='Escape closes it' tests={['Escape closes it while a day is focused']}>
         <Steps>
           <li>
             <p>
-              Click <b>Select a date</b>, then press <kbd>Tab</kbd> until the focus bar shows a day "in the DatePicker
-              popup": 3 times in Chromium (‹, ›, the day), once in WebKit/Safari.
+              Click the trigger, <b>Aug 06, 2024</b>, then press <kbd>Tab</kbd> until the focus bar shows a day "in the
+              DatePicker popup": 3 times in Chromium (‹, ›, the day), once in WebKit/Safari.
             </p>
             <p>
               The focus is on <b>Aug 6</b>, in the popup.
@@ -119,7 +193,7 @@ export const PickerCases = component$(() => {
         <Steps>
           <li>
             <p>
-              Click <b>Select a date</b>, then <b>‹</b> in the popup.
+              Click the trigger, <b>Aug 06, 2024</b>, then <b>‹</b> in the popup.
             </p>
             <p>The popup shows July 2024.</p>
           </li>
@@ -159,7 +233,7 @@ export const PickerCases = component$(() => {
           </li>
           <li>
             <p>
-              Click <b>Select a date</b>.
+              Click the trigger, <b>Aug 15, 2024</b>.
             </p>
             <p>The popup opens 8px under the trigger (above it, if there's no room below).</p>
           </li>
@@ -191,7 +265,7 @@ export const PickerCases = component$(() => {
           </li>
           <li>
             <p>
-              Click <b>Select a date</b>.
+              Click the trigger, <b>Aug 15, 2024</b>.
             </p>
             <p>
               An unstyled popup (the browser's default popover border, a plain table) opens <b>8px under</b> the trigger
@@ -229,7 +303,7 @@ export const PickerCases = component$(() => {
           </li>
           <li>
             <p>
-              Click its <b>Select a date</b>.
+              Click its trigger, <b>Aug 15, 2024</b>.
             </p>
             <p>
               The popup opens 8px under the trigger (or above it), although the DatePicker wasn't rendered on the

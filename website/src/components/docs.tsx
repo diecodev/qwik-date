@@ -153,9 +153,16 @@ const datePickerProps = [
     defaultValue: 'undefined',
   },
   {
-    name: 'triggerLabel',
-    description: 'Label for the trigger button',
-    defaultValue: 'undefined',
+    name: 'placeholder',
+    description:
+      'What the trigger shows without a value. With one it shows the date',
+    defaultValue: "'Select a date'",
+  },
+  {
+    name: 'closeOnSelect',
+    description:
+      'Close the popup once a day is chosen, and focus the trigger again',
+    defaultValue: 'true',
   },
 ]
 

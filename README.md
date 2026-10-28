@@ -92,14 +92,15 @@ import { DatePicker, type LocalDate } from 'qwik-date';
 export default component$(() => {
   const date = useSignal<LocalDate | null>(null);
 
-  return <DatePicker bind:value={date} triggerLabel="Select Date" />;
+  return <DatePicker bind:value={date} placeholder="Pick a date" />;
 });
 ```
 
 #### Props
 
 - `triggerProps`: Custom props for the trigger button.
-- `triggerLabel`: Label for the trigger button.
+- `placeholder`: What the trigger shows without a value (default: "Select a date"). With a value it shows the date, like "Aug 15, 2024".
+- `closeOnSelect`: Close the popup once a day is chosen; the focus goes back to the trigger (default: true).
 - `triggerIcon`: Custom icon for the trigger button.
 - All other props from `Calendar` can also be used.
 

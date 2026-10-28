@@ -20,6 +20,18 @@ export default component$(() => {
         />
         <output id='picked'>{picked.value}</output>
       </section>
+      <section id='empty'>
+        <DatePicker />
+      </section>
+      <section id='placeholder'>
+        <DatePicker placeholder='Pick a date' />
+      </section>
+      <section id='es'>
+        <DatePicker value='2024-08-01' locale='es' />
+      </section>
+      <section id='keep-open'>
+        <DatePicker value='2024-08-15' closeOnSelect={false} />
+      </section>
       <section id='custom-id'>
         <DatePicker value='2024-08-15' containerProps={{ id: 'my-picker' }} />
       </section>

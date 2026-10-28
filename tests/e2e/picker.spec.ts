@@ -6,7 +6,7 @@ test.describe('DatePicker', () => {
     await page.goto('/e2e/picker/');
   });
 
-  test('opens next to its trigger and reports the chosen date', async ({ page }) => {
+  test('opens next to its trigger, reports the chosen date and closes', async ({ page }) => {
     const trigger = page.locator('#picker button[popovertarget]');
     const popover = page.locator('#picker [popover]');
     await trigger.click();
@@ -14,6 +14,41 @@ test.describe('DatePicker', () => {
     await expect.poll(() => popoverGap(trigger, popover)).toBeLessThan(3);
     await day(popover, '2024-08-20').click();
     await expect(page.locator('#picked')).toHaveText('2024-08-20');
+    await expect(popover).toBeHidden();
+    await expect(trigger).toHaveText('Aug 20, 2024');
+  });
+
+  test('shows the value in the trigger, or a placeholder without one', async ({ page }) => {
+    await expect(page.locator('#picker button[popovertarget]')).toHaveText('Aug 06, 2024');
+    await expect(page.locator('#empty button[popovertarget]')).toHaveText('Select a date');
+    await expect(page.locator('#placeholder button[popovertarget]')).toHaveText('Pick a date');
+    await expect(page.locator('#es button[popovertarget]')).toHaveText('01 Ago 2024');
+  });
+
+  test('choosing with the keyboard closes it and returns the focus to the trigger', async ({ page, browserName }) => {
+    const trigger = page.locator('#picker button[popovertarget]');
+    const popover = page.locator('#picker [popover]');
+    await trigger.click();
+    await expect(popover).toBeVisible();
+    // into the grid: past the month buttons in Chromium, straight to the day in WebKit
+    for (let i = 0; i < (browserName === 'webkit' ? 1 : 3); i++) await page.keyboard.press('Tab');
+    await expect(day(popover, '2024-08-06')).toBeFocused();
+    await page.keyboard.press('ArrowRight');
+    await expect(day(popover, '2024-08-07')).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#picked')).toHaveText('2024-08-07');
+    await expect(popover).toBeHidden();
+    await expect(trigger).toBeFocused();
+    await expect(trigger).toHaveText('Aug 07, 2024');
+  });
+
+  test('closeOnSelect={false} keeps it open', async ({ page }) => {
+    const trigger = page.locator('#keep-open button[popovertarget]');
+    const popover = page.locator('#keep-open [popover]');
+    await trigger.click();
+    await day(popover, '2024-08-20').click();
+    await expect(trigger).toHaveText('Aug 20, 2024');
+    await expect(popover).toBeVisible();
   });
 
   test('Escape closes it while a day is focused', async ({ page }) => {
