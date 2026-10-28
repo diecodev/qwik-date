@@ -31,11 +31,6 @@ export const MONTHS_LG = {
   ],
 } as const;
 
-export const MONTHS_SM = {
-  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-  es: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-} as const;
-
 export const LABELS = {
   en: {
     calendar: 'Calendar',

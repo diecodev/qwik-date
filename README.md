@@ -145,10 +145,15 @@ export default component$(() => {
 
 - [x] Add support for additional locales.
 - [x] range date selection
+- [ ] min / max and disabled dates
+- [ ] forms: a hidden input with the value, a text input with a date format
+- [ ] multiple selection
 - [ ] month and year navigation
 - [ ] Custom date ranges (last 7 days, next 30d)
+- [ ] headless version
 - [ ] Fancy animations (styled version)
 - [ ] website docs: easy to read, understand and implement.
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for the development setup and how to run the tests.
