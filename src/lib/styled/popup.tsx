@@ -3,6 +3,8 @@ import {
   $,
   type Component,
   type PropsOf,
+  type QRL,
+  type Signal,
   component$,
   isSignal,
   useId,
@@ -10,7 +12,7 @@ import {
   useStyles$,
   useVisibleTask$,
 } from '@qwik.dev/core';
-import { type LocalDate, formatDate, resolveLabels } from '../core';
+import { type DateRange, type LocalDate, formatDate, formatDateRange, resolveLabels } from '../core';
 import { CalendarIcon } from './icons';
 import { Calendar, type CalendarProps } from './inline';
 import styles from './style.css?inline';
@@ -34,18 +36,20 @@ const DatePicker = component$<DatePickerProps>(
     const popoverId = props.containerProps?.id ?? `qwik-date-${id}`;
     const locale = props.locale ?? 'en';
 
-    // the trigger shows the selected day: share it with the calendar
-    const valueSignal = useSignal<LocalDate | null>(props.value ?? null);
-    const selected = props['bind:value'] ?? valueSignal;
+    // the trigger shows the selected day or range: share it with the calendar
+    const valueSignal = useSignal<LocalDate | DateRange | null>(props.value ?? null);
+    const selected = (props['bind:value'] ?? valueSignal) as Signal<LocalDate | DateRange | null>;
 
-    const choose = $((value: LocalDate) => {
-      if (closeOnSelect) {
+    const choose = $((value: LocalDate | DateRange) => {
+      // a range is chosen once it has an end
+      if (closeOnSelect && (typeof value === 'string' || value.end)) {
         const popover = document.getElementById(popoverId);
         if (popover?.matches(':popover-open')) popover.hidePopover();
         // back to where the user opened it from (WebKit doesn't focus buttons on click, so do it explicitly)
         document.querySelector<HTMLButtonElement>(`button[popovertarget="${popoverId}"]`)?.focus();
       }
-      return onChange$?.(value);
+      // the type of the value follows `mode`
+      return (onChange$ as QRL<(value: LocalDate | DateRange) => void> | undefined)?.(value);
     });
 
     const TriggerIcon = triggerIcon ?? CalendarIcon;
@@ -97,14 +101,17 @@ const DatePicker = component$<DatePickerProps>(
     return (
       <div data-qwik-wrapper data-unstyled={props.unstyled} data-theme={themeValue}>
         <button type='button' {...triggerProps} popovertarget={popoverId}>
-          {selected.value
-            ? formatDate(selected.value, locale)
-            : placeholder ?? resolveLabels(locale, props.labels).placeholder}
+          {selected.value === null
+            ? placeholder ?? resolveLabels(locale, props.labels).placeholder
+            : typeof selected.value === 'string'
+              ? formatDate(selected.value, locale)
+              : formatDateRange(selected.value, locale)}
           <TriggerIcon />
         </button>
         <Calendar
           {...props}
-          bind:value={selected}
+          // a day or a range: the calendar's `mode`, in `props`, decides which one it gets
+          bind:value={selected as Signal<never>}
           onChange$={choose}
           containerProps={{
             id: popoverId,

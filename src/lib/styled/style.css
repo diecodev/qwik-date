@@ -196,6 +196,11 @@
           background-color: hsla(var(--accent-color), 1);
         }
 
+        /* the days between the start and the end of a range: darker than today's grey */
+        &[data-in-range] {
+          background-color: hsla(var(--background-color), 0.12);
+        }
+
         &[data-selected] {
           background-color: hsla(var(--background-color), 1);
           color: hsla(var(--foreground-color), 1);

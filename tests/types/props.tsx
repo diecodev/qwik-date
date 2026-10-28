@@ -1,12 +1,13 @@
 // Type checks of the public props, run by `tsc` (not by Vitest): each `@ts-expect-error` must stay an error.
-import { component$ } from '@qwik.dev/core';
-import { Calendar, DatePicker, type Labels } from '../../src/lib';
+import { component$, useSignal } from '@qwik.dev/core';
+import { Calendar, DatePicker, type DateRange, type Labels, type LocalDate } from '../../src/lib';
 
 const fr: Labels = {
   calendar: 'Calendrier',
   previousMonth: 'Mois précédent',
   nextMonth: 'Mois suivant',
   selectedDate: 'date sélectionnée :',
+  selectedRange: 'période sélectionnée :',
   placeholder: 'Choisir une date',
 };
 
@@ -27,3 +28,24 @@ export const Locales = component$(() => (
     <Calendar weekStartsOn={7} />
   </>
 ));
+
+export const Modes = component$(() => {
+  const day = useSignal<LocalDate | null>(null);
+  const range = useSignal<DateRange | null>(null);
+
+  return (
+    <>
+      <Calendar value='2024-08-15' onChange$={(value) => value.length} />
+      <Calendar bind:value={day} />
+      <Calendar mode='range' value={{ start: '2024-08-05', end: null }} onChange$={(value) => value.end} />
+      <Calendar mode='range' bind:value={range} />
+      <DatePicker mode='range' bind:value={range} />
+      {/* @ts-expect-error: a range is a { start, end } */}
+      <Calendar mode='range' value='2024-08-15' />
+      {/* @ts-expect-error: ...in a signal too */}
+      <Calendar mode='range' bind:value={day} />
+      {/* @ts-expect-error: and a single day is not a range */}
+      <DatePicker bind:value={range} />
+    </>
+  );
+});

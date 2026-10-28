@@ -4,6 +4,7 @@ import { KeyboardCases } from '../playground/keyboard';
 import { NavigationCases } from '../playground/navigation';
 import { PickerCases } from '../playground/picker';
 import styles from '../playground/playground.css?inline';
+import { RangeCases } from '../playground/range';
 import { RenderingCases } from '../playground/rendering';
 import { SelectionCases } from '../playground/selection';
 import { StylesCases } from '../playground/styles';
@@ -15,6 +16,7 @@ import { Section, StatusBar } from '../playground/ui';
 const AREAS = [
   { id: 'rendering', title: 'Rendering', spec: 'rendering.spec.ts', Cases: RenderingCases },
   { id: 'selection', title: 'Selection', spec: 'selection.spec.ts', Cases: SelectionCases },
+  { id: 'range', title: 'Range', spec: 'range.spec.ts', Cases: RangeCases },
   { id: 'navigation', title: 'Navigation', spec: 'navigation.spec.ts', Cases: NavigationCases },
   { id: 'keyboard', title: 'Keyboard', spec: 'keyboard.spec.ts', Cases: KeyboardCases },
   { id: 'timezone', title: 'Timezone', spec: 'timezone.spec.ts', Cases: TimezoneCases },

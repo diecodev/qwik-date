@@ -6,6 +6,7 @@ const FR: Labels = {
   previousMonth: 'Mois précédent',
   nextMonth: 'Mois suivant',
   selectedDate: 'date sélectionnée :',
+  selectedRange: 'période sélectionnée :',
   placeholder: 'Choisir une date',
 };
 

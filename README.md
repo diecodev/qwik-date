@@ -46,14 +46,30 @@ export default component$(() => {
 
 Dates are `'YYYY-MM-DD'` strings (the `LocalDate` type): a day, without time or timezone.
 
+#### Range
+
+With `mode="range"` the value is a `DateRange`, `{ start, end }`: the first day chosen starts it (`end: null`), the second ends it (they swap if it's earlier), and the next one starts a new range. `onChange$` is called on every choice.
+
+```tsx
+import { component$, useSignal } from '@qwik.dev/core';
+import { Calendar, type DateRange } from 'qwik-date';
+
+export default component$(() => {
+  const range = useSignal<DateRange | null>(null);
+
+  return <Calendar mode="range" bind:value={range} onChange$={({ start, end }) => console.log(start, end)} />;
+});
+```
+
 #### Props
 
-- `value`: The selected day, or `null` for none (default: `null`). The calendar opens on its month, or on today's month without one. Today is marked with `aria-current="date"`.
-- `bind:value`: A `Signal<LocalDate | null>` kept in sync with the selected day, in both directions.
-- `onChange$`: Called with the day the user chooses.
+- `mode`: `'single'` (default) to select a day, `'range'` to select a start and an end; see [Range](#range).
+- `value`: The selected day (a `DateRange` with `mode="range"`), or `null` for none (default: `null`). The calendar opens on its month, or on today's month without one. Today is marked with `aria-current="date"`.
+- `bind:value`: A signal kept in sync with the value, in both directions.
+- `onChange$`: Called with the new value when the user chooses a day.
 - `fullWeeks`: If true, shows full weeks (default: false).
 - `locale`: `'en'` (default), `'es'`, or any BCP 47 language tag (`'fr-FR'`, `'de'`); see [Languages](#languages).
-- `labels`: The texts `Intl` can't give (`calendar`, `previousMonth`, `nextMonth`, `selectedDate`, `placeholder`). Optional for `en` and `es`, required for any other locale.
+- `labels`: The texts `Intl` can't give (`calendar`, `previousMonth`, `nextMonth`, `selectedDate`, `selectedRange`, `placeholder`). Optional for `en` and `es`, required for any other locale.
 - `weekStartsOn`: The first day of the week, from `0` (Sunday, the default) to `6`, as in `Date#getDay()`.
 - `showWeekNumber`: If true, shows week numbers (default: false).
 - `showDaysOfWeek`: If true, shows days of the week ~Mo, Tu, We, etc.~ (default: true).
@@ -74,6 +90,7 @@ const fr: Labels = {
   previousMonth: 'Mois précédent',
   nextMonth: 'Mois suivant',
   selectedDate: 'date sélectionnée :',
+  selectedRange: 'période sélectionnée :',
   placeholder: 'Choisir une date',
 };
 
@@ -119,15 +136,15 @@ export default component$(() => {
 #### Props
 
 - `triggerProps`: Custom props for the trigger button.
-- `placeholder`: What the trigger shows without a value (default: "Select a date"). With a value it shows the date, like "Aug 15, 2024".
-- `closeOnSelect`: Close the popup once a day is chosen; the focus goes back to the trigger (default: true).
+- `placeholder`: What the trigger shows without a value (default: "Select a date"). With a value it shows the date, like "Aug 15, 2024", or the range, like "Aug 05, 2024 – Aug 12, 2024".
+- `closeOnSelect`: Close the popup once a day is chosen (a range, once it has an end); the focus goes back to the trigger (default: true).
 - `triggerIcon`: Custom icon for the trigger button.
 - All other props from `Calendar` can also be used.
 
 ## Roadmap
 
-- [ ] Add support for additional locales.
-- [ ] range date selection
+- [x] Add support for additional locales.
+- [x] range date selection
 - [ ] month and year navigation
 - [ ] Custom date ranges (last 7 days, next 30d)
 - [ ] Fancy animations (styled version)

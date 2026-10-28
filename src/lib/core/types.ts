@@ -9,6 +9,8 @@ export type DateFormat =
 
 /** A day as `YYYY-MM-DD`, without time or timezone. */
 export type LocalDate = `${number}-${number}-${number}`;
+/** The value of `mode="range"`: `end` is `null` until the second day is chosen. */
+export type DateRange = { start: LocalDate; end: LocalDate | null };
 /** The languages with built-in texts. */
 export type BuiltInLocale = 'en' | 'es';
 /** A BCP 47 language tag, as `Intl` takes it ("fr", "de-AT"). */
@@ -24,6 +26,8 @@ export interface Labels {
   nextMonth: string;
   /** goes between the calendar's name and the selected date, in its accessible name */
   selectedDate: string;
+  /** the same, for the selected range of `mode="range"` */
+  selectedRange: string;
   /** what the DatePicker trigger shows without a value */
   placeholder: string;
 }

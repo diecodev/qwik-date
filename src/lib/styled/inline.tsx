@@ -16,6 +16,7 @@ import {
 } from '@qwik.dev/core';
 import {
   type BuiltInLocale,
+  type DateRange,
   type Labels,
   type LocalDate,
   type Locale,
@@ -26,7 +27,10 @@ import {
   daysArrGenerator,
   formatMonth,
   getRowWeekNumber,
+  isInsideRange,
   isValidLocalDate,
+  isValidRange,
+  nextRange,
   parseLocalDate,
   resolveLabels,
   toLocalDateString,
@@ -38,16 +42,39 @@ import styles from './style.css?inline';
 /** `en` and `es` have built-in texts (`labels` overrides some of them); any other locale needs all of them. */
 type LocaleProps = { locale?: BuiltInLocale; labels?: Partial<Labels> } | { locale: Locale; labels: Labels };
 
-export type CalendarProps = CalendarBaseProps & LocaleProps;
+/** `mode="single"` (the default) selects a day, `mode="range"` a start and an end. */
+type ModeProps =
+  | {
+      mode?: 'single';
+      /** the selected day, `null` (the default) for none */
+      value?: LocalDate | null;
+      'bind:value'?: Signal<LocalDate | null>;
+      onChange$?: QRL<(value: LocalDate) => void>;
+    }
+  | {
+      mode: 'range';
+      /** the selected range, `null` (the default) for none; `end` is `null` until it's chosen */
+      value?: DateRange | null;
+      'bind:value'?: Signal<DateRange | null>;
+      /** called on every choice: with `end: null` after the first day */
+      onChange$?: QRL<(value: DateRange) => void>;
+    };
+
+export type CalendarProps = CalendarBaseProps & ModeProps & LocaleProps;
+
+type Value = LocalDate | DateRange | null;
+
+/** The day the calendar opens on for a value: the selected day, or the start of the range. */
+const dayOf = (value: Value) => (value === null || typeof value === 'string' ? value : value.start);
+
+const isValidValue = (value: LocalDate | DateRange) =>
+  typeof value === 'string' ? isValidLocalDate(value) : isValidRange(value);
 
 interface CalendarBaseProps {
   /** the first column: 0 for Sunday (the default), 1 for Monday... */
   weekStartsOn?: WeekDay;
   showWeekNumber?: boolean;
   fullWeeks?: boolean;
-  /** the selected day, `null` (the default) for none */
-  value?: LocalDate | null;
-  'bind:value'?: Signal<LocalDate | null>;
   showDaysOfWeek?: boolean;
   unstyled?: boolean;
   theme?: Theme | Signal<Theme>;
@@ -71,7 +98,6 @@ interface CalendarBaseProps {
   cellProps?: PropsOf<'td'>;
   dayButtonProps?: PropsOf<'button'>;
   weekNumberProps?: PropsOf<'td'>;
-  onChange$?: QRL<(value: LocalDate) => void>;
 }
 
 const ACTION_KEYS = [
@@ -96,6 +122,7 @@ const dateFormatter = (locale: Locale) =>
 
 export const Calendar = component$<CalendarProps>(
   ({
+    mode = 'single',
     value: valueProp = null,
     fullWeeks = false,
     locale = 'en',
@@ -135,12 +162,15 @@ export const Calendar = component$<CalendarProps>(
     const labelStr = containerProps['aria-label'] ?? labels.calendar;
 
     // signals
-    const valueSignal = useSignal<LocalDate | null>(valueProp);
-    const selected = props['bind:value'] ?? valueSignal;
+    const valueSignal = useSignal<Value>(valueProp);
+    const selected = (props['bind:value'] ?? valueSignal) as Signal<Value>;
+    // the value of the last choice in the grid: the calendar already shows its month (the end of a range can
+    // be chosen in the month after the start's, the calendar must stay there)
+    const chosen = useSignal<Value>(null);
     // the day where the component rendered: with SSR that's the server's, the visible task below switches it
     const today = useSignal(toLocalDateString(new Date()) as LocalDate);
-    // the calendar opens on the selected day, or on today without one
-    const initial = selected.value ?? today.value;
+    // the calendar opens on the selected day (the start of a range), or on today without one
+    const initial = dayOf(selected.value) ?? today.value;
     const monthToRender = useSignal<Month>(initial.split('-')[1] as Month);
     const yearToRender = useSignal<number>(+initial.split('-')[0]);
     const dateToFocus = useSignal<LocalDate>(initial);
@@ -153,10 +183,12 @@ export const Calendar = component$<CalendarProps>(
 
     // computed
     const labelSignal = useComputed$(() => {
-      if (!selected.value) return labelStr;
+      const value = selected.value;
+      if (!value) return labelStr;
 
-      const date = dateFormatter(locale).format(parseLocalDate(selected.value));
-      return `${labelStr}, ${labels.selectedDate} ${date}`;
+      const long = (day: LocalDate) => dateFormatter(locale).format(parseLocalDate(day));
+      if (typeof value === 'string') return `${labelStr}, ${labels.selectedDate} ${long(value)}`;
+      return `${labelStr}, ${labels.selectedRange} ${long(value.start)} – ${value.end ? long(value.end) : '…'}`;
     });
     const datesArray = useComputed$(() => {
       const dates = daysArrGenerator({
@@ -168,18 +200,22 @@ export const Calendar = component$<CalendarProps>(
       return dates;
     });
 
-    if (selected.value !== null && !isValidLocalDate(selected.value))
-      throw new Error('Invalid date in Calendar. Please use an existing date in YYYY-MM-DD format.');
+    if (selected.value !== null && !isValidValue(selected.value))
+      throw new Error(
+        'Invalid value in Calendar. Please use existing dates in YYYY-MM-DD format (a range ends after it starts).',
+      );
 
-    // show the selected day when it changes from outside (e.g. a parent writes to `bind:value`)
+    // show the selected day (the start of a range) when the value changes from outside, e.g. a parent writes
+    // to `bind:value`
     useTask$(({ track }) => {
       const value = track(() => selected.value);
-      if (!value || !isValidLocalDate(value)) return;
+      if (value === null || value === chosen.value || !isValidValue(value)) return;
 
-      const [year, month] = value.split('-');
+      const day = dayOf(value) as LocalDate;
+      const [year, month] = day.split('-');
       monthToRender.value = month as Month;
       yearToRender.value = +year;
-      dateToFocus.value = value;
+      dateToFocus.value = day;
     });
 
     // "today" is the visitor's day, not the server's (frozen at build time with SSG); without a selected day
@@ -488,12 +524,18 @@ export const Calendar = component$<CalendarProps>(
                     const label = day ? dateFormatter(locale).format(new Date(`${day}T12:00:00`)) : undefined; // the T12:00:00 is to avoid timezone issues
                     const disabled = day?.split('-')[1] !== monthToRender.value;
                     // the days of the adjacent months (fullWeeks) are never selected nor today: they're disabled
-                    const isSelected = !disabled && day === selected.value;
+                    const value = selected.value;
+                    const range = value !== null && typeof value !== 'string' ? value : null;
+                    const isStart = !disabled && day === range?.start;
+                    const isEnd = !disabled && day === range?.end;
+                    const isInside = !disabled && !!day && !!range && isInsideRange(day, range);
+                    // a day, or the ends of a range: the days between them are selected too, but not highlighted
+                    const isSelected = !disabled && (range ? isStart || isEnd : day === value);
 
                     return (
                       <td
                         key={`${week.toString()}-${day}`}
-                        aria-selected={isSelected ? 'true' : undefined}
+                        aria-selected={isSelected || isInside ? 'true' : undefined}
                         aria-disabled={disabled}
                         {...cellProps}
                       >
@@ -501,6 +543,9 @@ export const Calendar = component$<CalendarProps>(
                           <button
                             type='button'
                             data-selected={isSelected}
+                            data-range-start={isStart}
+                            data-range-end={isEnd}
+                            data-in-range={isInside}
                             data-value={day}
                             aria-label={label}
                             aria-current={!disabled && day === today.value ? 'date' : undefined}
@@ -509,8 +554,14 @@ export const Calendar = component$<CalendarProps>(
                             {...dayButtonProps}
                             onClick$={[
                               $(() => {
-                                selected.value = day as LocalDate;
-                                onChange$?.(day as LocalDate);
+                                const next =
+                                  mode === 'range'
+                                    ? nextRange(selected.value as DateRange | null, day as LocalDate)
+                                    : (day as LocalDate);
+                                chosen.value = next;
+                                selected.value = next;
+                                // the type of the value follows `mode`
+                                (onChange$ as QRL<(value: LocalDate | DateRange) => void> | undefined)?.(next);
                               }),
                               dayButtonProps.onClick$,
                             ]}

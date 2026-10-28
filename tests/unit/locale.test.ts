@@ -15,6 +15,7 @@ describe('resolveLabels', () => {
       previousMonth: 'Mois précédent',
       nextMonth: 'Mois suivant',
       selectedDate: 'date sélectionnée :',
+      selectedRange: 'période sélectionnée :',
       placeholder: 'Choisir une date',
     };
     expect(resolveLabels('fr', fr)).toEqual(fr);

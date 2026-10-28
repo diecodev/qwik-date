@@ -2,6 +2,12 @@ import { component$ } from '@qwik.dev/core'
 
 const calendarInlinePropsInfo = [
   {
+    name: 'mode',
+    description:
+      "'single' selects a day, 'range' a start and an end ({ start, end })",
+    defaultValue: "'single'",
+  },
+  {
     name: 'value',
     description:
       "The selected day as 'YYYY-MM-DD', or null for none. Without one the calendar opens on today's month",
@@ -27,7 +33,7 @@ const calendarInlinePropsInfo = [
   {
     name: 'labels',
     description:
-      'The texts Intl cannot give (calendar, previousMonth, nextMonth, selectedDate, placeholder). Required for locales other than en and es',
+      'The texts Intl cannot give (calendar, previousMonth, nextMonth, selectedDate, selectedRange, placeholder). Required for locales other than en and es',
     defaultValue: 'built in for en and es',
   },
   {
@@ -137,7 +143,7 @@ const calendarInlinePropsInfo = [
   },
   {
     name: 'onChange$',
-    description: 'Called with the day the user chooses',
+    description: 'Called with the new value (a day or a range) on every choice',
     defaultValue: 'undefined',
   },
   {
@@ -173,7 +179,7 @@ const datePickerProps = [
   {
     name: 'closeOnSelect',
     description:
-      'Close the popup once a day is chosen, and focus the trigger again',
+      'Close the popup once a day is chosen (a range, once it has an end), and focus the trigger again',
     defaultValue: 'true',
   },
 ]

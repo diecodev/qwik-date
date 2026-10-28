@@ -42,6 +42,7 @@ export const LABELS = {
     previousMonth: 'go to previous month',
     nextMonth: 'go to next month',
     selectedDate: 'selected date:',
+    selectedRange: 'selected range:',
     placeholder: 'Select a date',
   },
   es: {
@@ -49,6 +50,7 @@ export const LABELS = {
     previousMonth: 'Ir al mes anterior',
     nextMonth: 'Ir al siguiente mes',
     selectedDate: 'fecha seleccionada:',
+    selectedRange: 'rango seleccionado:',
     placeholder: 'Seleccionar una fecha',
   },
 } as const satisfies Record<BuiltInLocale, Labels>;

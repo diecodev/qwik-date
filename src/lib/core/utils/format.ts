@@ -1,5 +1,5 @@
 import { LABELS, MONTHS_LG, WEEKDAYS } from '../constants';
-import type { BuiltInLocale, Labels, Locale, WeekDay } from '../types';
+import type { BuiltInLocale, DateRange, Labels, Locale, WeekDay } from '../types';
 import { parseLocalDate } from './local-date';
 
 export const isBuiltInLocale = (locale: Locale): locale is BuiltInLocale => locale === 'en' || locale === 'es';
@@ -17,6 +17,14 @@ export const formatDate = (value: string, locale: Locale) =>
     .formatToParts(parseLocalDate(value))
     .map((part) => (part.type === 'month' ? capitalize(part.value, locale) : part.value))
     .join('');
+
+/**
+ * A range as the DatePicker trigger shows it: "Aug 05, 2024 – Aug 12, 2024", or "Aug 05, 2024 – …" until it
+ * has an end. Two full dates, not `Intl#formatRange`: it drops the two-digit day and its separators change
+ * between engines.
+ */
+export const formatDateRange = (range: DateRange, locale: Locale) =>
+  `${formatDate(range.start, locale)} – ${range.end ? formatDate(range.end, locale) : '…'}`;
 
 /** The title of a month: "August 2024", "Agosto 2024", "Août 2024", "2024年8月". */
 export const formatMonth = (year: number, month: number, locale: Locale) => {
