@@ -45,8 +45,8 @@ const Readout = component$(() => {
       <button id='select-disabled' type='button' onClick$={() => calendar.select$('2024-08-10')}>
         select$ 2024-08-10
       </button>
-      <button id='next-month' type='button' onClick$={() => calendar.nextMonth$()}>
-        nextMonth$
+      <button id='next' type='button' onClick$={() => calendar.next$()}>
+        next$
       </button>
       <button
         id='set-value'

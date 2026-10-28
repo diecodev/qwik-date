@@ -69,7 +69,7 @@ test.describe('PageUp / PageDown', () => {
   ] as const) {
     test(`${key} from ${from} goes to ${expected}`, async ({ page }) => {
       const calendar = calendarIn(page, 'basic');
-      for (let i = 0; i < prevClicks; i++) await calendar.locator('header button').first().click();
+      for (let i = 0; i < prevClicks; i++) await calendar.locator('header > button').first().click();
       await press(page, 'basic', from, key);
       await expect(day(calendar, expected)).toBeFocused();
     });

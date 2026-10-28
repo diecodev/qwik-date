@@ -30,8 +30,8 @@ test('after changing month, Tab enters the grid on the 1st', async ({ page, brow
   await page.keyboard.press('Enter');
   await expect(title(calendar)).toHaveText('July 2024');
   await expect(calendar.locator('button[data-value][tabindex="0"]')).toHaveAttribute('data-value', '2024-07-01');
-  // WebKit, like Safari, only tabs to elements with an explicit tabindex, so it skips the ">" button
-  for (let i = 0; i < (browserName === 'webkit' ? 1 : 2); i++) await page.keyboard.press('Tab');
+  // WebKit, like Safari, only tabs to elements with an explicit tabindex, so it skips the title and ">" buttons
+  for (let i = 0; i < (browserName === 'webkit' ? 1 : 3); i++) await page.keyboard.press('Tab');
   await expect(day(calendar, '2024-07-01')).toBeFocused();
 });
 

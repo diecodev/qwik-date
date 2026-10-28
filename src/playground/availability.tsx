@@ -9,7 +9,7 @@ const unavailableDays = $(
 );
 
 const monthButtons = $((root: HTMLElement) =>
-  [...(calendarOf(root)?.querySelectorAll('header button') ?? [])]
+  [...(calendarOf(root)?.querySelectorAll('header > button') ?? [])]
     .map((button) => `${button.getAttribute('aria-label')}: ${button.getAttribute('aria-disabled') ?? 'enabled'}`)
     .join(' / '),
 );

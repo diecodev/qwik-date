@@ -2,10 +2,12 @@ export * as Calendar from './calendar';
 export { useCalendar } from './context';
 export type { CalendarState } from './context';
 export type { CalendarOptions, LocaleOptions, ModeOptions, RootProps } from './root';
-export type { GridBodyProps } from './parts';
+export type { GridBodyProps, PeriodGridProps, TitleProps } from './parts';
 export type {
   CalendarDay,
   CalendarGrid,
+  CalendarPeriod,
+  CalendarView,
   CalendarWeek,
   DateRange,
   Labels,

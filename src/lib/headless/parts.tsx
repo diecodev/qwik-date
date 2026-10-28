@@ -1,49 +1,72 @@
 import { type PropsOf, Slot, component$, sync$, useContext } from '@qwik.dev/core';
-import type { CalendarDay, CalendarGrid, LocalDate } from '../core';
-import { CalendarContextId } from './context';
+import type { CalendarDay, CalendarGrid, CalendarPeriod, LocalDate } from '../core';
+import { type CalendarContext, CalendarContextId } from './context';
 
-/** The previous month button: its label, `aria-disabled` at `min`, and the change of month. The icon goes inside. */
+/**
+ * The previous button: a month back, or a year or twelve years in the months and years views. Its label,
+ * `aria-disabled` at `min`, and the change. The icon goes inside.
+ */
 export const PrevButton = component$<PropsOf<'button'>>(({ onClick$, ...props }) => {
   const context = useContext(CalendarContextId);
+  const { previousMonth, previousYear, previousYears } = context.labels.value;
+  const view = context.view.value;
 
   return (
     <button
       type='button'
-      aria-label={context.labels.value.previousMonth}
+      aria-label={view === 'days' ? previousMonth : view === 'months' ? previousYear : previousYears}
       // aria-disabled, not disabled: a disabled button would drop the focus when it reaches the limit
       aria-disabled={context.canGoBack.value ? undefined : 'true'}
       {...props}
-      onClick$={[context.prevMonth$, onClick$]}
+      onClick$={[context.prev$, onClick$]}
     >
       <Slot />
     </button>
   );
 });
 
-/** The next month button, as `PrevButton`: `aria-disabled` at `max`. */
+/** The next button, as `PrevButton`: `aria-disabled` at `max`. */
 export const NextButton = component$<PropsOf<'button'>>(({ onClick$, ...props }) => {
   const context = useContext(CalendarContextId);
+  const { nextMonth, nextYear, nextYears } = context.labels.value;
+  const view = context.view.value;
 
   return (
     <button
       type='button'
-      aria-label={context.labels.value.nextMonth}
+      aria-label={view === 'days' ? nextMonth : view === 'months' ? nextYear : nextYears}
       aria-disabled={context.canGoForward.value ? undefined : 'true'}
       {...props}
-      onClick$={[context.nextMonth$, onClick$]}
+      onClick$={[context.next$, onClick$]}
     >
       <Slot />
     </button>
   );
 });
 
-/** The month on show, "August 2024": it names the grid, and screen readers announce it when it changes. */
-export const Title = component$<PropsOf<'div'>>(({ id, ...props }) => {
+export interface TitleProps extends PropsOf<'div'> {
+  /** `false` for a title that's only text, without the months and years views */
+  button?: boolean;
+  buttonProps?: PropsOf<'button'>;
+}
+
+/**
+ * The title of the view, "August 2024", "2024" or "2016 – 2027": it names the grid, and screen readers announce it
+ * when it changes. Its button shows the months of the year, then the years, then the days again.
+ */
+export const Title = component$<TitleProps>(({ id, button = true, buttonProps = {}, ...props }) => {
   const context = useContext(CalendarContextId);
 
   return (
     <div id={id ?? context.titleId} aria-live='polite' role='presentation' {...props}>
-      {context.grids.value[0].title}
+      {button ? (
+        // its name is its text, without an aria-label: the grid takes its name from the title
+        <button type='button' data-view-toggle {...buttonProps} onClick$={[context.toggleView$, buttonProps.onClick$]}>
+          {context.title.value}
+        </button>
+      ) : (
+        context.title.value
+      )}
     </div>
   );
 });
@@ -64,6 +87,8 @@ const preventGridKeys = sync$((e: KeyboardEvent) => {
  */
 export const Grid = component$<PropsOf<'table'>>(({ 'aria-labelledby': labelledBy, onKeyDown$, ...props }) => {
   const context = useContext(CalendarContextId);
+  // only the days view: the months and years have their own grids
+  if (context.view.value !== 'days') return null;
 
   return (
     <table
@@ -190,4 +215,83 @@ export const Day = component$<PropsOf<'button'> & { day: LocalDate }>(({ day, on
       <Slot />
     </button>
   );
+});
+
+/**
+ * Only cancels the default action of the keys the months and years grids handle, pressed on a cell (Escape is the
+ * root's), as the days grid does.
+ */
+const preventPeriodKeys = sync$((e: KeyboardEvent) => {
+  const keys = ['enter', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
+  if (keys.includes(e.key.toLowerCase()) && (e.target as Element).closest('[data-month], [data-year]'))
+    e.preventDefault();
+});
+
+export interface PeriodGridProps extends PropsOf<'table'> {
+  rowProps?: PropsOf<'tr'>;
+  cellProps?: PropsOf<'td'>;
+  /** the props of every month or year button */
+  buttonProps?: PropsOf<'button'>;
+}
+
+/** A grid of twelve months or years, in rows of three. */
+const periodGrid = (
+  context: CalendarContext,
+  cells: CalendarPeriod[],
+  { 'aria-labelledby': labelledBy, onKeyDown$, rowProps, cellProps, buttonProps = {}, ...props }: PeriodGridProps,
+) => (
+  <table
+    tabIndex={-1}
+    role='grid'
+    aria-labelledby={labelledBy ?? context.titleId}
+    {...props}
+    onKeyDown$={[preventPeriodKeys, context.periodKeyDown$, onKeyDown$]}
+  >
+    <tbody>
+      {[0, 3, 6, 9].map((start) => (
+        <tr key={start} {...rowProps}>
+          {cells.slice(start, start + 3).map((cell) => (
+            <td
+              key={cell.label}
+              aria-selected={cell.selected ? 'true' : undefined}
+              aria-disabled={cell.disabled}
+              {...cellProps}
+            >
+              <button
+                type='button'
+                data-month={cell.month ? `${cell.year}-${cell.month}` : undefined}
+                data-year={cell.month ? undefined : cell.year}
+                data-selected={cell.selected}
+                aria-current={cell.today ? 'date' : undefined}
+                aria-label={cell.label}
+                disabled={cell.disabled}
+                tabIndex={cell.tabbable ? 0 : -1}
+                {...buttonProps}
+                onClick$={[context.pickPeriod$, buttonProps.onClick$]}
+              >
+                {cell.text}
+              </button>
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+);
+
+/**
+ * The months of a year, when the title is clicked: arrows, Enter or Space to show a month's days, Escape to go back.
+ * Named after the title, like the days grid.
+ */
+export const MonthGrid = component$<PeriodGridProps>((props) => {
+  const context = useContext(CalendarContextId);
+  if (context.view.value !== 'months') return null;
+  return periodGrid(context, context.monthCells.value, props);
+});
+
+/** Twelve years, when the title is clicked twice: a year shows the days of the same month in it. */
+export const YearGrid = component$<PeriodGridProps>((props) => {
+  const context = useContext(CalendarContextId);
+  if (context.view.value !== 'years') return null;
+  return periodGrid(context, context.yearCells.value, props);
 });

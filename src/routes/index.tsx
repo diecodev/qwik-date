@@ -15,6 +15,7 @@ import { StylesCases } from '../playground/styles';
 import { ThemeCases } from '../playground/theme';
 import { TimezoneCases } from '../playground/timezone';
 import { Section, StatusBar } from '../playground/ui';
+import { ViewsCases } from '../playground/views';
 
 // one section per spec file of tests/e2e, in the same order as the areas of the suite
 const AREAS = [
@@ -24,6 +25,7 @@ const AREAS = [
   { id: 'availability', title: 'Availability', spec: 'availability.spec.ts', Cases: AvailabilityCases },
   { id: 'form', title: 'Forms', spec: 'form.spec.ts', Cases: FormCases },
   { id: 'navigation', title: 'Navigation', spec: 'navigation.spec.ts', Cases: NavigationCases },
+  { id: 'views', title: 'Months and years', spec: 'views.spec.ts', Cases: ViewsCases },
   { id: 'keyboard', title: 'Keyboard', spec: 'keyboard.spec.ts', Cases: KeyboardCases },
   { id: 'auto-focus', title: 'autoFocus', spec: 'auto-focus.spec.ts', Cases: AutoFocusCases },
   { id: 'timezone', title: 'Timezone', spec: 'timezone.spec.ts', Cases: TimezoneCases },

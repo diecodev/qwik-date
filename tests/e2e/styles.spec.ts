@@ -38,10 +38,10 @@ test('the weekday names and week numbers meet WCAG AA contrast', async ({ page }
 
 test('right-to-left layouts mirror the month chevrons', async ({ page }) => {
   await page.goto('/e2e/calendar/');
-  for (const button of await calendarIn(page, 'rtl').locator('header button').all()) {
+  for (const button of await calendarIn(page, 'rtl').locator('header > button').all()) {
     await expect(button).toHaveCSS('transform', 'matrix(-1, 0, 0, -1, 0, 0)');
   }
-  await expect(calendarIn(page, 'basic').locator('header button').first()).toHaveCSS('transform', 'none');
+  await expect(calendarIn(page, 'basic').locator('header > button').first()).toHaveCSS('transform', 'none');
 });
 
 test('the icons keep a size of their own without the stylesheet', async ({ page }) => {

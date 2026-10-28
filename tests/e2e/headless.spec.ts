@@ -91,7 +91,7 @@ test('useCalendar() gives the state and the handlers', async ({ page }) => {
   await expect(section.locator('#tab-day')).toHaveText('2024-08-20');
   // a day that can't be chosen is ignored, as a click on it would be
   await section.locator('#select-disabled').click();
-  await section.locator('#next-month').click();
+  await section.locator('#next').click();
   await expect(section.locator('#month')).toHaveText('2024-09');
   await expect(section.locator('#tab-day')).toHaveText('2024-09-01');
   await expect(section.locator('#value')).toHaveText('2024-08-20');

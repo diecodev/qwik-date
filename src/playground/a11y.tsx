@@ -45,7 +45,7 @@ export const A11yCases = component$(() => (
         <Probe
           label='header buttons'
           read$={(root) =>
-            [...(calendarOf(root)?.querySelectorAll('header button') ?? [])]
+            [...(calendarOf(root)?.querySelectorAll('header > button') ?? [])]
               .map((button) => button.getAttribute('aria-label'))
               .join(' / ')
           }

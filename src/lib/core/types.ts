@@ -15,6 +15,12 @@ export interface Labels {
   calendar: string;
   previousMonth: string;
   nextMonth: string;
+  /** the previous and next buttons while the months of a year show */
+  previousYear: string;
+  nextYear: string;
+  /** the previous and next buttons while twelve years show */
+  previousYears: string;
+  nextYears: string;
   /** goes between the calendar's name and the selected date, in its accessible name */
   selectedDate: string;
   /** the same, for the selected range of `mode="range"` */

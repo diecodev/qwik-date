@@ -88,8 +88,8 @@ export const NavigationCases = component$(() => {
           </li>
           <li>
             <p>
-              Press <kbd>Tab</kbd>: twice in Chromium (the first one stops on ›), once in WebKit/Safari (it only tabs to
-              elements with an explicit tabindex, so it skips ›).
+              Press <kbd>Tab</kbd>: three times in Chromium (it stops on the title button and on ›), once in
+              WebKit/Safari (it only tabs to elements with an explicit tabindex, so it skips both).
             </p>
             <p>
               The focus is on <b>Jul 1</b>, not on the 15.
@@ -147,7 +147,7 @@ export const NavigationCases = component$(() => {
           <Probe
             label='class / title of ‹ and ›'
             read$={(root) =>
-              [...(calendarOf(root)?.querySelectorAll('header button') ?? [])]
+              [...(calendarOf(root)?.querySelectorAll('header > button') ?? [])]
                 .map((button) => `${button.className} / ${button.getAttribute('title')}`)
                 .join(' — ')
             }

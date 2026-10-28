@@ -17,6 +17,7 @@ import {
   type Availability,
   type BuiltInLocale,
   type CalendarValue,
+  type CalendarView,
   type DateRange,
   type GridKey,
   type Labels,
@@ -24,24 +25,38 @@ import {
   type Locale,
   type Mode,
   type Month,
+  type PeriodKey,
   type WeekDay,
+  YEARS_PER_PAGE,
+  type YearMonth,
   calendarGrid,
+  canStep,
   clampDay,
+  clampMonth,
+  clampYear,
   daysArrGenerator,
   isMonthInLimits,
+  isPageInLimits,
   isUnavailable,
   isValidLocalDate,
   isValidValue,
+  isYearInLimits,
   keyTarget,
+  monthCells,
   nearestAvailable,
   nextValue,
   openingDay,
+  periodKeyTarget,
   resolveLabels,
+  sameDayIn,
   selectionLabel,
   shiftMonth,
   tabDayOf,
   toLocalDateString,
+  viewTitle,
   weekdayNames,
+  yearCells,
+  yearPageStart,
 } from '../core';
 import { CalendarContextId } from './context';
 
@@ -126,39 +141,117 @@ const KEY_DIRECTIONS: Record<GridKey, 1 | -1> = {
 const focusTabDay = sync$((event: Event, root: HTMLElement) => {
   const opened = (event as Event & { newState?: string }).newState === 'open' && (event.target as Node).contains(root);
   if ((event.type === 'qinit' || opened) && root.checkVisibility())
-    root.querySelector<HTMLElement>('[data-value][tabindex="0"]')?.focus();
+    root.querySelector<HTMLElement>(':is([data-value], [data-month], [data-year])[tabindex="0"]')?.focus();
 });
 
-interface View {
+/** The signals of a calendar: the handlers pass them to the helpers below, with the props they read. */
+interface State {
+  selected: Signal<CalendarValue>;
+  chosen: Signal<CalendarValue>;
   yearToRender: Signal<number>;
   monthToRender: Signal<Month>;
   dateToFocus: Signal<LocalDate>;
   focusDayOnMonthChange: Signal<boolean>;
+  view: Signal<CalendarView>;
+  /** the focused cell of the months and years grids */
+  periodFocus: Signal<YearMonth>;
+  rootRef: Signal<HTMLDivElement | undefined>;
 }
 
-/** Shows the month `delta` months away, unless `min` or `max` rule it out: Tab enters on its first day. */
-const moveMonth = (delta: number, view: View, limits: Availability) => {
-  const { year, month } = shiftMonth(view.yearToRender.value, view.monthToRender.value, delta);
-  if (!isMonthInLimits(year, month, limits)) return;
-  // the month buttons keep the focus, so they can be pressed repeatedly
-  view.focusDayOnMonthChange.value = false;
-  view.yearToRender.value = year;
-  view.monthToRender.value = month as Month;
-  view.dateToFocus.value = `${year}-${month}-01` as LocalDate;
+const observers = new WeakMap<Element, MutationObserver>();
+
+/**
+ * Focuses what `selector` finds in `root`, once it's there: a view or a month renders after the handler that shows
+ * it. A newer call replaces a pending one.
+ */
+const focusWhenReady = (root: Element | undefined, selector: string) => {
+  if (!root) return;
+  observers.get(root)?.disconnect();
+  // the first one that takes the focus: Qwik keeps the days of a hidden grid in a <q:template>, where they can't
+  const focus = () =>
+    [...root.querySelectorAll<HTMLElement>(selector)].some((element) => {
+      element.focus();
+      return document.activeElement === element;
+    });
+  if (focus()) return;
+
+  const observer = new MutationObserver(() => focus() && observer.disconnect());
+  observers.set(root, observer);
+  observer.observe(root, {
+    subtree: true,
+    childList: true,
+    attributeFilter: ['data-value', 'data-month', 'data-year', 'tabindex', 'disabled'],
+  });
+  setTimeout(() => observer.disconnect(), 2000);
 };
 
-interface Choice {
-  selected: Signal<CalendarValue>;
-  chosen: Signal<CalendarValue>;
-  dateToFocus: Signal<LocalDate>;
-}
+/** The day of a month where Tab enters, as a selector: the day itself, the grid may still show the month before. */
+const tabDaySelector = (shown: YearMonth, focus: LocalDate, availability: Availability) =>
+  `[data-value="${tabDayOf(shown.year, shown.month, focus, availability)}"]`;
+
+/** A cell of the months or years grid. */
+const periodSelector = (view: CalendarView, { year, month }: YearMonth) =>
+  view === 'months' ? `[data-month="${year}-${month}"]` : `[data-year="${year}"]`;
+
+/** Shows the month `delta` months away, unless `min` or `max` rule it out: Tab enters on its first day. */
+const moveMonth = (delta: number, state: State, limits: Availability) => {
+  const { year, month } = shiftMonth(state.yearToRender.value, state.monthToRender.value, delta);
+  if (!isMonthInLimits(year, month, limits)) return;
+  // the month buttons keep the focus, so they can be pressed repeatedly
+  state.focusDayOnMonthChange.value = false;
+  state.yearToRender.value = year;
+  state.monthToRender.value = month as Month;
+  state.dateToFocus.value = `${year}-${month}-01` as LocalDate;
+};
+
+/** The previous (`-1`) or next (`1`) button: a month, a year or twelve years away, as the view shows. */
+const step = (delta: 1 | -1, state: State, limits: Availability) => {
+  const { view, periodFocus } = state;
+  if (view.value === 'days') return moveMonth(delta, state, limits);
+  const { year, month } = periodFocus.value;
+  if (view.value === 'months') {
+    if (isYearInLimits(year + delta, limits)) periodFocus.value = clampMonth(year + delta, month, limits);
+    return;
+  }
+  if (isPageInLimits(yearPageStart(year) + delta * YEARS_PER_PAGE, limits))
+    periodFocus.value = { year: clampYear(year + delta * YEARS_PER_PAGE, limits), month };
+};
+
+/** Shows a view: the months and years grids open on the month on show, with the focus on it. */
+const setView = (next: CalendarView, state: State) => {
+  if (state.view.value === 'days' && next !== 'days')
+    state.periodFocus.value = { year: state.yearToRender.value, month: state.monthToRender.value };
+  state.view.value = next;
+  if (next !== 'days') focusWhenReady(state.rootRef.value, periodSelector(next, state.periodFocus.value));
+};
+
+/** Back to the days, of the month chosen in the months or years grid: the focus goes to the same day of it. */
+const showDays = (shown: YearMonth, state: State, availability: Availability) => {
+  state.focusDayOnMonthChange.value = false;
+  state.yearToRender.value = shown.year;
+  state.monthToRender.value = shown.month;
+  state.dateToFocus.value = sameDayIn(state.dateToFocus.value, shown);
+  state.view.value = 'days';
+  // where Tab enters: that day, or the first one of the month that can be chosen
+  focusWhenReady(state.rootRef.value, tabDaySelector(shown, state.dateToFocus.value, availability));
+};
+
+const chooseMonth = (year: number, month: Month, state: State, availability: Availability) => {
+  if (isMonthInLimits(year, month, availability)) showDays({ year, month }, state, availability);
+};
+
+/** A year shows the same month of it, or the month of the limit it's past. */
+const chooseYear = (year: number, state: State, availability: Availability) => {
+  if (isYearInLimits(year, availability))
+    showDays(clampMonth(year, state.monthToRender.value, availability), state, availability);
+};
 
 /** Chooses `day` (the new value, where Tab enters, `onChange$`), unless it can't be chosen. */
 const choose = (
   day: LocalDate,
   mode: Mode,
   availability: Availability,
-  { selected, chosen, dateToFocus }: Choice,
+  { selected, chosen, dateToFocus }: State,
   onChange$: ModeOptions['onChange$'],
 ) => {
   if (!isValidLocalDate(day) || isUnavailable(day, availability)) return;
@@ -171,6 +264,16 @@ const choose = (
   // the type of the value follows `mode`
   (onChange$ as QRL<(value: LocalDate | DateRange) => void> | undefined)?.(next);
 };
+
+const PERIOD_KEYS = ['enter', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
+
+/**
+ * Escape goes back to the days from the months or the years, and keeps a popover around the calendar open: sync$
+ * (the default action can't wait for a chunk), so it reads the view from the DOM.
+ */
+const keepOpen = sync$((e: KeyboardEvent, root: HTMLElement) => {
+  if (e.key === 'Escape' && root.getAttribute('data-view') !== 'days') e.preventDefault();
+});
 
 /** The calendar's state and its `<div>`: the other parts go inside, and read the state through the context. */
 export const Root = component$<RootProps>(
@@ -191,6 +294,7 @@ export const Root = component$<RootProps>(
     locale = 'en',
     labels: labelsProp,
     'aria-label': ariaLabel,
+    onKeyDown$,
     ...props
   }) => {
     // signals
@@ -209,6 +313,19 @@ export const Root = component$<RootProps>(
     const dateToFocus = useSignal<LocalDate>(initial);
     const focusDayOnMonthChange = useSignal(false);
     const rootRef = useSignal<HTMLDivElement>();
+    const view = useSignal<CalendarView>('days');
+    const periodFocus = useSignal<YearMonth>({ year: +initial.split('-')[0], month: initial.split('-')[1] as Month });
+    const state: State = {
+      selected,
+      chosen,
+      yearToRender,
+      monthToRender,
+      dateToFocus,
+      focusDayOnMonthChange,
+      view,
+      periodFocus,
+      rootRef,
+    };
     // the grid is named after the month title (`role="grid"` requires a name)
     const titleId = `qwik-date-${useId()}-title`;
 
@@ -250,14 +367,27 @@ export const Root = component$<RootProps>(
     );
     const labels = useComputed$(() => resolveLabels(locale, labelsProp));
     const weekdays = useComputed$(() => weekdayNames(locale, weekStartsOn));
-    const canGoBack = useComputed$(() => {
-      const before = shiftMonth(yearToRender.value, monthToRender.value, -1);
-      return isMonthInLimits(before.year, before.month, { min, max });
-    });
-    const canGoForward = useComputed$(() => {
-      const after = shiftMonth(yearToRender.value, monthToRender.value, 1);
-      return isMonthInLimits(after.year, after.month, { min, max });
-    });
+    const canGoBack = useComputed$(() => canStep(-1, view.value, month.value, periodFocus.value, { min, max }));
+    const canGoForward = useComputed$(() => canStep(1, view.value, month.value, periodFocus.value, { min, max }));
+    const title = useComputed$(() => viewTitle(view.value, month.value, periodFocus.value, locale));
+    const months = useComputed$(() =>
+      monthCells({
+        focus: periodFocus.value,
+        value: selected.value,
+        today: today.value,
+        locale,
+        availability: { min, max },
+      }),
+    );
+    const years = useComputed$(() =>
+      yearCells({
+        focus: periodFocus.value,
+        value: selected.value,
+        today: today.value,
+        locale,
+        availability: { min, max },
+      }),
+    );
     const weekNumbers = useComputed$(() => showWeekNumber);
     const label = useComputed$(() => {
       const selection = selectionLabel(selected.value, locale, labels.value);
@@ -278,6 +408,7 @@ export const Root = component$<RootProps>(
 
       const day = openingDay(value) as LocalDate;
       const [year, month] = day.split('-');
+      view.value = 'days';
       monthToRender.value = month as Month;
       yearToRender.value = +year;
       dateToFocus.value = day;
@@ -338,7 +469,7 @@ export const Root = component$<RootProps>(
 
     // handlers
     const select$ = $((day: LocalDate) =>
-      choose(day, mode, { min, max, disabledDates, disabledWeekdays }, { selected, chosen, dateToFocus }, onChange$),
+      choose(day, mode, { min, max, disabledDates, disabledWeekdays }, state, onChange$),
     );
     // one handler for every day button, so they don't each serialize their own
     const pick$ = $((_: Event, button: HTMLElement) =>
@@ -346,13 +477,83 @@ export const Root = component$<RootProps>(
         button.getAttribute('data-value') as LocalDate,
         mode,
         { min, max, disabledDates, disabledWeekdays },
-        { selected, chosen, dateToFocus },
+        state,
         onChange$,
       ),
     );
-    const view = { yearToRender, monthToRender, dateToFocus, focusDayOnMonthChange };
-    const prevMonth$ = $(() => moveMonth(-1, view, { min, max }));
-    const nextMonth$ = $(() => moveMonth(1, view, { min, max }));
+    const prev$ = $(() => step(-1, state, { min, max }));
+    const next$ = $(() => step(1, state, { min, max }));
+    const setView$ = $((next: CalendarView) => setView(next, state));
+    // the title: days, months, years, and back to the days
+    const toggleView$ = $(() =>
+      setView(view.value === 'days' ? 'months' : view.value === 'months' ? 'years' : 'days', state),
+    );
+    const chooseMonth$ = $((year: number, month: Month) =>
+      chooseMonth(year, month, state, { min, max, disabledDates, disabledWeekdays }),
+    );
+    const chooseYear$ = $((year: number) => chooseYear(year, state, { min, max, disabledDates, disabledWeekdays }));
+    // one handler for every month and year button
+    const pickPeriod$ = $((_: Event, button: HTMLElement) => {
+      const availability = { min, max, disabledDates, disabledWeekdays };
+      const month = button.getAttribute('data-month');
+      if (month) chooseMonth(+month.slice(0, 4), month.slice(5, 7) as Month, state, availability);
+      else chooseYear(Number(button.getAttribute('data-year')), state, availability);
+    });
+    // the months and years grids: arrows, and Enter or Space to choose
+    const periodKeyDown$ = $((e: KeyboardEvent, grid: HTMLElement) => {
+      const key = e.key.toLowerCase();
+      const current = view.value;
+      if (
+        current === 'days' ||
+        !PERIOD_KEYS.includes(key) ||
+        !(e.target as Element).closest('[data-month], [data-year]')
+      )
+        return;
+
+      const availability = { min, max, disabledDates, disabledWeekdays };
+      // as in the days: the focused cell, unless an earlier key moved to a year or a page that isn't rendered
+      // yet (the state, set synchronously by each key, doesn't lag behind)
+      const focus = periodFocus.value;
+      const active = grid.contains(document.activeElement) ? document.activeElement : null;
+      const activeMonth = active?.getAttribute('data-month');
+      const activeYear = Number(active?.getAttribute('data-year'));
+      const from: YearMonth =
+        current === 'months' && activeMonth?.startsWith(`${focus.year}-`)
+          ? { year: focus.year, month: activeMonth.slice(5, 7) as Month }
+          : current === 'years' && activeYear && yearPageStart(activeYear) === yearPageStart(focus.year)
+            ? { year: activeYear, month: focus.month }
+            : focus;
+
+      if (key === 'enter' || key === ' ') {
+        if (current === 'months') chooseMonth(from.year, from.month, state, availability);
+        else chooseYear(from.year, state, availability);
+        return;
+      }
+      // in right-to-left layouts the rows are mirrored, so left/right follow the visual direction
+      const mirrored: Record<string, PeriodKey> = { arrowleft: 'arrowright', arrowright: 'arrowleft' };
+      const periodKey = (getComputedStyle(grid).direction === 'rtl' ? mirrored[key] ?? key : key) as PeriodKey;
+      // stay put past min or max
+      const target = periodKeyTarget(current, from, periodKey, availability) ?? from;
+      periodFocus.value = target;
+      focusWhenReady(rootRef.value, periodSelector(current, target));
+    });
+    const escape$ = $((e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || view.value === 'days') return;
+      view.value = 'days';
+      // back to the title that opened the view, or else where Tab enters the days
+      const toggle = rootRef.value?.querySelector<HTMLElement>('[data-view-toggle]');
+      if (toggle) toggle.focus();
+      else
+        focusWhenReady(
+          rootRef.value,
+          tabDaySelector({ year: yearToRender.value, month: monthToRender.value }, dateToFocus.value, {
+            min,
+            max,
+            disabledDates,
+            disabledWeekdays,
+          }),
+        );
+    });
     const keyDown$ = $((e: KeyboardEvent, grid: HTMLElement) => {
       const key = e.key.toLowerCase();
       // only the keys pressed on a day: the grid itself (focused by a click on it) keeps their default action
@@ -370,7 +571,7 @@ export const Root = component$<RootProps>(
       // Enter and Space choose it here, not through a click on its button: the click handler would load and
       // run after the keys that follow
       if (key === 'enter' || key === ' ') {
-        choose(from, mode, availability, { selected, chosen, dateToFocus }, onChange$);
+        choose(from, mode, availability, state, onChange$);
         return;
       }
 
@@ -403,7 +604,11 @@ export const Root = component$<RootProps>(
     useContextProvider(CalendarContextId, {
       value: selected,
       month,
+      view,
+      title,
       grids,
+      monthCells: months,
+      yearCells: years,
       today,
       tabDay,
       canGoBack,
@@ -411,9 +616,15 @@ export const Root = component$<RootProps>(
       weekdays,
       labels,
       select$,
-      prevMonth$,
-      nextMonth$,
+      prev$,
+      next$,
+      setView$,
+      chooseMonth$,
+      chooseYear$,
       titleId,
+      toggleView$,
+      pickPeriod$,
+      periodKeyDown$,
       showWeekNumber: weekNumbers,
       pick$,
       keyDown$,
@@ -427,7 +638,9 @@ export const Root = component$<RootProps>(
         // only with the prop: without it the calendar gets no listener, and never takes the focus on its own
         document:onQinit$={autoFocus ? focusTabDay : undefined}
         document:onToggle$={autoFocus ? focusTabDay : undefined}
+        data-view={view.value}
         {...props}
+        onKeyDown$={[keepOpen, escape$, onKeyDown$]}
         ref={rootRef}
       >
         <Slot />

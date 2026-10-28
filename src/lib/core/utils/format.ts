@@ -34,6 +34,19 @@ export const formatMonth = (year: number, month: number, locale: Locale) => {
     .join('');
 };
 
+/** A month's name, capitalized: "August", or "Aug" with `short`. */
+export const monthName = (month: number, locale: Locale, width: 'long' | 'short' = 'long') => {
+  if (width === 'long' && isBuiltInLocale(locale)) return MONTHS_LG[locale][month - 1];
+  return capitalize(new Intl.DateTimeFormat(locale, { month: width }).format(new Date(2024, month - 1, 1)), locale);
+};
+
+/** A year as the locale writes it alone: "2024", "2024年". */
+export const formatYear = (year: number, locale: Locale) => {
+  const date = new Date(2024, 0, 1);
+  date.setFullYear(year);
+  return new Intl.DateTimeFormat(locale, { year: 'numeric' }).format(date);
+};
+
 /**
  * The weekday names in column order, starting on `weekStartsOn`: `short` for the header ("Su", "Lu", "Lun."),
  * `long` for its accessible name.

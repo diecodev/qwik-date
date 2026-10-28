@@ -7,9 +7,9 @@ export const day = (calendar: Locator, date: string) => calendar.locator(`button
 
 export const title = (calendar: Locator) => calendar.locator('header > div');
 
-export const prevButton = (calendar: Locator) => calendar.locator('header button').first();
+export const prevButton = (calendar: Locator) => calendar.locator('header > button').first();
 
-export const nextButton = (calendar: Locator) => calendar.locator('header button').nth(1);
+export const nextButton = (calendar: Locator) => calendar.locator('header > button').nth(1);
 
 /** The `data-value` of the focused day, or the tag name when the focus isn't on a day. */
 export const focusedDay = (page: Page) =>

@@ -261,3 +261,7 @@
     line-height: 0.5;
   }
 }
+
+.pg-headless table[role="grid"]:has([data-month], [data-year]) button {
+  width: 4rem;
+}

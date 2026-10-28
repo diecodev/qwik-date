@@ -93,7 +93,7 @@ So a trigger is one line:
 - `onChange$`: Called with the new value when the user chooses a day.
 - `fullWeeks`: If true, shows full weeks (default: false).
 - `locale`: `'en'` (default), `'es'`, or any BCP 47 language tag (`'fr-FR'`, `'de'`); see [Languages](#languages).
-- `labels`: The texts `Intl` can't give (`calendar`, `previousMonth`, `nextMonth`, `selectedDate`, `selectedRange`). Optional for `en` and `es`, required for any other locale.
+- `labels`: The texts `Intl` can't give (`calendar`, `previousMonth`, `nextMonth`, `previousYear`, `nextYear`, `previousYears`, `nextYears`, `selectedDate`, `selectedRange`). Optional for `en` and `es`, required for any other locale.
 - `weekStartsOn`: The first day of the week, from `0` (Sunday, the default) to `6`, as in `Date#getDay()`.
 - `showWeekNumber`: If true, shows week numbers (default: false).
 - `showDaysOfWeek`: If true, shows days of the week ~Mo, Tu, We, etc.~ (default: true).
@@ -101,6 +101,15 @@ So a trigger is one line:
 - `containerProps`, `headerProps`, `navButtonProps` (both month buttons), `prevButtonProps`, `nextButtonProps`, `calendarProps`, `theadProps`, `tbodyProps`, `theadRowProps`, `tbodyRowProps`, `headerCellProps`, `cellProps`, `dayButtonProps`, `iconProps`, `titleProps`, `weekNumberProps`: Custom props for various parts of the component.
 - `unstyled`: If true, removes default styling (default: false).
 - `theme`: `'light'` (default), `'dark'`, or `'auto'` to follow the operating system's color scheme. It also accepts a `Signal<Theme>` to change it at runtime.
+
+#### Months and years
+
+Click the title to see the months of the year, and again for twelve years (2016 – 2027); a third click goes back to the days. Choosing a month shows its days, and choosing a year shows the days of the same month in it. Nothing is selected on the way: only the month on show changes.
+
+- The keyboard moves along the months and years with the arrows (across years and pages), Enter or Space shows the days, and Escape goes back to them with the focus on the title. In a popover, that Escape doesn't close it: the next one does.
+- The previous and next buttons move a year among the months, and twelve years among the years, with their own labels (`previousYear`, `nextYear`, `previousYears`, `nextYears`).
+- `min` and `max` disable the months and years past them, and a year past them shows the month of the limit.
+- The months are named in the `locale`, with a capital letter ("Aug", or "Ago" in Spanish, named "August 2024" for screen readers), and the title is still the live region that announces each view.
 
 #### Languages
 
@@ -113,6 +122,10 @@ const fr: Labels = {
   calendar: 'Calendrier',
   previousMonth: 'Mois précédent',
   nextMonth: 'Mois suivant',
+  previousYear: 'Année précédente',
+  nextYear: 'Année suivante',
+  previousYears: 'Années précédentes',
+  nextYears: 'Années suivantes',
   selectedDate: 'date sélectionnée :',
   selectedRange: 'période sélectionnée :',
 };
@@ -166,10 +179,11 @@ export default component$(() => {
 | --- | --- | --- |
 | `Calendar.Root` | `<div role="group">` | Takes the options: the `Calendar` props from `mode` to `showWeekNumber` (`value`, `bind:value`, `onChange$`, `min`, `max`, `name`, `autoFocus`, `locale`, `labels`…). Its name is its `aria-label` (`labels.calendar` by default) followed by the selection. With `name`, it adds the hidden inputs. |
 | `Calendar.PrevButton`, `Calendar.NextButton` | `<button>` | Change the month, with their label, and `aria-disabled` at `min` and `max`. The icon goes inside. |
-| `Calendar.Title` | `<div aria-live="polite">` | The month on show, "August 2024": it names the grid. |
+| `Calendar.Title` | `<div aria-live="polite">` | The title of the view, "August 2024", "2024" or "2016 – 2027": it names the grid. Its button shows the months, then the years (`button={false}` for a title without it; `buttonProps` go to the button). |
 | `Calendar.Grid` | `<table role="grid">` | The keyboard: arrows, Home/End, PageUp/PageDown, Enter and Space. |
 | `Calendar.GridHead` | `<thead>` | The weekday names. `rowProps` and `cellProps` go to its `<tr>` and its `<th>`s. |
 | `Calendar.GridBody` | `<tbody>` | A row per week and a button per day. `rowProps`, `cellProps`, `dayProps` and `weekNumberProps` go to every `<tr>`, `<td>`, day `<button>` and week number cell. |
+| `Calendar.MonthGrid`, `Calendar.YearGrid` | `<table role="grid">` | The months of a year and twelve years, only in their view (the days grid, `Calendar.Grid`, only in its own). `rowProps`, `cellProps` and `buttonProps`. The buttons have `data-month` (`2024-08`) or `data-year`, `data-selected`, `aria-current="date"` and `disabled`. |
 | `Calendar.Cell`, `Calendar.Day` | `<td>`, `<button>` | For rows of your own, see below. |
 
 Style the days by their attributes, the same ones the stylesheet of `Calendar` uses: `data-selected` (the day, or an end of the range), `data-range-start`, `data-range-end`, `data-in-range`, `data-unavailable` (ruled out by `min`, `max` and the disabled days), `aria-current="date"` (today) and `disabled`. Their cells have `aria-selected` and `aria-disabled`. With Tailwind: `dayProps={{ class: 'size-8 rounded data-[selected]:bg-black data-[selected]:text-white' }}`.
@@ -219,9 +233,13 @@ const PriceDays = component$<{ prices: Record<string, number> }>(({ prices }) =>
 
 - `value`: the selected value, a signal you can write to: the calendar shows the month of a value written from outside.
 - `month`: the month on show, `{ year, month }`.
+- `view`: `'days'`, `'months'` or `'years'`, and `title`, the title of the view.
 - `grids`: the months on show, each with its `title` and its `weeks`: `{ number, days }`, with a `CalendarDay` per day (`null` for the empty cells): `date`, `label`, `outside`, `unavailable`, `disabled`, `today`, `selected`, `rangeStart`, `rangeEnd`, `inRange` and `tabbable`.
-- `today`, `tabDay` (where Tab enters the grid), `canGoBack`, `canGoForward`, `weekdays` (`{ long, short }` in column order) and `labels`.
-- `select$(day)`: chooses a day as a click on it does (a day that can't be chosen is ignored); `prevMonth$()`, `nextMonth$()`.
+- `monthCells` and `yearCells`: the cells of the months and years views (`year`, `month`, `text`, `label`, `disabled`, `selected`, `today`, `tabbable`).
+- `today`, `tabDay` (where Tab enters the grid), `canGoBack`, `canGoForward` (as the view moves), `weekdays` (`{ long, short }` in column order) and `labels`.
+- `select$(day)`: chooses a day as a click on it does (a day that can't be chosen is ignored).
+- `prev$()`, `next$()`: a month, a year or twelve years away, as the view shows.
+- `setView$(view)`, `chooseMonth$(year, month)` and `chooseYear$(year)`: what the title and the month and year buttons do.
 
 ### Date picker (popover) recipes
 
@@ -401,7 +419,7 @@ export const DatePicker = component$<{ 'bind:value': Signal<LocalDate | null>; n
 - [x] forms: a hidden input with the value
 - [ ] a text input with a date format
 - [ ] multiple selection
-- [ ] month and year navigation
+- [x] month and year navigation
 - [ ] Custom date ranges (last 7 days, next 30d)
 - [x] headless version
 - [ ] Fancy animations (styled version)

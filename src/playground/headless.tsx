@@ -85,8 +85,8 @@ const Readout = component$(() => {
         <button type='button' class='pg-button' onClick$={() => calendar.select$('2024-08-10')}>
           select$('2024-08-10')
         </button>
-        <button type='button' class='pg-button' onClick$={() => calendar.nextMonth$()}>
-          nextMonth$()
+        <button type='button' class='pg-button' onClick$={() => calendar.next$()}>
+          next$()
         </button>
         <button
           type='button'
@@ -252,7 +252,7 @@ export const HeadlessCases = component$(() => {
           <Probe
             label='month buttons'
             read$={(root) =>
-              [...(rootOf(root)?.querySelectorAll('header button') ?? [])]
+              [...(rootOf(root)?.querySelectorAll('header > button') ?? [])]
                 .map((button) => `${button.textContent}: ${button.getAttribute('aria-disabled') ?? 'enabled'}`)
                 .join(' / ')
             }
@@ -345,7 +345,7 @@ export const HeadlessCases = component$(() => {
           </li>
           <li>
             <p>
-              Click <b>nextMonth$()</b>.
+              Click <b>next$()</b>.
             </p>
             <p>
               month <b>2024-09</b> and tabDay <b>2024-09-01</b>; the value stays <b>2024-08-20</b>.

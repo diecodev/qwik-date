@@ -144,7 +144,7 @@ export const StylesCases = component$(() => {
             label='transform of ‹ and › (rtl) / ‹ (ltr)'
             read$={(root) => {
               const [rtl, ltr] = root.querySelectorAll('[data-qwik-date]');
-              const transforms = [...rtl.querySelectorAll('header button'), ltr.querySelector('header button')];
+              const transforms = [...rtl.querySelectorAll('header > button'), ltr.querySelector('header > button')];
               return transforms
                 .map((button) => (button ? getComputedStyle(button).transform : 'not found'))
                 .join(' / ');

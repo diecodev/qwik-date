@@ -1,6 +1,16 @@
 import { type Component, type PropsOf, type Signal, component$, isSignal, useStyles$ } from '@qwik.dev/core';
 import type { Theme } from '../core';
-import { Grid, GridBody, GridHead, NextButton, PrevButton, Root, Title } from '../headless/calendar';
+import {
+  Grid,
+  GridBody,
+  GridHead,
+  MonthGrid,
+  NextButton,
+  PrevButton,
+  Root,
+  Title,
+  YearGrid,
+} from '../headless/calendar';
 import type { CalendarOptions } from '../headless/root';
 import { ChevronLeft, ChevronRight } from './icons';
 import styles from './style.css?inline';
@@ -108,6 +118,9 @@ export const Calendar = component$<CalendarProps>(
             weekNumberProps={weekNumberProps}
           />
         </Grid>
+        {/* the title's views: the months of a year and twelve years */}
+        <MonthGrid data-period />
+        <YearGrid data-period />
       </Root>
     );
   },

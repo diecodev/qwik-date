@@ -11,6 +11,10 @@ const fr: Labels = {
   calendar: 'Calendrier',
   previousMonth: 'Mois précédent',
   nextMonth: 'Mois suivant',
+  previousYear: 'Année précédente',
+  nextYear: 'Année suivante',
+  previousYears: 'Années précédentes',
+  nextYears: 'Années suivantes',
   selectedDate: 'date sélectionnée :',
   selectedRange: 'période sélectionnée :',
 };
@@ -105,5 +109,27 @@ export const HeadlessState = component$(() => {
     <button type='button' onClick$={() => calendar.select$('2024-08-15')}>
       {end}
     </button>
+  );
+});
+
+// the months and years views: the title's button, their grids and handlers
+export const HeadlessViews = component$(() => {
+  const calendar = useCalendar();
+
+  return (
+    <Headless.Root>
+      <Headless.Title button={false} />
+      <Headless.Title buttonProps={{ class: 'title' }} />
+      <Headless.MonthGrid buttonProps={{ class: 'month' }} />
+      <Headless.YearGrid cellProps={{ class: 'year' }} />
+      <button type='button' onClick$={() => calendar.setView$('months')}>
+        {calendar.title.value}
+      </button>
+      {/* @ts-expect-error: the views are days, months and years */}
+      <button type='button' onClick$={() => calendar.setView$('weeks')} />
+      <button type='button' onClick$={() => calendar.chooseMonth$(2025, '02')} />
+      {/* @ts-expect-error: a month is '01' to '12' */}
+      <button type='button' onClick$={() => calendar.chooseMonth$(2025, '13')} />
+    </Headless.Root>
   );
 });

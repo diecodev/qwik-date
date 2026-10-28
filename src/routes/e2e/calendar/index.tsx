@@ -5,6 +5,10 @@ const FR: Labels = {
   calendar: 'Calendrier',
   previousMonth: 'Mois précédent',
   nextMonth: 'Mois suivant',
+  previousYear: 'Année précédente',
+  nextYear: 'Année suivante',
+  previousYears: 'Années précédentes',
+  nextYears: 'Années suivantes',
   selectedDate: 'date sélectionnée :',
   selectedRange: 'période sélectionnée :',
 };

@@ -61,7 +61,7 @@ const calendarInlinePropsInfo = [
   {
     name: 'labels',
     description:
-      'The texts Intl cannot give (calendar, previousMonth, nextMonth, selectedDate, selectedRange). Required for locales other than en and es',
+      'The texts Intl cannot give (calendar, previousMonth, nextMonth, previousYear, nextYear, previousYears, nextYears, selectedDate, selectedRange). Required for locales other than en and es',
     defaultValue: 'built in for en and es',
   },
   {
@@ -217,7 +217,7 @@ const headlessParts = [
   {
     name: 'Calendar.Title',
     description:
-      'The month on show, announced when it changes: it names the grid',
+      'The title of the view, announced when it changes: it names the grid. Its button shows the months of the year, then twelve years (button={false} without it)',
     renders: '<div aria-live>',
   },
   {
@@ -238,9 +238,15 @@ const headlessParts = [
     renders: '<tbody>',
   },
   {
+    name: 'Calendar.MonthGrid / YearGrid',
+    description:
+      'The months of a year and twelve years, only in their view: arrows, Enter or Space shows the days, Escape goes back (rowProps, cellProps, buttonProps)',
+    renders: '<table role="grid">',
+  },
+  {
     name: 'Calendar.Cell / Day',
     description:
-      'For rows of your own: a component inside the root reads useCalendar() (value, month, grids, today, tabDay, select$, prevMonth$, nextMonth$…)',
+      'For rows of your own: a component inside the root reads useCalendar() (value, month, grids, today, tabDay, view, select$, prev$, next$, setView$, chooseMonth$…)',
     renders: '<td> / <button>',
   },
 ]
