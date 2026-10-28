@@ -17,19 +17,20 @@ import {
 import {
   type BuiltInLocale,
   type DateRange,
+  type GridKey,
   type Labels,
   type LocalDate,
   type Locale,
   type Month,
   type Theme,
   type WeekDay,
-  addMonths,
   daysArrGenerator,
   formatMonth,
   getRowWeekNumber,
   isInsideRange,
   isValidLocalDate,
   isValidRange,
+  keyTarget,
   nextRange,
   parseLocalDate,
   resolveLabels,
@@ -66,6 +67,10 @@ type Value = LocalDate | DateRange | null;
 
 /** The day the calendar opens on for a value: the selected day, or the start of the range. */
 const dayOf = (value: Value) => (value === null || typeof value === 'string' ? value : value.start);
+
+/** The value after choosing `day`: that day, or the range it starts or ends. */
+const nextValue = (mode: 'single' | 'range', value: Value, day: LocalDate) =>
+  mode === 'range' ? nextRange(value as DateRange | null, day) : day;
 
 const isValidValue = (value: LocalDate | DateRange) =>
   typeof value === 'string' ? isValidLocalDate(value) : isValidRange(value);
@@ -284,137 +289,43 @@ export const Calendar = component$<CalendarProps>(
       monthToRender.value = String(+monthToRender.value + 1).padStart(2, '0') as Month;
     });
     const updateDateFocused = $((e: KeyboardEvent, tbody: HTMLTableSectionElement) => {
-      if (!ACTION_KEYS.includes(e.key.toLowerCase() as (typeof ACTION_KEYS)[number])) return;
-
-      focusDayOnMonthChange.value = true;
-
-      const elFocus = document.activeElement;
-
-      if (elFocus?.tagName.toLowerCase() !== 'button') return;
-
-      const buttons = Array.from(tbody.getElementsByTagName('button'));
-
-      const getNewIndex = ({ currentIdx, step }: { currentIdx: number; step: number }) => {
-        const newIdx = currentIdx + step;
-
-        if (newIdx < 0 || newIdx >= buttons.length) return currentIdx;
-
-        const btn = buttons[newIdx];
-
-        if (btn.hasAttribute('disabled')) return currentIdx;
-
-        return newIdx;
-      };
-
-      const idx = buttons.indexOf(elFocus as HTMLButtonElement);
-
-      // local helpers
-      let localIdx: number = idx;
-      let newDate: LocalDate | null = null;
-
-      // in right-to-left layouts the rows are mirrored, so left/right follow the visual direction
       const key = e.key.toLowerCase();
-      const mirrored: Record<string, string> = { arrowleft: 'arrowright', arrowright: 'arrowleft' };
-      const isRtl = getComputedStyle(tbody).direction === 'rtl';
+      if (!ACTION_KEYS.includes(key as (typeof ACTION_KEYS)[number])) return;
 
-      switch (isRtl ? mirrored[key] ?? key : key) {
-        case 'arrowup': {
-          localIdx = getNewIndex({ currentIdx: idx, step: -7 });
-          if (idx === localIdx) {
-            const d = parseLocalDate(elFocus.getAttribute('data-value') as LocalDate);
-            newDate = toLocalDateString(new Date(d.setDate(d.getDate() - 7))) as LocalDate;
+      // the day keeping the focus: the focused button, unless an earlier key moved to a month that isn't
+      // rendered yet. Keys pressed back to back (or queued while this handler loads) run before Qwik renders
+      // again, so the DOM can lag behind: the state, set synchronously by each key, doesn't
+      const active = tbody.contains(document.activeElement) ? document.activeElement?.getAttribute('data-value') : null;
+      const shown = `${yearToRender.value}-${monthToRender.value}`;
+      const from = (active?.startsWith(shown) ? active : dateToFocus.value) as LocalDate;
 
-            decreaseDate();
-          }
-          break;
-        }
-        case 'arrowdown': {
-          localIdx = getNewIndex({ currentIdx: idx, step: 7 });
-          if (idx === localIdx) {
-            const d = parseLocalDate(elFocus.getAttribute('data-value') as LocalDate);
-            newDate = toLocalDateString(new Date(d.setDate(d.getDate() + 7))) as LocalDate;
-
-            increaseDate();
-          }
-
-          break;
-        }
-        case 'arrowleft': {
-          localIdx = getNewIndex({ currentIdx: idx, step: -1 });
-          if (idx === localIdx) {
-            const d = parseLocalDate(elFocus.getAttribute('data-value') as LocalDate);
-            newDate = toLocalDateString(new Date(d.setDate(d.getDate() - 1))) as LocalDate;
-
-            decreaseDate();
-          }
-          break;
-        }
-        case 'arrowright': {
-          localIdx = getNewIndex({ currentIdx: idx, step: 1 });
-          if (idx === localIdx) {
-            const d = parseLocalDate(elFocus.getAttribute('data-value') as LocalDate);
-            newDate = toLocalDateString(new Date(d.setDate(d.getDate() + 1))) as LocalDate;
-
-            increaseDate();
-          }
-          break;
-        }
-        case ' ':
-        case 'enter': {
-          (elFocus as HTMLButtonElement).click();
-          break;
-        }
-        case 'pageup': {
-          const localDate = elFocus.getAttribute('data-value') as LocalDate;
-          newDate = toLocalDateString(addMonths(parseLocalDate(localDate), -1)) as LocalDate;
-
-          decreaseDate();
-          break;
-        }
-        case 'pagedown': {
-          const localDate = elFocus.getAttribute('data-value') as LocalDate;
-          newDate = toLocalDateString(addMonths(parseLocalDate(localDate), 1)) as LocalDate;
-
-          increaseDate();
-          break;
-        }
-        case 'home': {
-          // Find the start of the current row (a row has fewer than 7 buttons when fullWeeks is false)
-          const rowButtons = Array.from(elFocus.closest('tr')?.getElementsByTagName('button') ?? []);
-          const startButton = rowButtons[0];
-          const rowStartIndex = buttons.indexOf(startButton);
-          newDate = startButton.getAttribute('data-value') as LocalDate;
-
-          // Check if the start of the row is in the previous month
-          if (newDate.split('-')[1] !== monthToRender.value) {
-            decreaseDate();
-          }
-
-          localIdx = rowStartIndex;
-          break;
-        }
-        case 'end': {
-          // Find the end of the current row (a row has fewer than 7 buttons when fullWeeks is false)
-          const rowButtons = Array.from(elFocus.closest('tr')?.getElementsByTagName('button') ?? []);
-          const endButton = rowButtons[rowButtons.length - 1];
-          const rowEndIndex = buttons.indexOf(endButton);
-          newDate = endButton.getAttribute('data-value') as LocalDate;
-
-          // Check if the end of the row is in the next month
-          if (newDate.split('-')[1] !== monthToRender.value) {
-            increaseDate();
-          }
-
-          localIdx = rowEndIndex;
-          break;
-        }
+      // Enter and Space choose it here, not through a click on its button: the click handler would load and
+      // run after the keys that follow
+      if (key === 'enter' || key === ' ') {
+        const next = nextValue(mode, selected.value, from);
+        chosen.value = next;
+        selected.value = next;
+        (onChange$ as QRL<(value: LocalDate | DateRange) => void> | undefined)?.(next);
+        return;
       }
 
-      dateToFocus.value = newDate ?? (buttons[localIdx].getAttribute('data-value') as LocalDate);
-      elFocus.setAttribute('tabindex', '-1');
-      buttons[localIdx].setAttribute('tabindex', '0');
-      // @ts-expect-error
-      buttons[localIdx].focus({ preventScroll: true, focusVisible: true });
+      // in right-to-left layouts the rows are mirrored, so left/right follow the visual direction
+      const mirrored: Record<string, GridKey> = { arrowleft: 'arrowright', arrowright: 'arrowleft' };
+      const isRtl = getComputedStyle(tbody).direction === 'rtl';
+      const target = keyTarget(from, (isRtl ? mirrored[key] ?? key : key) as GridKey, { weekStartsOn, fullWeeks });
+
+      focusDayOnMonthChange.value = true;
+      dateToFocus.value = target;
+      const [year, month] = target.split('-');
+      if (+year === yearToRender.value && month === monthToRender.value) {
+        // focusVisible isn't in the DOM typings yet
+        const options = { preventScroll: true, focusVisible: true } as FocusOptions;
+        tbody.querySelector<HTMLButtonElement>(`button[data-value="${target}"]`)?.focus(options);
+        return;
+      }
+      // another month: the visible task focuses the day once it's rendered
+      yearToRender.value = +year;
+      monthToRender.value = month as Month;
     });
 
     return (
@@ -506,9 +417,8 @@ export const Calendar = component$<CalendarProps>(
                 ];
                 if (keys.includes(e.key.toLowerCase())) e.preventDefault();
               }),
-              $((e: KeyboardEvent, target: HTMLTableSectionElement) => {
-                updateDateFocused(e, target);
-              }),
+              // the handler itself, not a wrapper calling it: one less async hop keeps queued keys in order
+              updateDateFocused,
               tbodyProps.onKeyDown$,
             ]}
           >
@@ -554,10 +464,7 @@ export const Calendar = component$<CalendarProps>(
                             {...dayButtonProps}
                             onClick$={[
                               $(() => {
-                                const next =
-                                  mode === 'range'
-                                    ? nextRange(selected.value as DateRange | null, day as LocalDate)
-                                    : (day as LocalDate);
+                                const next = nextValue(mode, selected.value, day as LocalDate);
                                 chosen.value = next;
                                 selected.value = next;
                                 // the type of the value follows `mode`

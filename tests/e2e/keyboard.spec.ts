@@ -92,6 +92,17 @@ test('the grid keys do not scroll the page', async ({ page }) => {
   expect(await page.evaluate(() => window.scrollY)).toBe(before);
 });
 
+test('a key right after choosing a day still lands where it should', async ({ page }) => {
+  // pressed back to back, without waiting for Space to choose the day: the choice must not send the
+  // calendar back to its month nor drop the focus
+  const calendar = calendarIn(page, 'basic');
+  await day(calendar, '2024-08-15').focus();
+  for (const key of ['ArrowDown', 'Space', 'PageDown', 'End']) await page.keyboard.press(key);
+  await expect(page.locator('#changes')).toHaveText('2024-08-22');
+  await expect(title(calendar)).toHaveText('September 2024');
+  await expect(day(calendar, '2024-09-28')).toBeFocused();
+});
+
 test('a header click after keyboard navigation keeps the focus off the grid', async ({ page }) => {
   const calendar = calendarIn(page, 'basic');
   await press(page, 'basic', '2024-08-31', 'ArrowRight');

@@ -368,8 +368,8 @@ export const KeyboardCases = component$(() => {
 
       <Case
         id='keyboard-no-scroll'
-        title="The grid keys don't scroll the page"
-        tests={['the grid keys do not scroll the page']}
+        title="The grid keys don't scroll the page, even pressed back to back"
+        tests={['the grid keys do not scroll the page', 'a key right after choosing a day still lands where it should']}
       >
         <Steps>
           <li>
@@ -380,6 +380,16 @@ export const KeyboardCases = component$(() => {
             <p>
               The focus goes to Aug 22, Space chooses it (onChange$: <b>2024-08-22</b>), then Sep 22 and <b>Sep 28</b>.
               "Page scroll" in the focus bar doesn't change: the page never scrolls.
+            </p>
+          </li>
+          <li>
+            <p>
+              Reload, click <b>Focus Aug 15</b> and press the same four keys as fast as you can: the first one waits for
+              its handler to load, so they run back to back.
+            </p>
+            <p>
+              Same result: onChange$ gets <b>2024-08-22</b>, the calendar shows <b>September 2024</b> and the focus ends
+              on <b>Sep 28</b>.
             </p>
           </li>
         </Steps>

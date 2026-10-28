@@ -5,3 +5,4 @@ export * from './utils/get-week-number';
 export * from './utils/local-date';
 export * from './utils/format';
 export * from './utils/range';
+export * from './utils/navigation';
