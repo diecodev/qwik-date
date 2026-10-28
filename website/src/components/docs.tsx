@@ -187,6 +187,20 @@ const calendarInlinePropsInfo = [
   },
 ] as const
 
+const helpers = [
+  {
+    name: 'formatDate(value, locale?)',
+    description:
+      "A day as a trigger shows it: two-digit day, capitalized month, in any locale ('en' by default)",
+    example: "'Aug 15, 2024'",
+  },
+  {
+    name: 'formatDateRange(range, locale?)',
+    description: 'A range as a trigger shows it, with … until it has an end',
+    example: "'Aug 05, 2024 – Aug 12, 2024'",
+  },
+]
+
 const datePickerProps = [
   {
     name: 'triggerProps',
@@ -236,6 +250,40 @@ export const Docs = component$(() => {
                 <td class="border-l px-2 py-1.5">
                   <span class="rounded-lg bg-neutral-100 px-2 py-0.5 font-mono text-xs">
                     {prop.defaultValue}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="!mt-12 space-y-2">
+        <h4 class="text-center font-medium">~Formatting~</h4>
+        <p class="text-balance text-center text-neutral-600 text-sm">
+          Exported from qwik-date too, to write a trigger in one line:{' '}
+          <code class="rounded bg-neutral-100 px-1 font-mono text-xs">
+            {"date.value ? formatDate(date.value) : 'Pick a date'"}
+          </code>
+        </p>
+      </div>
+      <div class="overflow-clip rounded-lg border ">
+        <table class="min-w-full table-auto border-collapse text-sm">
+          <thead class="bg-neutral-100">
+            <tr>
+              <th class="border-r border-b px-4 py-2 text-left">Function</th>
+              <th class="border-b px-4 py-2 text-left">Description</th>
+              <th class="border-b border-l px-4 py-2 text-left">Returns</th>
+            </tr>
+          </thead>
+          <tbody>
+            {helpers.map((helper, index) => (
+              <tr key={index} class="border-b text-neutral-700 last:border-b-0">
+                <td class="border-r px-4 py-2 font-semibold">{helper.name}</td>
+                <td class="px-4 py-2">{helper.description}</td>
+                <td class="border-l px-2 py-1.5">
+                  <span class="rounded-lg bg-neutral-100 px-2 py-0.5 font-mono text-xs">
+                    {helper.example}
                   </span>
                 </td>
               </tr>

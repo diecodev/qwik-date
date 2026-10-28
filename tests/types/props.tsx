@@ -1,6 +1,14 @@
 // Type checks of the public props, run by `tsc` (not by Vitest): each `@ts-expect-error` must stay an error.
 import { component$, useSignal } from '@qwik.dev/core';
-import { Calendar, DatePicker, type DateRange, type Labels, type LocalDate } from '../../src/lib';
+import {
+  Calendar,
+  DatePicker,
+  type DateRange,
+  type Labels,
+  type LocalDate,
+  formatDate,
+  formatDateRange,
+} from '../../src/lib';
 
 const fr: Labels = {
   calendar: 'Calendrier',
@@ -46,6 +54,21 @@ export const Modes = component$(() => {
       <Calendar mode='range' bind:value={day} />
       {/* @ts-expect-error: and a single day is not a range */}
       <DatePicker bind:value={range} />
+    </>
+  );
+});
+
+// the formatters come from the entry point too: a trigger is one line
+export const Triggers = component$(() => {
+  const day = useSignal<LocalDate | null>(null);
+  const range = useSignal<DateRange | null>(null);
+
+  return (
+    <>
+      <button type='button'>{day.value ? formatDate(day.value) : 'Pick a date'}</button>
+      <button type='button'>{range.value ? formatDateRange(range.value, 'es') : 'Elegir fechas'}</button>
+      {/* @ts-expect-error: a day is a LocalDate, YYYY-MM-DD */}
+      <span>{formatDate('15/08/2024')}</span>
     </>
   );
 });

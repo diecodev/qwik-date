@@ -14,6 +14,10 @@ describe.each(TIMEZONES)('formatDate in %s', (tz, offset) => {
   it('pads the day and capitalizes the month', () => {
     expect(formatDate('2024-08-01', 'es')).toBe('01 Ago 2024');
   });
+
+  it('formats in English without a locale', () => {
+    expect(formatDate('2024-08-15')).toBe('Aug 15, 2024');
+  });
 });
 
 describe('capitalize', () => {

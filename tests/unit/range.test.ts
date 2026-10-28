@@ -59,4 +59,8 @@ describe('formatDateRange', () => {
     expect(formatDateRange({ start: '2024-08-05', end: '2024-08-12' }, 'en')).toBe('Aug 05, 2024 – Aug 12, 2024');
     expect(formatDateRange({ start: '2024-08-05', end: null }, 'es')).toBe('05 Ago 2024 – …');
   });
+
+  it('formats in English without a locale', () => {
+    expect(formatDateRange({ start: '2024-08-05', end: '2024-08-12' })).toBe('Aug 05, 2024 – Aug 12, 2024');
+  });
 });

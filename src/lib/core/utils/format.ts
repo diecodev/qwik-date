@@ -1,5 +1,5 @@
 import { LABELS, MONTHS_LG, WEEKDAYS } from '../constants';
-import type { BuiltInLocale, DateRange, Labels, Locale, WeekDay } from '../types';
+import type { BuiltInLocale, DateRange, Labels, LocalDate, Locale, WeekDay } from '../types';
 import { parseLocalDate } from './local-date';
 
 export const isBuiltInLocale = (locale: Locale): locale is BuiltInLocale => locale === 'en' || locale === 'es';
@@ -11,19 +11,18 @@ export const resolveLabels = (locale: Locale, labels?: Partial<Labels>): Labels 
 /** Upper-cases the first letter: many languages write month and weekday names in lower case ("agosto"). */
 export const capitalize = (text: string, locale: Locale) => text.charAt(0).toLocaleUpperCase(locale) + text.slice(1);
 
-/** A day as the DatePicker trigger shows it: "Aug 01, 2024", "01 Ago 2024" (two-digit day, capitalized month). */
-export const formatDate = (value: string, locale: Locale) =>
+/** A day as a trigger shows it: "Aug 01, 2024", "01 Ago 2024" (two-digit day, capitalized month). */
+export const formatDate = (value: LocalDate, locale: Locale = 'en') =>
   new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', year: 'numeric' })
     .formatToParts(parseLocalDate(value))
     .map((part) => (part.type === 'month' ? capitalize(part.value, locale) : part.value))
     .join('');
 
 /**
- * A range as the DatePicker trigger shows it: "Aug 05, 2024 – Aug 12, 2024", or "Aug 05, 2024 – …" until it
- * has an end. Two full dates, not `Intl#formatRange`: it drops the two-digit day and its separators change
- * between engines.
+ * A range as a trigger shows it: "Aug 05, 2024 – Aug 12, 2024", or "Aug 05, 2024 – …" until it has an end.
+ * Two full dates, not `Intl#formatRange`: it drops the two-digit day and its separators change between engines.
  */
-export const formatDateRange = (range: DateRange, locale: Locale) =>
+export const formatDateRange = (range: DateRange, locale: Locale = 'en') =>
   `${formatDate(range.start, locale)} – ${range.end ? formatDate(range.end, locale) : '…'}`;
 
 /** The title of a month: "August 2024", "Agosto 2024", "Août 2024", "2024年8月". */

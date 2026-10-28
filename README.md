@@ -61,6 +61,25 @@ export default component$(() => {
 });
 ```
 
+#### Formatting
+
+`formatDate` and `formatDateRange` turn a value into text for a trigger or a label: a two-digit day and a capitalized month, in any locale (`'en'` by default). A range without an end shows `…`.
+
+```tsx
+import { formatDate, formatDateRange } from 'qwik-date';
+
+formatDate('2024-08-15'); // 'Aug 15, 2024'
+formatDate('2024-08-01', 'es'); // '01 Ago 2024'
+formatDateRange({ start: '2024-08-05', end: '2024-08-12' }); // 'Aug 05, 2024 – Aug 12, 2024'
+formatDateRange({ start: '2024-08-05', end: null }); // 'Aug 05, 2024 – …'
+```
+
+So a trigger is one line:
+
+```tsx
+<button type="button">{date.value ? formatDate(date.value) : 'Pick a date'}</button>
+```
+
 #### Props
 
 - `mode`: `'single'` (default) to select a day, `'range'` to select a start and an end; see [Range](#range).
