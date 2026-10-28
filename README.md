@@ -61,6 +61,8 @@ export default component$(() => {
 });
 ```
 
+While the range has a start and no end, the days between it and the day under the pointer or the focus get `data-preview` (a lighter grey): the range a click would make. It stops before a day that can't be chosen, as the choice does.
+
 #### Multiple
 
 With `mode="multiple"` the value is an array of days, `LocalDate[]` (`[]` for none). A click, Enter or Space marks a day, and unmarks it if it was marked; there's no maximum, and the days that can't be chosen stay unmarked. `onChange$` gets the days, in order, on every change.
@@ -204,7 +206,7 @@ export default component$(() => {
 | `Calendar.MonthGrid`, `Calendar.YearGrid` | `<table role="grid">` | The months of a year and twelve years, only in their view (the days grid, `Calendar.Grid`, only in its own). `rowProps`, `cellProps` and `buttonProps`. The buttons have `data-month` (`2024-08`) or `data-year`, `data-selected`, `aria-current="date"` and `disabled`. |
 | `Calendar.Cell`, `Calendar.Day` | `<td>`, `<button>` | For rows of your own, see below. |
 
-Style the days by their attributes, the same ones the stylesheet of `Calendar` uses: `data-selected` (the day, or an end of the range), `data-range-start`, `data-range-end`, `data-in-range`, `data-unavailable` (ruled out by `min`, `max` and the disabled days), `aria-current="date"` (today) and `disabled`. Their cells have `aria-selected` and `aria-disabled`. With Tailwind: `dayProps={{ class: 'size-8 rounded data-[selected]:bg-black data-[selected]:text-white' }}`.
+Style the days by their attributes, the same ones the stylesheet of `Calendar` uses: `data-selected` (the day, or an end of the range), `data-range-start`, `data-range-end`, `data-in-range`, `data-preview` (see [Range](#range)), `data-unavailable` (ruled out by `min`, `max` and the disabled days), `aria-current="date"` (today) and `disabled`. Their cells have `aria-selected` and `aria-disabled`. With Tailwind: `dayProps={{ class: 'size-8 rounded data-[selected]:bg-black data-[selected]:text-white' }}`.
 
 The root has no `data-qwik-date`, so the stylesheet of a styled `Calendar` on the same page leaves it alone.
 
@@ -251,11 +253,12 @@ const PriceDays = component$<{ prices: Record<string, number> }>(({ prices }) =>
 
 - `value`: the selected value, a signal you can write to: the calendar shows the month of a value written from outside.
 - `month`: the month on show, `{ year, month }`.
+- `mode`, and `preview`: the range a choice of the day under the pointer or the focus would make, while a range has no end (or `null`).
 - `view`: `'days'`, `'months'` or `'years'`, and `title`, the title of the view.
-- `grids`: the months on show, each with its `title` and its `weeks`: `{ number, days }`, with a `CalendarDay` per day (`null` for the empty cells): `date`, `label`, `outside`, `unavailable`, `disabled`, `today`, `selected`, `rangeStart`, `rangeEnd`, `inRange` and `tabbable`.
+- `grids`: the months on show, each with its `title` and its `weeks`: `{ number, days }`, with a `CalendarDay` per day (`null` for the empty cells): `date`, `label`, `outside`, `unavailable`, `disabled`, `today`, `selected`, `rangeStart`, `rangeEnd`, `inRange`, `preview` and `tabbable`.
 - `monthCells` and `yearCells`: the cells of the months and years views (`year`, `month`, `text`, `label`, `disabled`, `selected`, `today`, `tabbable`).
 - `today`, `tabDay` (where Tab enters the grid), `canGoBack`, `canGoForward` (as the view moves), `weekdays` (`{ long, short }` in column order) and `labels`.
-- `select$(day)`: chooses a day as a click on it does (a day that can't be chosen is ignored).
+- `select$(day)`: chooses a day as a click on it does (a day that can't be chosen is ignored); `setPreview$(day)` previews the range up to a day, as the pointer on it does (`null` for none).
 - `prev$()`, `next$()`: a month, a year or twelve years away, as the view shows.
 - `setView$(view)`, `chooseMonth$(year, month)` and `chooseYear$(year)`: what the title and the month and year buttons do.
 

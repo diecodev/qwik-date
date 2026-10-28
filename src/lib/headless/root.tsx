@@ -47,6 +47,7 @@ import {
   nextValue,
   openingDay,
   periodKeyTarget,
+  previewRange,
   resolveLabels,
   sameDayIn,
   selectionLabel,
@@ -321,6 +322,8 @@ export const Root = component$<RootProps>(
     const dateToFocus = useSignal<LocalDate>(initial);
     const focusDayOnMonthChange = useSignal(false);
     const rootRef = useSignal<HTMLDivElement>();
+    // the day under the pointer or the focus, for the preview of a range that has no end yet
+    const previewDay = useSignal<LocalDate | null>(null);
     const view = useSignal<CalendarView>('days');
     const periodFocus = useSignal<YearMonth>({ year: +initial.split('-')[0], month: initial.split('-')[1] as Month });
     const state: State = {
@@ -356,6 +359,10 @@ export const Root = component$<RootProps>(
       }),
     );
     const month = useComputed$(() => ({ year: yearToRender.value, month: monthToRender.value }));
+    const preview = useComputed$(() =>
+      previewRange(selected.value, previewDay.value, { min, max, disabledDates, disabledWeekdays }),
+    );
+    const modeSignal = useComputed$(() => mode);
     const grids = useComputed$(
       () => [
         calendarGrid({
@@ -368,6 +375,7 @@ export const Root = component$<RootProps>(
           weekStartsOn,
           fullWeeks,
           availability: { min, max, disabledDates, disabledWeekdays },
+          preview: preview.value,
         }),
       ],
       // the HTML already shows it, and it would weigh ~16 KB in the state: the client computes it when it renders
@@ -545,6 +553,22 @@ export const Root = component$<RootProps>(
       periodFocus.value = target;
       focusWhenReady(rootRef.value, periodSelector(current, target));
     });
+    const setPreview$ = $((day: LocalDate | null) => {
+      previewDay.value = day;
+    });
+    // the grid's pointerover and focusin: the day under the pointer or the focus (between two days, the last one).
+    // What's hovered or focused now, not the event's target: these handlers load lazily, and an earlier event's
+    // can run after a later one's
+    const previewTarget$ = $((e: Event, grid: HTMLElement) => {
+      const current = e.type === 'focusin' ? document.activeElement : grid.querySelector('[data-value]:hover');
+      const day = current?.closest('[data-value]:not([disabled])')?.getAttribute('data-value');
+      if (day && grid.contains(current)) previewDay.value = day as LocalDate;
+    });
+    // the grid's pointerleave and focusout: no preview, unless the pointer or the focus is still in the grid
+    const previewEnd$ = $((e: Event, grid: HTMLElement) => {
+      const inside = e.type === 'focusout' ? grid.contains(document.activeElement) : grid.matches(':hover');
+      if (!inside) previewDay.value = null;
+    });
     const escape$ = $((e: KeyboardEvent) => {
       if (e.key !== 'Escape' || view.value === 'days') return;
       view.value = 'days';
@@ -611,6 +635,8 @@ export const Root = component$<RootProps>(
 
     useContextProvider(CalendarContextId, {
       value: selected,
+      mode: modeSignal,
+      preview,
       month,
       view,
       title,
@@ -624,6 +650,7 @@ export const Root = component$<RootProps>(
       weekdays,
       labels,
       select$,
+      setPreview$,
       prev$,
       next$,
       setView$,
@@ -631,6 +658,8 @@ export const Root = component$<RootProps>(
       chooseYear$,
       titleId,
       toggleView$,
+      previewTarget$,
+      previewEnd$,
       pickPeriod$,
       periodKeyDown$,
       showWeekNumber: weekNumbers,

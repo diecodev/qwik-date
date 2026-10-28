@@ -234,7 +234,7 @@ const headlessParts = [
   {
     name: 'Calendar.GridBody',
     description:
-      'A row per week, a button per day (rowProps, cellProps, dayProps, weekNumberProps). Style the days by data-selected, data-in-range, data-unavailable, aria-current="date"…',
+      'A row per week, a button per day (rowProps, cellProps, dayProps, weekNumberProps). Style the days by data-selected, data-in-range, data-preview (the range a click would make), data-unavailable, aria-current="date"…',
     renders: '<tbody>',
   },
   {

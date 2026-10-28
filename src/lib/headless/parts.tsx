@@ -85,24 +85,40 @@ const preventGridKeys = sync$((e: KeyboardEvent) => {
  * The `<table role="grid">`, named after the title, with the keyboard: arrows, Home/End, PageUp/PageDown, and
  * Enter/Space to choose. Its body can be `GridBody` or rows of your own, with `Cell` and `Day`.
  */
-export const Grid = component$<PropsOf<'table'>>(({ 'aria-labelledby': labelledBy, onKeyDown$, ...props }) => {
-  const context = useContext(CalendarContextId);
-  // only the days view: the months and years have their own grids
-  if (context.view.value !== 'days') return null;
+export const Grid = component$<PropsOf<'table'>>(
+  ({
+    'aria-labelledby': labelledBy,
+    onKeyDown$,
+    onPointerOver$,
+    onPointerLeave$,
+    onFocusIn$,
+    onFocusOut$,
+    ...props
+  }) => {
+    const context = useContext(CalendarContextId);
+    // only the days view: the months and years have their own grids
+    if (context.view.value !== 'days') return null;
+    // the preview of a range: only `mode="range"` listens to the pointer
+    const range = context.mode.value === 'range';
 
-  return (
-    <table
-      tabIndex={-1}
-      role='grid'
-      aria-labelledby={labelledBy ?? context.titleId}
-      {...props}
-      // the handler itself, not a wrapper calling it: one less async hop keeps queued keys in order
-      onKeyDown$={[preventGridKeys, context.keyDown$, onKeyDown$]}
-    >
-      <Slot />
-    </table>
-  );
-});
+    return (
+      <table
+        tabIndex={-1}
+        role='grid'
+        aria-labelledby={labelledBy ?? context.titleId}
+        {...props}
+        // the handler itself, not a wrapper calling it: one less async hop keeps queued keys in order
+        onKeyDown$={[preventGridKeys, context.keyDown$, onKeyDown$]}
+        onPointerOver$={[range ? context.previewTarget$ : undefined, onPointerOver$]}
+        onFocusIn$={[range ? context.previewTarget$ : undefined, onFocusIn$]}
+        onPointerLeave$={[range ? context.previewEnd$ : undefined, onPointerLeave$]}
+        onFocusOut$={[range ? context.previewEnd$ : undefined, onFocusOut$]}
+      >
+        <Slot />
+      </table>
+    );
+  },
+);
 
 /** The `<thead>` with the weekday names. */
 export const GridHead = component$<PropsOf<'thead'> & { rowProps?: PropsOf<'tr'>; cellProps?: PropsOf<'th'> }>(
@@ -138,6 +154,7 @@ const dayAttributes = (day: CalendarDay) => ({
   'data-range-start': day.rangeStart,
   'data-range-end': day.rangeEnd,
   'data-in-range': day.inRange,
+  'data-preview': day.preview,
   'data-value': day.date,
   'aria-label': day.label,
   'aria-current': day.today ? ('date' as const) : undefined,

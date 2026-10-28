@@ -1,10 +1,17 @@
 import { type QRL, type Signal, createContextId, useContext } from '@qwik.dev/core';
-import type { CalendarGrid, CalendarPeriod, CalendarView, DateRange, Labels, LocalDate, Month } from '../core';
+import type { CalendarGrid, CalendarPeriod, CalendarView, DateRange, Labels, LocalDate, Mode, Month } from '../core';
 
 /** The state and the handlers of a `Calendar.Root`, as `useCalendar()` gives them. Everything in it serializes. */
 export interface CalendarState<V extends LocalDate | DateRange | LocalDate[] = LocalDate | DateRange | LocalDate[]> {
   /** the selected value: the `bind:value` signal, or one of its own (`[]` for none with `mode="multiple"`) */
   value: Signal<V | null>;
+  /** `single`, `range` or `multiple` */
+  mode: Readonly<Signal<Mode>>;
+  /**
+   * while a range has a start and no end, the range a choice of the day under the pointer or the focus would make
+   * (the days of the grids have `preview`), or `null`
+   */
+  preview: Readonly<Signal<DateRange | null>>;
   /** the month on show */
   month: Readonly<Signal<{ year: number; month: Month }>>;
   /** the days of the month, the months of a year (a click on the title), or twelve years */
@@ -31,6 +38,8 @@ export interface CalendarState<V extends LocalDate | DateRange | LocalDate[] = L
   labels: Readonly<Signal<Labels>>;
   /** chooses a day, as a click on it does: ignored when it can't be chosen */
   select$: QRL<(day: LocalDate) => void>;
+  /** previews the range up to a day, as the pointer or the focus on it does; `null` for no preview */
+  setPreview$: QRL<(day: LocalDate | null) => void>;
   /** shows the previous month, year or twelve years, as the view shows: ignored at `min` */
   prev$: QRL<() => void>;
   /** the same, forward: ignored at `max` */
@@ -50,6 +59,10 @@ export interface CalendarContext extends CalendarState {
   showWeekNumber: Readonly<Signal<boolean>>;
   /** the title button: days, months, years, and back */
   toggleView$: QRL<() => void>;
+  /** the grid's pointerover and focusin: the day to preview */
+  previewTarget$: QRL<(event: Event, grid: HTMLElement) => void>;
+  /** the grid's pointerleave and focusout: no preview */
+  previewEnd$: QRL<(event: Event, grid: HTMLElement) => void>;
   /** a month or year button's click */
   pickPeriod$: QRL<(event: Event, button: HTMLElement) => void>;
   /** the months and years grids' keys */

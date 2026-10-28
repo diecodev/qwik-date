@@ -96,3 +96,65 @@ test.describe('bind:value', () => {
     await expect(calendar.locator('[aria-selected="true"]')).toHaveCount(0);
   });
 });
+
+test.describe('preview', () => {
+  const previewed = (calendar: import('@playwright/test').Locator) => calendar.locator('button[data-preview]');
+
+  test('with a start and no end, the pointer previews the range up to the day under it', async ({ page }) => {
+    const calendar = calendarIn(page, 'preview');
+    await day(calendar, '2024-08-14').hover();
+    await expect(previewed(calendar)).toHaveText(['11', '12', '13', '14']);
+    await day(calendar, '2024-08-07').hover();
+    await expect(previewed(calendar)).toHaveText(['07', '08', '09']);
+    // out of the grid, no preview
+    await page.mouse.move(0, 0);
+    await expect(previewed(calendar)).toHaveCount(0);
+  });
+
+  test('the keyboard previews the range up to the focused day, across months', async ({ page }) => {
+    const calendar = calendarIn(page, 'preview');
+    await day(calendar, '2024-08-10').focus();
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowRight');
+    await expect(day(calendar, '2024-08-12')).toBeFocused();
+    await expect(previewed(calendar)).toHaveText(['11', '12']);
+    await page.keyboard.press('PageDown');
+    await expect(day(calendar, '2024-09-12')).toBeFocused();
+    await expect(previewed(calendar)).toHaveCount(12);
+    await page.keyboard.press('PageUp');
+    await expect(previewed(calendar)).toHaveText(['11', '12']);
+    // Tab out of the grid: no preview
+    await page.keyboard.press('Tab');
+    await expect(previewed(calendar)).toHaveCount(0);
+  });
+
+  test("the preview stops before a day that can't be chosen, as the choice does", async ({ page }) => {
+    const calendar = calendarIn(page, 'preview-cut');
+    await day(calendar, '2024-08-25').hover();
+    await expect(previewed(calendar)).toHaveText(['11', '12', '13', '14', '15', '16', '17', '18', '19']);
+    await day(calendar, '2024-08-25').click();
+    await expect(calendar.locator('button[data-range-end]')).toHaveText('19');
+    await expect(previewed(calendar)).toHaveCount(0);
+  });
+
+  test('no preview once the range has an end, nor in the other modes', async ({ page }) => {
+    const calendar = calendarIn(page, 'preview');
+    await day(calendar, '2024-08-14').click();
+    await expect(calendar.locator('button[data-range-end]')).toHaveText('14');
+    await day(calendar, '2024-08-20').hover();
+    await expect(previewed(calendar)).toHaveCount(0);
+    const single = calendarIn(page, 'preview-single');
+    await day(single, '2024-08-14').hover();
+    await expect(previewed(single)).toHaveCount(0);
+  });
+
+  test("headless: useCalendar()'s preview and setPreview$", async ({ page }) => {
+    const section = page.locator('#preview-headless');
+    await expect(page.locator('#preview-range')).toHaveText('null');
+    await section.locator('button[data-value="2024-08-12"]').hover();
+    await expect(page.locator('#preview-range')).toHaveText('2024-08-10/2024-08-12');
+    await expect(section.locator('button[data-preview]')).toHaveText(['11', '12']);
+    await section.locator('#preview-18').click();
+    await expect(page.locator('#preview-range')).toHaveText('2024-08-10/2024-08-18');
+  });
+});

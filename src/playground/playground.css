@@ -265,3 +265,12 @@
 .pg-headless table[role="grid"]:has([data-month], [data-year]) button {
   width: 4rem;
 }
+
+.pg-headless td > button[data-preview] {
+  background: #ddf4ff;
+}
+
+/* readouts inside a headless calendar: a fixed width, or their text changing would move the days under the pointer */
+.pg-headless .pg-demo {
+  width: 20rem;
+}

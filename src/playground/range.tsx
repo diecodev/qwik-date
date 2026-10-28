@@ -1,5 +1,6 @@
 import { $, component$, useSignal } from '@qwik.dev/core';
 import { Calendar, type DateRange } from '../lib';
+import { Calendar as Headless, useCalendar } from '../lib/headless';
 import { Case, Demo, Focus, Probe, Steps, calendarOf, day } from './ui';
 
 const show = (range: DateRange | null) => (range ? `${range.start} → ${range.end ?? 'null'}` : 'null');
@@ -16,6 +17,28 @@ const rangeDays = $((root: HTMLElement) => {
   const texts = (selector: string) =>
     [...(calendar?.querySelectorAll(selector) ?? [])].map((el) => el.textContent).join(', ') || 'none';
   return `selected ${texts('button[data-selected]')} · in range ${texts('button[data-in-range]')}`;
+});
+
+const previewDays = $(
+  (root: HTMLElement) =>
+    [...(calendarOf(root)?.querySelectorAll('button[data-preview]') ?? [])].map((el) => el.textContent).join(', ') ||
+    'none',
+);
+
+/** `useCalendar()`'s preview, and `setPreview$` on a button. */
+const PreviewReadout = component$(() => {
+  const calendar = useCalendar<DateRange>();
+
+  return (
+    <div class='pg-demo'>
+      <p class='pg-probe'>
+        useCalendar().preview: <output>{show(calendar.preview.value)}</output>
+      </p>
+      <button type='button' class='pg-button' onClick$={() => calendar.setPreview$('2024-08-18')}>
+        setPreview$('2024-08-18')
+      </button>
+    </div>
+  );
 });
 
 export const RangeCases = component$(() => {
@@ -270,6 +293,163 @@ export const RangeCases = component$(() => {
               Clear the signal
             </button>
           </p>
+        </Demo>
+      </Case>
+
+      <Case
+        id='range-preview-pointer'
+        title='The preview under the pointer'
+        tests={['with a start and no end, the pointer previews the range up to the day under it']}
+      >
+        <Steps>
+          <li>
+            <p>Hover the 14. The calendar is rendered with a range that starts on Aug 10 and has no end.</p>
+            <p>
+              <b>11 to 14</b> turn a light grey (data-preview): the range a click would make.
+            </p>
+          </li>
+          <li>
+            <p>Hover the 07.</p>
+            <p>
+              <b>07 to 09</b>: before the start, the range would swap its ends.
+            </p>
+          </li>
+          <li>
+            <p>Move the pointer out of the calendar.</p>
+            <p>No preview.</p>
+          </li>
+        </Steps>
+        <Demo>
+          <Calendar mode='range' value={{ start: '2024-08-10', end: null }} />
+          <Probe label='preview' read$={previewDays} />
+        </Demo>
+      </Case>
+
+      <Case
+        id='range-preview-keyboard'
+        title='The preview with the keyboard'
+        tests={['the keyboard previews the range up to the focused day, across months']}
+      >
+        <Steps>
+          <li>
+            <p>
+              Click <b>Focus Aug 10</b>, press <kbd>→</kbd> twice.
+            </p>
+            <p>
+              The focus is on the <b>12</b>, and <b>11 and 12</b> are previewed.
+            </p>
+          </li>
+          <li>
+            <p>
+              Press <kbd>PageDown</kbd>, then <kbd>PageUp</kbd>.
+            </p>
+            <p>
+              September, with <b>01 to 12</b> previewed: the preview goes across months. Then August again, with 11 and
+              12.
+            </p>
+          </li>
+          <li>
+            <p>
+              Press <kbd>Tab</kbd>.
+            </p>
+            <p>The focus leaves the grid: no preview.</p>
+          </li>
+        </Steps>
+        <Demo>
+          <Focus on={day('2024-08-10')}>Focus Aug 10</Focus>
+          <Calendar mode='range' value={{ start: '2024-08-10', end: null }} />
+          <Probe label='preview' read$={previewDays} />
+        </Demo>
+      </Case>
+
+      <Case
+        id='range-preview-cut'
+        title="The preview stops before a day that can't be chosen"
+        tests={["the preview stops before a day that can't be chosen, as the choice does"]}
+      >
+        <Steps>
+          <li>
+            <p>Hover the 25. The range starts on Aug 10, and disabledDates=&#123;['2024-08-20']&#125;.</p>
+            <p>
+              <b>11 to 19</b> are previewed: the range can't cross the 20.
+            </p>
+          </li>
+          <li>
+            <p>Click the 25.</p>
+            <p>
+              The range ends on the <b>19</b>, as the preview said, and the preview is gone.
+            </p>
+          </li>
+        </Steps>
+        <Demo>
+          <Calendar mode='range' value={{ start: '2024-08-10', end: null }} disabledDates={['2024-08-20']} />
+          <Probe label='preview' read$={previewDays} />
+          <Probe label='days' read$={rangeDays} />
+        </Demo>
+      </Case>
+
+      <Case
+        id='range-preview-none'
+        title='No preview with an end, nor in the other modes'
+        tests={['no preview once the range has an end, nor in the other modes']}
+      >
+        <Steps>
+          <li>
+            <p>Click the 14 in the first calendar (a range from Aug 10 with no end), then hover the 20.</p>
+            <p>The range ends on the 14, and hovering previews nothing.</p>
+          </li>
+          <li>
+            <p>Hover the 14 in the second calendar (a single day).</p>
+            <p>Nothing is previewed.</p>
+          </li>
+        </Steps>
+        <Demo>
+          <div class='pg-row'>
+            <Calendar mode='range' value={{ start: '2024-08-10', end: null }} />
+            <Calendar value='2024-08-10' />
+          </div>
+          <Probe
+            label='preview, in both'
+            read$={(root) => `${root.querySelectorAll('[data-qwik-date] button[data-preview]').length} days`}
+          />
+        </Demo>
+      </Case>
+
+      <Case
+        id='range-preview-headless'
+        title="Headless: useCalendar()'s preview"
+        tests={["headless: useCalendar()'s preview and setPreview$"]}
+      >
+        <Steps>
+          <li>
+            <p>Look at the readout, from a component inside the root that calls useCalendar().</p>
+            <p>
+              <b>null</b>: nothing to preview yet.
+            </p>
+          </li>
+          <li>
+            <p>Hover the 12.</p>
+            <p>
+              <b>2024-08-10 → 2024-08-12</b>, with the 11 and the 12 previewed.
+            </p>
+          </li>
+          <li>
+            <p>
+              Click <b>setPreview$('2024-08-18')</b>.
+            </p>
+            <p>
+              <b>2024-08-10 → 2024-08-18</b>.
+            </p>
+          </li>
+        </Steps>
+        <Demo>
+          <Headless.Root mode='range' value={{ start: '2024-08-10', end: null }} class='pg-headless'>
+            <Headless.Title />
+            <Headless.Grid>
+              <Headless.GridBody />
+            </Headless.Grid>
+            <PreviewReadout />
+          </Headless.Root>
         </Demo>
       </Case>
     </>

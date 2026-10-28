@@ -7,6 +7,7 @@ import {
   isValidValue,
   nextValue,
   openingDay,
+  previewRange,
   resolveLabels,
   selectionLabel,
   tabDayOf,
@@ -213,5 +214,40 @@ describe.each(TIMEZONES)('mode="multiple" in %s', (tz, offset) => {
     expect(isValidValue(['2024-08-05', '2024-08-20'])).toBe(true);
     expect(isValidValue([])).toBe(true);
     expect(isValidValue(['2024-08-05', '2024-02-30' as LocalDate])).toBe(false);
+  });
+});
+
+describe.each(TIMEZONES)('the preview of a range in %s', (tz, offset) => {
+  useTimezone(tz, offset);
+
+  const started = { start: '2024-08-10', end: null } as const;
+
+  it('previews the range a choice would make, while the range has a start and no end', () => {
+    expect(previewRange(started, '2024-08-14')).toEqual({ start: '2024-08-10', end: '2024-08-14' });
+    expect(previewRange(started, '2024-08-05')).toEqual({ start: '2024-08-05', end: '2024-08-10' });
+    expect(previewRange(started, null)).toBeNull();
+    expect(previewRange({ start: '2024-08-10', end: '2024-08-12' }, '2024-08-14')).toBeNull();
+    expect(previewRange('2024-08-10', '2024-08-14')).toBeNull();
+    expect(previewRange(['2024-08-10'], '2024-08-14')).toBeNull();
+  });
+
+  it('stops before a day that cannot be chosen, as the choice does', () => {
+    const disabled = { disabledDates: ['2024-08-13'] } as const;
+    expect(previewRange(started, '2024-08-20', disabled)).toEqual({ start: '2024-08-10', end: '2024-08-12' });
+    expect(previewRange(started, '2024-08-20', disabled)).toEqual(nextValue('range', started, '2024-08-20', disabled));
+  });
+
+  it('marks the days of the preview, the start apart, across months', () => {
+    const grid = calendarGrid({ ...august, value: started, preview: previewRange(started, '2024-08-13') });
+    expect(dates(grid, 'preview')).toEqual(['2024-08-11', '2024-08-12', '2024-08-13']);
+    const before = calendarGrid({ ...august, value: started, preview: previewRange(started, '2024-08-08') });
+    expect(dates(before, 'preview')).toEqual(['2024-08-08', '2024-08-09']);
+    const next = calendarGrid({
+      ...august,
+      month: '09',
+      value: { start: '2024-08-28', end: null },
+      preview: previewRange({ start: '2024-08-28', end: null }, '2024-09-02'),
+    });
+    expect(dates(next, 'preview')).toEqual(['2024-09-01', '2024-09-02']);
   });
 });

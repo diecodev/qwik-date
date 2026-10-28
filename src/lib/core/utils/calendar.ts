@@ -41,6 +41,11 @@ export interface CalendarDay {
   rangeEnd: boolean;
   /** strictly between the ends of the range: selected too, but not highlighted */
   inRange: boolean;
+  /**
+   * while a range has a start and no end: in the range a choice of the day under the pointer or the focus would
+   * make, start excluded (it stops before a day that can't be chosen, as the choice does)
+   */
+  preview: boolean;
   /** where Tab enters the grid */
   tabbable: boolean;
 }
@@ -78,6 +83,12 @@ export const nextValue = (mode: Mode, value: CalendarValue, day: LocalDate, avai
     return days.includes(day) ? days.filter((chosen) => chosen !== day) : [...days, day].sort();
   }
   return day;
+};
+
+/** The range a choice of `day` would make, while a range has a start and no end: what the calendar previews. */
+export const previewRange = (value: CalendarValue, day: LocalDate | null, availability: Availability = {}) => {
+  const range = asRange(value);
+  return range && !range.end && day ? nextRange(range, day, availability) : null;
 };
 
 /** Existing days in `YYYY-MM-DD`, and a range that ends after it starts. */
@@ -124,6 +135,7 @@ export const calendarGrid = ({
   weekStartsOn = 0,
   fullWeeks = false,
   availability = {},
+  preview = null,
 }: {
   year: number;
   month: Month;
@@ -134,6 +146,8 @@ export const calendarGrid = ({
   weekStartsOn?: WeekDay;
   fullWeeks?: boolean;
   availability?: Availability;
+  /** the range to preview: `previewRange()` */
+  preview?: DateRange | null;
 }): CalendarGrid => {
   const format = dayFormatter(locale);
   const range = asRange(value);
@@ -155,6 +169,7 @@ export const calendarGrid = ({
       rangeStart,
       rangeEnd,
       inRange: !outside && !!range && isInsideRange(date, range),
+      preview: !outside && !!preview?.end && date >= preview.start && date <= preview.end && date !== range?.start,
       tabbable: date === tabDay,
     };
   };

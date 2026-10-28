@@ -244,6 +244,11 @@
           background-color: hsla(var(--background-color), 0.12);
         }
 
+        /* the range a choice would make, while a range has no end: lighter than the days in range */
+        &[data-preview] {
+          background-color: hsla(var(--background-color), 0.07);
+        }
+
         &[data-selected] {
           background-color: hsla(var(--background-color), 1);
           color: hsla(var(--foreground-color), 1);
