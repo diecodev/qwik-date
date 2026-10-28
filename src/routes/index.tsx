@@ -1,6 +1,7 @@
 import { component$, useStyles$ } from '@qwik.dev/core';
 import { A11yCases } from '../playground/a11y';
 import { AvailabilityCases } from '../playground/availability';
+import { FormCases } from '../playground/form';
 import { KeyboardCases } from '../playground/keyboard';
 import { NavigationCases } from '../playground/navigation';
 import { PickerCases } from '../playground/picker';
@@ -19,6 +20,7 @@ const AREAS = [
   { id: 'selection', title: 'Selection', spec: 'selection.spec.ts', Cases: SelectionCases },
   { id: 'range', title: 'Range', spec: 'range.spec.ts', Cases: RangeCases },
   { id: 'availability', title: 'Availability', spec: 'availability.spec.ts', Cases: AvailabilityCases },
+  { id: 'form', title: 'Forms', spec: 'form.spec.ts', Cases: FormCases },
   { id: 'navigation', title: 'Navigation', spec: 'navigation.spec.ts', Cases: NavigationCases },
   { id: 'keyboard', title: 'Keyboard', spec: 'keyboard.spec.ts', Cases: KeyboardCases },
   { id: 'timezone', title: 'Timezone', spec: 'timezone.spec.ts', Cases: TimezoneCases },

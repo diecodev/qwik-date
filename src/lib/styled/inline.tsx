@@ -95,6 +95,11 @@ const isValidValue = (value: LocalDate | DateRange) =>
   typeof value === 'string' ? isValidLocalDate(value) : isValidRange(value);
 
 interface CalendarBaseProps extends Availability {
+  /**
+   * submits the value with the form around the calendar, in a hidden input with this name (`YYYY-MM-DD`, empty
+   * without a value); a range submits `name[start]` and `name[end]`
+   */
+  name?: string;
   /** the first column: 0 for Sunday (the default), 1 for Monday... */
   weekStartsOn?: WeekDay;
   showWeekNumber?: boolean;
@@ -152,6 +157,7 @@ export const Calendar = component$<CalendarProps>(
     max,
     disabledDates,
     disabledWeekdays,
+    name,
     fullWeeks = false,
     locale = 'en',
     labels: labelsProp,
@@ -540,6 +546,14 @@ export const Calendar = component$<CalendarProps>(
             })}
           </tbody>
         </table>
+        {name && mode === 'range' ? (
+          <>
+            <input type='hidden' name={`${name}[start]`} value={(selected.value as DateRange | null)?.start ?? ''} />
+            <input type='hidden' name={`${name}[end]`} value={(selected.value as DateRange | null)?.end ?? ''} />
+          </>
+        ) : (
+          name && <input type='hidden' name={name} value={(selected.value as LocalDate | null) ?? ''} />
+        )}
       </div>
     );
   },

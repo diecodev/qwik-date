@@ -20,6 +20,12 @@ const calendarInlinePropsInfo = [
     defaultValue: 'undefined',
   },
   {
+    name: 'name',
+    description:
+      'Submits the value with the form, in a hidden input with this name (name[start] and name[end] for a range)',
+    defaultValue: 'undefined',
+  },
+  {
     name: 'min / max',
     description: "First and last day that can be chosen ('YYYY-MM-DD')",
     defaultValue: 'undefined',

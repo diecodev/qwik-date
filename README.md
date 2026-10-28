@@ -66,6 +66,7 @@ export default component$(() => {
 - `mode`: `'single'` (default) to select a day, `'range'` to select a start and an end; see [Range](#range).
 - `value`: The selected day (a `DateRange` with `mode="range"`), or `null` for none (default: `null`). The calendar opens on its month, or on today's month without one. Today is marked with `aria-current="date"`.
 - `bind:value`: A signal kept in sync with the value, in both directions.
+- `name`: Submits the value with the form around the calendar, in a hidden input with this name (`YYYY-MM-DD`, empty without a value). A range submits `name[start]` and `name[end]`.
 - `min`, `max`: The first and the last day that can be chosen (`'YYYY-MM-DD'`). The month buttons stop at their months.
 - `disabledDates`: Days that can't be chosen (`LocalDate[]`).
 - `disabledWeekdays`: Weekdays that can't be chosen, `0` for Sunday: `[0, 6]` disables the weekends. The keyboard skips these days, and a range can't cross them (it ends right before the first one).
@@ -149,7 +150,8 @@ export default component$(() => {
 - [x] Add support for additional locales.
 - [x] range date selection
 - [x] min / max and disabled dates
-- [ ] forms: a hidden input with the value, a text input with a date format
+- [x] forms: a hidden input with the value
+- [ ] a text input with a date format
 - [ ] multiple selection
 - [ ] month and year navigation
 - [ ] Custom date ranges (last 7 days, next 30d)
