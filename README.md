@@ -61,6 +61,23 @@ export default component$(() => {
 });
 ```
 
+#### Multiple
+
+With `mode="multiple"` the value is an array of days, `LocalDate[]` (`[]` for none). A click, Enter or Space marks a day, and unmarks it if it was marked; there's no maximum, and the days that can't be chosen stay unmarked. `onChange$` gets the days, in order, on every change.
+
+```tsx
+import { component$, useSignal } from '@qwik.dev/core';
+import { Calendar, type LocalDate } from 'qwik-date';
+
+export default component$(() => {
+  const days = useSignal<LocalDate[]>([]);
+
+  return <Calendar mode="multiple" bind:value={days} name="days" />;
+});
+```
+
+With `name`, each day goes in a hidden input named `days[]`: a Qwik Router action gets them as an array (`{ days: ['2024-08-05', '2024-08-20'] }`); a repeated name without `[]` would keep only the last one. Without days, nothing is sent.
+
 #### Formatting
 
 `formatDate` and `formatDateRange` turn a value into text for a trigger or a label: a two-digit day and a capitalized month, in any locale (`'en'` by default). A range without an end shows `…`.
@@ -82,10 +99,10 @@ So a trigger is one line:
 
 #### Props
 
-- `mode`: `'single'` (default) to select a day, `'range'` to select a start and an end; see [Range](#range).
-- `value`: The selected day (a `DateRange` with `mode="range"`), or `null` for none (default: `null`). The calendar opens on its month, or on today's month without one. Today is marked with `aria-current="date"`.
+- `mode`: `'single'` (default) to select a day, `'range'` to select a start and an end, `'multiple'` for any days; see [Range](#range) and [Multiple](#multiple).
+- `value`: The selected day (a `DateRange` with `mode="range"`, a `LocalDate[]` with `mode="multiple"`), or `null` for none (default: `null`, `[]` with `mode="multiple"`). The calendar opens on its month, or on today's month without one. Today is marked with `aria-current="date"`.
 - `bind:value`: A signal kept in sync with the value, in both directions.
-- `name`: Submits the value with the form around the calendar, in a hidden input with this name (`YYYY-MM-DD`, empty without a value). A range submits `name[start]` and `name[end]`.
+- `name`: Submits the value with the form around the calendar, in a hidden input with this name (`YYYY-MM-DD`, empty without a value). A range submits `name[start]` and `name[end]`, and `mode="multiple"` a `name[]` input per day.
 - `autoFocus`: Focuses the day where Tab enters the grid (the selected one, or the first that can be chosen) every time the calendar shows up: on load or once mounted if it's visible, and when a popover, dialog or `<details>` around it opens. Without it the calendar never takes the focus on its own. As with the HTML `autofocus` attribute, Chromium drops the focus on load when the URL points at an element (`#id`).
 - `min`, `max`: The first and the last day that can be chosen (`'YYYY-MM-DD'`). The month buttons stop at their months.
 - `disabledDates`: Days that can't be chosen (`LocalDate[]`).
@@ -93,7 +110,7 @@ So a trigger is one line:
 - `onChange$`: Called with the new value when the user chooses a day.
 - `fullWeeks`: If true, shows full weeks (default: false).
 - `locale`: `'en'` (default), `'es'`, or any BCP 47 language tag (`'fr-FR'`, `'de'`); see [Languages](#languages).
-- `labels`: The texts `Intl` can't give (`calendar`, `previousMonth`, `nextMonth`, `previousYear`, `nextYear`, `previousYears`, `nextYears`, `selectedDate`, `selectedRange`). Optional for `en` and `es`, required for any other locale.
+- `labels`: The texts `Intl` can't give (`calendar`, `previousMonth`, `nextMonth`, `previousYear`, `nextYear`, `previousYears`, `nextYears`, `selectedDate`, `selectedRange`, `selectedDates`). Optional for `en` and `es`, required for any other locale.
 - `weekStartsOn`: The first day of the week, from `0` (Sunday, the default) to `6`, as in `Date#getDay()`.
 - `showWeekNumber`: If true, shows week numbers (default: false).
 - `showDaysOfWeek`: If true, shows days of the week ~Mo, Tu, We, etc.~ (default: true).
@@ -128,6 +145,7 @@ const fr: Labels = {
   nextYears: 'Années suivantes',
   selectedDate: 'date sélectionnée :',
   selectedRange: 'période sélectionnée :',
+  selectedDates: 'dates sélectionnées :',
 };
 
 <Calendar locale="fr-FR" labels={fr} weekStartsOn={1} />;
@@ -418,7 +436,7 @@ export const DatePicker = component$<{ 'bind:value': Signal<LocalDate | null>; n
 - [x] min / max and disabled dates
 - [x] forms: a hidden input with the value
 - [ ] a text input with a date format
-- [ ] multiple selection
+- [x] multiple selection
 - [x] month and year navigation
 - [ ] Custom date ranges (last 7 days, next 30d)
 - [x] headless version

@@ -129,3 +129,10 @@ describe('the months and years keys and limits', () => {
     expect(sameDayIn('2024-01-31', { year: 2023, month: '02' })).toBe('2023-02-28');
   });
 });
+
+describe('the months of mode="multiple"', () => {
+  it('marks the months with a selected day', () => {
+    const cells = monthCells({ ...options, value: ['2024-02-10', '2024-08-15', '2025-01-01'] });
+    expect(cells.filter((cell) => cell.selected).map((cell) => cell.month)).toEqual(['02', '08']);
+  });
+});

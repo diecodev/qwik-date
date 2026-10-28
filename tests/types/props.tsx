@@ -17,6 +17,7 @@ const fr: Labels = {
   nextYears: 'Années suivantes',
   selectedDate: 'date sélectionnée :',
   selectedRange: 'période sélectionnée :',
+  selectedDates: 'dates sélectionnées :',
 };
 
 export const Locales = component$(() => (
@@ -131,5 +132,25 @@ export const HeadlessViews = component$(() => {
       {/* @ts-expect-error: a month is '01' to '12' */}
       <button type='button' onClick$={() => calendar.chooseMonth$(2025, '13')} />
     </Headless.Root>
+  );
+});
+
+// mode="multiple": an array of days, [] for none
+export const Multiple = component$(() => {
+  const days = useSignal<LocalDate[]>([]);
+  const day = useSignal<LocalDate | null>(null);
+
+  return (
+    <>
+      <Calendar mode='multiple' value={['2024-08-05', '2024-08-20']} onChange$={(value) => value.length} />
+      <Calendar mode='multiple' bind:value={days} name='days' />
+      <Headless.Root mode='multiple' bind:value={days} />
+      {/* @ts-expect-error: the value of mode="multiple" is an array */}
+      <Calendar mode='multiple' value='2024-08-15' />
+      {/* @ts-expect-error: ...in a signal too */}
+      <Calendar mode='multiple' bind:value={day} />
+      {/* @ts-expect-error: and an array isn't a single day */}
+      <Calendar bind:value={days} />
+    </>
   );
 });

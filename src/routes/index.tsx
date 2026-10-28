@@ -5,6 +5,7 @@ import { AvailabilityCases } from '../playground/availability';
 import { FormCases } from '../playground/form';
 import { HeadlessCases } from '../playground/headless';
 import { KeyboardCases } from '../playground/keyboard';
+import { MultipleCases } from '../playground/multiple';
 import { NavigationCases } from '../playground/navigation';
 import styles from '../playground/playground.css?inline';
 import { PopoverCases } from '../playground/popover';
@@ -17,11 +18,15 @@ import { TimezoneCases } from '../playground/timezone';
 import { Section, StatusBar } from '../playground/ui';
 import { ViewsCases } from '../playground/views';
 
+// Qwik Router finds actions in the route's module: the Multiple area submits a form to this one
+export { usePlaygroundEcho } from '../playground/multiple';
+
 // one section per spec file of tests/e2e, in the same order as the areas of the suite
 const AREAS = [
   { id: 'rendering', title: 'Rendering', spec: 'rendering.spec.ts', Cases: RenderingCases },
   { id: 'selection', title: 'Selection', spec: 'selection.spec.ts', Cases: SelectionCases },
   { id: 'range', title: 'Range', spec: 'range.spec.ts', Cases: RangeCases },
+  { id: 'multiple', title: 'Multiple', spec: 'multiple.spec.ts', Cases: MultipleCases },
   { id: 'availability', title: 'Availability', spec: 'availability.spec.ts', Cases: AvailabilityCases },
   { id: 'form', title: 'Forms', spec: 'form.spec.ts', Cases: FormCases },
   { id: 'navigation', title: 'Navigation', spec: 'navigation.spec.ts', Cases: NavigationCases },

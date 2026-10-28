@@ -42,6 +42,7 @@ export const LABELS = {
     nextYears: 'go to next years',
     selectedDate: 'selected date:',
     selectedRange: 'selected range:',
+    selectedDates: 'selected dates:',
   },
   es: {
     calendar: 'Calendario',
@@ -53,6 +54,7 @@ export const LABELS = {
     nextYears: 'Ir a los siguientes años',
     selectedDate: 'fecha seleccionada:',
     selectedRange: 'rango seleccionado:',
+    selectedDates: 'fechas seleccionadas:',
   },
 } as const satisfies Record<BuiltInLocale, Labels>;
 

@@ -175,3 +175,43 @@ describe('values', () => {
     expect(isValidValue({ start: '2024-08-12', end: '2024-08-05' })).toBe(false);
   });
 });
+
+describe.each(TIMEZONES)('mode="multiple" in %s', (tz, offset) => {
+  useTimezone(tz, offset);
+
+  it('marks a day, and unmarks it, keeping the days in order', () => {
+    const marked = nextValue('multiple', ['2024-08-20'], '2024-08-05');
+    expect(marked).toEqual(['2024-08-05', '2024-08-20']);
+    expect(nextValue('multiple', marked, '2024-08-20')).toEqual(['2024-08-05']);
+    expect(nextValue('multiple', [], '2024-08-05')).toEqual(['2024-08-05']);
+    expect(nextValue('multiple', null, '2024-08-05')).toEqual(['2024-08-05']);
+    // no maximum
+    const many = ['01', '02', '03', '04', '05', '06', '07'].reduce<LocalDate[]>(
+      (days, date) => nextValue('multiple', days, `2024-08-${date}` as LocalDate) as LocalDate[],
+      [],
+    );
+    expect(many).toHaveLength(7);
+  });
+
+  it('selects every day of the value in the grid', () => {
+    const grid = calendarGrid({ ...august, value: ['2024-08-20', '2024-08-05', '2024-09-02'] });
+    expect(dates(grid, 'selected')).toEqual(['2024-08-05', '2024-08-20']);
+    expect(dates(grid, 'inRange')).toEqual([]);
+    expect(dates(grid, 'rangeStart')).toEqual([]);
+  });
+
+  it('opens on the first day, names the days in order, and checks them all', () => {
+    expect(openingDay(['2024-09-02', '2024-08-20'])).toBe('2024-08-20');
+    expect(openingDay([])).toBeNull();
+    expect(selectionLabel(['2024-08-20', '2024-08-05'], 'en', resolveLabels('en'))).toBe(
+      'selected dates: Monday, August 5, 2024; Tuesday, August 20, 2024',
+    );
+    expect(selectionLabel([], 'en', resolveLabels('en'))).toBeNull();
+    expect(selectionLabel(['2024-08-05'], 'es', resolveLabels('es'))).toBe(
+      'fechas seleccionadas: lunes, 5 de agosto de 2024',
+    );
+    expect(isValidValue(['2024-08-05', '2024-08-20'])).toBe(true);
+    expect(isValidValue([])).toBe(true);
+    expect(isValidValue(['2024-08-05', '2024-02-30' as LocalDate])).toBe(false);
+  });
+});

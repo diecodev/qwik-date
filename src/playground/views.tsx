@@ -14,6 +14,7 @@ const FR: Labels = {
   nextYears: 'Années suivantes',
   selectedDate: 'date sélectionnée :',
   selectedRange: 'période sélectionnée :',
+  selectedDates: 'dates sélectionnées :',
 };
 
 const titleButton = '[data-qwik-date]:not([popover]) header > div > button';

@@ -13,6 +13,7 @@ const FR: Labels = {
   nextYears: 'Années suivantes',
   selectedDate: 'date sélectionnée :',
   selectedRange: 'période sélectionnée :',
+  selectedDates: 'dates sélectionnées :',
 };
 
 /** `useCalendar()` with the views: what it shows, and its handlers on buttons of the page. */

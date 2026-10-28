@@ -20,6 +20,7 @@ describe('resolveLabels', () => {
       nextYears: 'Années suivantes',
       selectedDate: 'date sélectionnée :',
       selectedRange: 'période sélectionnée :',
+      selectedDates: 'dates sélectionnées :',
     };
     expect(resolveLabels('fr', fr)).toEqual(fr);
   });

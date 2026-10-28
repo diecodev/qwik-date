@@ -11,6 +11,7 @@ const FR: Labels = {
   nextYears: 'Années suivantes',
   selectedDate: 'date sélectionnée :',
   selectedRange: 'période sélectionnée :',
+  selectedDates: 'dates sélectionnées :',
 };
 
 const ArrowIcon = component$((props: PropsOf<'svg'>) => (

@@ -1,6 +1,6 @@
 import type { LocalDate, Locale, Month } from '../types';
 import { type Availability, isMonthInLimits, shiftMonth } from './availability';
-import type { CalendarValue } from './calendar';
+import { type CalendarValue, selectedDays } from './calendar';
 import { formatMonth, formatYear, monthName } from './format';
 
 /** What the calendar shows: the days of a month, the months of a year (a click on the title), or twelve years. */
@@ -23,7 +23,7 @@ export interface CalendarPeriod {
   label: string;
   /** past `min` or `max`: none of its days can be chosen */
   disabled: boolean;
-  /** it has the selected day, or an end of the selected range */
+  /** it has the selected day, an end of the selected range, or one of the selected days */
   selected: boolean;
   /** it has today */
   today: boolean;
@@ -80,9 +80,6 @@ export const sameDayIn = (day: LocalDate, { year, month }: YearMonth) => {
   return `${year}-${month}-${String(Math.min(+day.slice(8), length)).padStart(2, '0')}` as LocalDate;
 };
 
-const chosenDays = (value: CalendarValue): string[] =>
-  value === null ? [] : typeof value === 'string' ? [value] : value.end ? [value.start, value.end] : [value.start];
-
 interface PeriodOptions {
   /** the focused cell */
   focus: YearMonth;
@@ -103,7 +100,7 @@ export const monthCells = ({ focus, value, today, locale, availability = {} }: P
       text: monthName(index + 1, locale, 'short'),
       label: formatMonth(focus.year, index + 1, locale),
       disabled: !isMonthInLimits(focus.year, month, availability),
-      selected: chosenDays(value).some((day) => day.startsWith(shown)),
+      selected: selectedDays(value).some((day) => day.startsWith(shown)),
       today: today.startsWith(shown),
       tabbable: month === focus.month,
     };
@@ -121,7 +118,7 @@ export const yearCells = ({ focus, value, today, locale, availability = {} }: Pe
       text,
       label: text,
       disabled: !isYearInLimits(year, availability),
-      selected: chosenDays(value).some((day) => +day.slice(0, 4) === year),
+      selected: selectedDays(value).some((day) => +day.slice(0, 4) === year),
       today: +today.slice(0, 4) === year,
       tabbable: year === focus.year,
     };

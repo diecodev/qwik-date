@@ -4,13 +4,13 @@ const calendarInlinePropsInfo = [
   {
     name: 'mode',
     description:
-      "'single' selects a day, 'range' a start and an end ({ start, end })",
+      "'single' selects a day, 'range' a start and an end ({ start, end }), 'multiple' any days (an array, [] for none)",
     defaultValue: "'single'",
   },
   {
     name: 'value',
     description:
-      "The selected day as 'YYYY-MM-DD', or null for none. Without one the calendar opens on today's month",
+      "The selected day as 'YYYY-MM-DD' (a range, or an array of days with mode='multiple'), or null for none. Without one the calendar opens on today's month",
     defaultValue: 'null',
   },
   {
@@ -22,7 +22,7 @@ const calendarInlinePropsInfo = [
   {
     name: 'name',
     description:
-      'Submits the value with the form, in a hidden input with this name (name[start] and name[end] for a range)',
+      'Submits the value with the form, in a hidden input with this name (name[start] and name[end] for a range, a name[] per day with mode="multiple": an array for a Qwik Router action)',
     defaultValue: 'undefined',
   },
   {
@@ -61,7 +61,7 @@ const calendarInlinePropsInfo = [
   {
     name: 'labels',
     description:
-      'The texts Intl cannot give (calendar, previousMonth, nextMonth, previousYear, nextYear, previousYears, nextYears, selectedDate, selectedRange). Required for locales other than en and es',
+      'The texts Intl cannot give (calendar, previousMonth, nextMonth, previousYear, nextYear, previousYears, nextYears, selectedDate, selectedRange, selectedDates). Required for locales other than en and es',
     defaultValue: 'built in for en and es',
   },
   {

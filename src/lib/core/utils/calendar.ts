@@ -6,11 +6,22 @@ import { getRowWeekNumber } from './get-week-number';
 import { isValidLocalDate, parseLocalDate } from './local-date';
 import { isInsideRange, isValidRange, nextRange } from './range';
 
-/** `single` selects a day, `range` a start and an end. */
-export type Mode = 'single' | 'range';
+/** `single` selects a day, `range` a start and an end, `multiple` any days. */
+export type Mode = 'single' | 'range' | 'multiple';
 
-/** The value of any mode: a day, a range, or `null` for none. */
-export type CalendarValue = LocalDate | DateRange | null;
+/** The value of any mode: a day, a range, days (`[]` for none), or `null` for none. */
+export type CalendarValue = LocalDate | DateRange | LocalDate[] | null;
+
+/** The selected days of a value, in order: the day, the ends of the range, or the days of `multiple`. */
+export const selectedDays = (value: CalendarValue): LocalDate[] => {
+  if (value === null) return [];
+  if (typeof value === 'string') return [value];
+  if (Array.isArray(value)) return [...value].sort();
+  return value.end ? [value.start, value.end] : [value.start];
+};
+
+const asRange = (value: CalendarValue) =>
+  value !== null && typeof value === 'object' && !Array.isArray(value) ? value : null;
 
 /** A day of a month grid, with what it shows. */
 export interface CalendarDay {
@@ -53,16 +64,29 @@ export interface CalendarGrid {
 const dayFormatter = (locale: Locale) =>
   new Intl.DateTimeFormat(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-/** The day the calendar opens on for a value: the selected day, or the start of the range. */
-export const openingDay = (value: CalendarValue) => (value === null || typeof value === 'string' ? value : value.start);
+/** The day the calendar opens on for a value: the selected day, the start of the range, or the first of the days. */
+export const openingDay = (value: CalendarValue): LocalDate | null => selectedDays(value)[0] ?? null;
 
-/** The value after choosing `day`: that day, or the range it starts or ends. */
-export const nextValue = (mode: Mode, value: CalendarValue, day: LocalDate, availability: Availability = {}) =>
-  mode === 'range' ? nextRange(value as DateRange | null, day, availability) : day;
+/**
+ * The value after choosing `day`: that day, the range it starts or ends, or the days with it marked or unmarked
+ * (in order).
+ */
+export const nextValue = (mode: Mode, value: CalendarValue, day: LocalDate, availability: Availability = {}) => {
+  if (mode === 'range') return nextRange(asRange(value), day, availability);
+  if (mode === 'multiple') {
+    const days = Array.isArray(value) ? value : [];
+    return days.includes(day) ? days.filter((chosen) => chosen !== day) : [...days, day].sort();
+  }
+  return day;
+};
 
 /** Existing days in `YYYY-MM-DD`, and a range that ends after it starts. */
-export const isValidValue = (value: LocalDate | DateRange) =>
-  typeof value === 'string' ? isValidLocalDate(value) : isValidRange(value);
+export const isValidValue = (value: LocalDate | DateRange | LocalDate[]) =>
+  typeof value === 'string'
+    ? isValidLocalDate(value)
+    : Array.isArray(value)
+      ? value.every(isValidLocalDate)
+      : isValidRange(value);
 
 /** Where Tab enters a month: `focusDay` if it's in it and can be chosen, or else its first day that can be. */
 export const tabDayOf = (year: number, month: Month, focusDay: LocalDate, availability: Availability = {}) => {
@@ -83,6 +107,9 @@ export const selectionLabel = (value: CalendarValue, locale: Locale, labels: Lab
 
   const long = (day: LocalDate) => dayFormatter(locale).format(parseLocalDate(day));
   if (typeof value === 'string') return `${labels.selectedDate} ${long(value)}`;
+  // the days' names have commas: semicolons between them
+  if (Array.isArray(value))
+    return value.length ? `${labels.selectedDates} ${selectedDays(value).map(long).join('; ')}` : null;
   return `${labels.selectedRange} ${long(value.start)} – ${value.end ? long(value.end) : '…'}`;
 };
 
@@ -109,7 +136,7 @@ export const calendarGrid = ({
   availability?: Availability;
 }): CalendarGrid => {
   const format = dayFormatter(locale);
-  const range = value !== null && typeof value !== 'string' ? value : null;
+  const range = asRange(value);
 
   const describe = (date: LocalDate): CalendarDay => {
     const outside = date.slice(5, 7) !== month;
@@ -123,7 +150,8 @@ export const calendarGrid = ({
       unavailable,
       disabled: outside || unavailable,
       today: !outside && date === today,
-      selected: !outside && (range ? rangeStart || rangeEnd : date === value),
+      selected:
+        !outside && (range ? rangeStart || rangeEnd : Array.isArray(value) ? value.includes(date) : date === value),
       rangeStart,
       rangeEnd,
       inRange: !outside && !!range && isInsideRange(date, range),

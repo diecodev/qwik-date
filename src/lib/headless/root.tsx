@@ -79,6 +79,14 @@ export type ModeOptions =
       'bind:value'?: Signal<DateRange | null>;
       /** called on every choice: with `end: null` after the first day */
       onChange$?: QRL<(value: DateRange) => void>;
+    }
+  | {
+      mode: 'multiple';
+      /** the selected days, `[]` (the default) for none: a click or Enter marks a day, and unmarks it */
+      value?: LocalDate[];
+      'bind:value'?: Signal<LocalDate[]>;
+      /** called on every change, with the days in order */
+      onChange$?: QRL<(value: LocalDate[]) => void>;
     };
 
 interface BaseOptions extends Availability {
@@ -262,7 +270,7 @@ const choose = (
   // Tab (and autoFocus) enters on the day chosen last
   dateToFocus.value = day;
   // the type of the value follows `mode`
-  (onChange$ as QRL<(value: LocalDate | DateRange) => void> | undefined)?.(next);
+  (onChange$ as QRL<(value: LocalDate | DateRange | LocalDate[]) => void> | undefined)?.(next);
 };
 
 const PERIOD_KEYS = ['enter', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
@@ -298,7 +306,7 @@ export const Root = component$<RootProps>(
     ...props
   }) => {
     // signals
-    const valueSignal = useSignal<CalendarValue>(valueProp);
+    const valueSignal = useSignal<CalendarValue>(valueProp ?? (mode === 'multiple' ? [] : null));
     const selected = (bound ?? valueSignal) as Signal<CalendarValue>;
     // the value of the last choice in the grid: the calendar already shows its month (the end of a range can
     // be chosen in the month after the start's, the calendar must stay there)
@@ -404,9 +412,9 @@ export const Root = component$<RootProps>(
     // to `bind:value`
     useTask$(({ track }) => {
       const value = track(() => selected.value);
-      if (value === null || value === chosen.value || !isValidValue(value)) return;
+      const day = openingDay(value);
+      if (value === null || day === null || value === chosen.value || !isValidValue(value)) return;
 
-      const day = openingDay(value) as LocalDate;
       const [year, month] = day.split('-');
       view.value = 'days';
       monthToRender.value = month as Month;
@@ -421,7 +429,7 @@ export const Root = component$<RootProps>(
       if (today.value === visitorToday) return;
 
       today.value = visitorToday;
-      if (selected.value) return;
+      if (openingDay(selected.value)) return;
       // a day `autoFocus` focused on load follows the move
       const focused = document.activeElement;
       if (focused?.closest('[data-value]') && rootRef.value?.contains(focused)) focusDayOnMonthChange.value = true;
@@ -649,6 +657,9 @@ export const Root = component$<RootProps>(
             <input type='hidden' name={`${name}[start]`} value={(selected.value as DateRange | null)?.start ?? ''} />
             <input type='hidden' name={`${name}[end]`} value={(selected.value as DateRange | null)?.end ?? ''} />
           </>
+        ) : name && mode === 'multiple' ? (
+          // one input per day, as `name[]`: Qwik Router actions read it as an array (a repeated name keeps the last)
+          (selected.value as LocalDate[]).map((day) => <input key={day} type='hidden' name={`${name}[]`} value={day} />)
         ) : (
           name && <input type='hidden' name={name} value={(selected.value as LocalDate | null) ?? ''} />
         )}

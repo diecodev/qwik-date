@@ -2,8 +2,8 @@ import { type QRL, type Signal, createContextId, useContext } from '@qwik.dev/co
 import type { CalendarGrid, CalendarPeriod, CalendarView, DateRange, Labels, LocalDate, Month } from '../core';
 
 /** The state and the handlers of a `Calendar.Root`, as `useCalendar()` gives them. Everything in it serializes. */
-export interface CalendarState<V extends LocalDate | DateRange = LocalDate | DateRange> {
-  /** the selected value: the `bind:value` signal, or one of its own */
+export interface CalendarState<V extends LocalDate | DateRange | LocalDate[] = LocalDate | DateRange | LocalDate[]> {
+  /** the selected value: the `bind:value` signal, or one of its own (`[]` for none with `mode="multiple"`) */
   value: Signal<V | null>;
   /** the month on show */
   month: Readonly<Signal<{ year: number; month: Month }>>;
@@ -65,7 +65,7 @@ export const CalendarContextId = createContextId<CalendarContext>('qwik-date.cal
 /**
  * The state and the handlers of the `Calendar.Root` around, to render parts of your own (cells with prices, a
  * readout…). Call it in a component inside the root: Qwik's context only reaches its descendants. The value takes
- * the type of the mode: `useCalendar<DateRange>()`.
+ * the type of the mode: `useCalendar<DateRange>()`, `useCalendar<LocalDate[]>()`.
  */
-export const useCalendar = <V extends LocalDate | DateRange = LocalDate | DateRange>() =>
+export const useCalendar = <V extends LocalDate | DateRange | LocalDate[] = LocalDate | DateRange | LocalDate[]>() =>
   useContext(CalendarContextId) as unknown as CalendarState<V>;
