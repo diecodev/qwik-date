@@ -29,6 +29,16 @@ test('right-to-left layouts mirror the month chevrons', async ({ page }) => {
   await expect(calendarIn(page, 'basic').locator('header button').first()).toHaveCSS('transform', 'none');
 });
 
+test('the icons keep a size of their own without the stylesheet', async ({ page }) => {
+  await page.goto('/e2e/styles/');
+  // the calendar starts unstyled: the chevrons must show, at the size of the text
+  for (const icon of await calendarIn(page, 'toggle').locator('header button svg').all()) {
+    const box = await icon.boundingBox();
+    expect(box?.width).toBeGreaterThan(10);
+    expect(box?.width).toBeLessThan(24);
+  }
+});
+
 test('unstyled can change at runtime', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));

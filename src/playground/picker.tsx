@@ -271,8 +271,8 @@ export const PickerCases = component$(() => {
           <li>
             <p>Look at the trigger.</p>
             <p>
-              A plain browser button: none of the library styles reach it, although the styled calendars on this page
-              load the stylesheet.
+              A plain browser button with a calendar icon the size of its text: none of the library styles reach it,
+              although the styled calendars on this page load the stylesheet.
             </p>
           </li>
           <li>

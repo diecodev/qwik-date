@@ -85,6 +85,8 @@ test.describe('DatePicker', () => {
     const popover = page.locator('#unstyled [popover]');
     // other, styled calendars on the page inject the stylesheet: it must not reach this one
     await expect(trigger).toHaveCSS('box-shadow', 'none');
+    // the calendar icon keeps the size of the text instead of filling the button
+    expect((await trigger.locator('svg').boundingBox())?.height).toBeLessThan(24);
     await trigger.click();
     await expect(popover).toBeVisible();
     await expect(popover).toHaveCSS('box-shadow', 'none');

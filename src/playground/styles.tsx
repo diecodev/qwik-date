@@ -104,11 +104,18 @@ export const StylesCases = component$(() => {
         </Demo>
       </Case>
 
-      <Case id='styles-unstyled-toggle' title='unstyled at runtime' tests={['unstyled can change at runtime']}>
+      <Case
+        id='styles-unstyled-toggle'
+        title='unstyled at runtime'
+        tests={['unstyled can change at runtime', 'the icons keep a size of their own without the stylesheet']}
+      >
         <Steps>
           <li>
             <p>Look at the calendar, rendered with unstyled=&#123;true&#125;.</p>
-            <p>A plain table with browser buttons: no card, no shadow.</p>
+            <p>
+              A plain table with browser buttons: no card, no shadow. The month buttons still show their chevrons, at
+              the size of the text.
+            </p>
           </li>
           <li>
             <p>
