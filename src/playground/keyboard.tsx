@@ -53,7 +53,7 @@ export const KeyboardCases = component$(() => {
         </Steps>
         <Demo>
           <Focus on={day('2024-08-15')}>Focus Aug 15</Focus>
-          <Calendar date='2024-08-15' />
+          <Calendar value='2024-08-15' />
         </Demo>
       </Case>
 
@@ -108,7 +108,7 @@ export const KeyboardCases = component$(() => {
             <Focus on={day('2024-08-29')}>Focus Aug 29</Focus>
             <Focus on={day('2024-08-02')}>Focus Aug 2</Focus>
           </p>
-          <Calendar date='2024-08-15' />
+          <Calendar value='2024-08-15' />
         </Demo>
       </Case>
 
@@ -148,7 +148,7 @@ export const KeyboardCases = component$(() => {
             <Focus on={day('2024-08-15')}>Focus Aug 15</Focus>
             <Focus on={day('2024-08-01')}>Focus Aug 1</Focus>
           </p>
-          <Calendar date='2024-08-15' containerProps={{ dir: 'rtl' }} />
+          <Calendar value='2024-08-15' containerProps={{ dir: 'rtl' }} />
         </Demo>
       </Case>
 
@@ -192,7 +192,7 @@ export const KeyboardCases = component$(() => {
             <Focus on={day('2024-08-06')}>Focus Aug 6</Focus>
             <Focus on={day('2024-08-02')}>Focus Aug 2</Focus>
           </p>
-          <Calendar date='2024-08-15' />
+          <Calendar value='2024-08-15' />
         </Demo>
       </Case>
 
@@ -224,7 +224,7 @@ export const KeyboardCases = component$(() => {
         </Steps>
         <Demo>
           <Focus on={day('2024-08-15')}>Focus Aug 15</Focus>
-          <Calendar date='2024-08-15' fullWeeks showWeekNumber />
+          <Calendar value='2024-08-15' fullWeeks showWeekNumber />
         </Demo>
       </Case>
 
@@ -268,7 +268,7 @@ export const KeyboardCases = component$(() => {
             <Focus on={day('2024-08-15')}>Focus Aug 15</Focus>
             <Focus on={day('2024-08-31')}>Focus Aug 31</Focus>
           </p>
-          <Calendar date='2024-08-15' />
+          <Calendar value='2024-08-15' />
         </Demo>
       </Case>
 
@@ -300,7 +300,7 @@ export const KeyboardCases = component$(() => {
             <Focus on={day('2024-01-31')}>Focus Jan 31</Focus>
             <Focus on={day('2024-03-31')}>Focus Mar 31</Focus>
           </p>
-          <Calendar date='2024-01-31' />
+          <Calendar value='2024-01-31' />
         </Demo>
       </Case>
 
@@ -330,7 +330,7 @@ export const KeyboardCases = component$(() => {
         </Steps>
         <Demo>
           <Focus on={day('2024-08-15')}>Focus Aug 15</Focus>
-          <Calendar date='2024-08-15' />
+          <Calendar value='2024-08-15' />
           <button type='button' class='pg-button' tabIndex={0}>
             after the calendar
           </button>
@@ -349,16 +349,16 @@ export const KeyboardCases = component$(() => {
               <kbd>Space</kbd>, <kbd>PageDown</kbd>, <kbd>End</kbd>.
             </p>
             <p>
-              The focus goes to Aug 22, Space chooses it (onDateChange$: <b>2024-08-22</b>), then Sep 22 and{' '}
-              <b>Sep 28</b>. "Page scroll" in the focus bar doesn't change: the page never scrolls.
+              The focus goes to Aug 22, Space chooses it (onChange$: <b>2024-08-22</b>), then Sep 22 and <b>Sep 28</b>.
+              "Page scroll" in the focus bar doesn't change: the page never scrolls.
             </p>
           </li>
         </Steps>
         <Demo>
           <Focus on={day('2024-08-15')}>Focus Aug 15</Focus>
           <Calendar
-            date='2024-08-15'
-            onDateChange$={$((date) => {
+            value='2024-08-15'
+            onChange$={$((date) => {
               changes.value = [...changes.value, date];
             })}
           />
@@ -400,7 +400,7 @@ export const KeyboardCases = component$(() => {
         </Steps>
         <Demo>
           <Focus on={day('2024-08-31')}>Focus Aug 31</Focus>
-          <Calendar date='2024-08-15' />
+          <Calendar value='2024-08-15' />
         </Demo>
       </Case>
     </>

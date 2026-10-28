@@ -24,7 +24,7 @@ export const ThemeCases = component$(() => {
           </li>
         </Steps>
         <Demo>
-          <Calendar date='2024-08-15' />
+          <Calendar value='2024-08-15' />
           <Probe label='data-theme / background' read$={themeAndBackground} />
         </Demo>
       </Case>
@@ -45,7 +45,7 @@ export const ThemeCases = component$(() => {
         </Steps>
         <Demo>
           <div class='pg-dark'>
-            <Calendar date='2024-08-15' theme='dark' showWeekNumber />
+            <Calendar value='2024-08-15' theme='dark' showWeekNumber />
           </div>
           <Probe label='data-theme / background' read$={themeAndBackground} />
           <Probe
@@ -79,7 +79,7 @@ export const ThemeCases = component$(() => {
           </li>
         </Steps>
         <Demo>
-          <Calendar date='2024-08-15' theme='auto' />
+          <Calendar value='2024-08-15' theme='auto' />
           <Probe label='data-theme / background' read$={themeAndBackground} />
         </Demo>
       </Case>
@@ -125,7 +125,7 @@ export const ThemeCases = component$(() => {
               </button>
             ))}
           </p>
-          <Calendar date='2024-08-15' theme={theme} />
+          <Calendar value='2024-08-15' theme={theme} />
           <p class='pg-probe'>
             theme signal: <output>{theme.value}</output>
           </p>
@@ -152,7 +152,7 @@ export const ThemeCases = component$(() => {
         </Steps>
         <Demo>
           <div class='pg-dark'>
-            <DatePicker date='2024-08-15' theme='dark' />
+            <DatePicker value='2024-08-15' theme='dark' />
           </div>
           <Probe
             label='contrast of the trigger'

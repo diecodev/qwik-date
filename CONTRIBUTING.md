@@ -17,7 +17,7 @@ pnpm dev # playground at http://localhost:5173, rendering the library straight f
 ```
 
 The playground is a catalog of manual checks, one case per e2e test: what to try, what should happen,
-and readouts for what the eye can't see (the focused element, attributes, the value `onDateChange$`
+and readouts for what the eye can't see (the focused element, attributes, the value `onChange$`
 received). The page is `src/routes/index.tsx`; the cases live in `src/playground/<area>.tsx`, one file
 per spec in `tests/e2e`.
 

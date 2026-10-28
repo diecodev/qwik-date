@@ -8,7 +8,7 @@ export default component$(() => {
   return (
     <main style={{ padding: '32px' }}>
       <section id='toggle'>
-        <Calendar date='2024-08-15' unstyled={unstyled.value} />
+        <Calendar value='2024-08-15' unstyled={unstyled.value} />
         <button
           id='toggle-unstyled'
           type='button'

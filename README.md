@@ -35,30 +35,28 @@ Here's a basic example of how to use the inline calendar:
 
 ```tsx
 import { component$, useSignal } from '@qwik.dev/core';
-import { Calendar } from 'qwik-date';
+import { Calendar, type LocalDate } from 'qwik-date';
 
 export default component$(() => {
-  const date = useSignal('2023-07-23');
-  
-  return (
-    <Calendar 
-      date={date.value} 
-      onDateChange$={(newDate) => console.log({ newDate })} 
-    />
-  );
+  const date = useSignal<LocalDate | null>(null);
+
+  return <Calendar bind:value={date} onChange$={(value) => console.log({ value })} />;
 });
 ```
 
+Dates are `'YYYY-MM-DD'` strings (the `LocalDate` type): a day, without time or timezone.
+
 #### Props
 
-- `date`: Initial date to display (default: current date).
+- `value`: The selected day, or `null` for none (default: `null`). The calendar opens on its month, or on today's month without one. Today is marked with `aria-current="date"`.
+- `bind:value`: A `Signal<LocalDate | null>` kept in sync with the selected day, in both directions.
+- `onChange$`: Called with the day the user chooses.
 - `fullWeeks`: If true, shows full weeks (default: false).
 - `locale`: Locale for the calendar (default: 'en').
 - `showWeekNumber`: If true, shows week numbers (default: false).
 - `showDaysOfWeek`: If true, shows days of the week ~Mo, Tu, We, etc.~ (default: true).
 - `prevIcon`, `nextIcon`: Custom icons for the previous and next month buttons.
 - `containerProps`, `headerProps`, `navButtonProps` (both month buttons), `prevButtonProps`, `nextButtonProps`, `calendarProps`, `theadProps`, `tbodyProps`, `theadRowProps`, `tbodyRowProps`, `headerCellProps`, `cellProps`, `dayButtonProps`, `iconProps`, `titleProps`, `weekNumberProps`: Custom props for various parts of the component.
-- `onDateChange$`: Callback for when the date changes.
 - `unstyled`: If true, removes default styling (default: false).
 - `theme`: `'light'` (default), `'dark'`, or `'auto'` to follow the operating system's color scheme. It also accepts a `Signal<Theme>` to change it at runtime.
 
@@ -89,18 +87,12 @@ Here's a basic example of how to use the popup date picker:
 
 ```tsx
 import { component$, useSignal } from '@qwik.dev/core';
-import { DatePicker } from 'qwik-date';
+import { DatePicker, type LocalDate } from 'qwik-date';
 
 export default component$(() => {
-  const date = useSignal('2023-07-23');
-  
-  return (
-    <DatePicker 
-      date={date.value} 
-      onDateChange$={(newDate) => console.log({ newDate })}
-      triggerLabel="Select Date"
-    />
-  );
+  const date = useSignal<LocalDate | null>(null);
+
+  return <DatePicker bind:value={date} triggerLabel="Select Date" />;
 });
 ```
 

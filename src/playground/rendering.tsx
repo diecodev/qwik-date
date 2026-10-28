@@ -1,20 +1,20 @@
 import { component$ } from '@qwik.dev/core';
 import { Calendar } from '../lib';
-import { Case, Demo, Focus, Probe, Steps, calendarOf, day, preselected } from './ui';
+import { Case, Demo, Focus, Probe, Steps, calendarOf, day, selectedCell } from './ui';
 
 export const RenderingCases = component$(() => (
   <>
     <Case
       id='rendering-month'
       title='The month of the given date'
-      tests={['shows the month of the given date', 'labels every day with its full date']}
+      tests={['shows the month of the given value, with that day selected', 'labels every day with its full date']}
     >
       <Steps>
         <li>
-          <p>Look at the calendar, rendered with date="2024-08-15".</p>
+          <p>Look at the calendar, rendered with value="2024-08-15".</p>
           <p>
             The title reads <b>August 2024</b>, the weekdays <b>Su Mo Tu We Th Fr Sa</b>. There are 31 days, the 1st
-            under Th (the cells before it are empty), and <b>15</b> has a grey background: it's the preselected day.
+            under Th (the cells before it are empty), and <b>15</b> is selected (black).
           </p>
         </li>
         <li>
@@ -29,12 +29,12 @@ export const RenderingCases = component$(() => (
       </Steps>
       <Demo>
         <Focus on={day('2024-08-15')}>Focus Aug 15</Focus>
-        <Calendar date='2024-08-15' />
+        <Calendar value='2024-08-15' />
         <Probe
           label='day buttons'
           read$={(root) => `${calendarOf(root)?.querySelectorAll('button[data-value]').length}`}
         />
-        <Probe label='preselected' read$={preselected} />
+        <Probe label='selected cell (aria-selected)' read$={selectedCell} />
       </Demo>
     </Case>
 
@@ -62,7 +62,7 @@ export const RenderingCases = component$(() => (
         </li>
       </Steps>
       <Demo>
-        <Calendar date='2024-08-15' fullWeeks showWeekNumber />
+        <Calendar value='2024-08-15' fullWeeks showWeekNumber />
         <Probe
           label='rows / day buttons / disabled'
           read$={(root) => {
@@ -100,7 +100,7 @@ export const RenderingCases = component$(() => (
       </Steps>
       <Demo>
         <Focus on={day('2024-08-15')}>Focus Aug 15</Focus>
-        <Calendar date='2024-08-15' locale='es' />
+        <Calendar value='2024-08-15' locale='es' />
       </Demo>
     </Case>
 
@@ -116,7 +116,7 @@ export const RenderingCases = component$(() => (
         </li>
       </Steps>
       <Demo>
-        <Calendar date='2024-08-15' showDaysOfWeek={false} />
+        <Calendar value='2024-08-15' showDaysOfWeek={false} />
         <Probe
           label='weekday row (thead)'
           read$={(root) => (calendarOf(root)?.querySelector('thead') ? 'present' : 'none')}
@@ -130,12 +130,12 @@ export const RenderingCases = component$(() => (
           <p>Reload the page and wait a couple of seconds without touching anything.</p>
           <p>
             The focus bar reads <b>nothing (the page)</b> and the page doesn't jump to any calendar, although each
-            calendar on this page, like the one here, has a preselected day it could focus.
+            calendar on this page, like the one here, has a selected day it could focus.
           </p>
         </li>
       </Steps>
       <Demo>
-        <Calendar date='2024-08-15' />
+        <Calendar value='2024-08-15' />
       </Demo>
     </Case>
   </>

@@ -81,9 +81,10 @@ export const selectedCell = $(
   (root: HTMLElement) => calendarOf(root)?.querySelector('td[aria-selected="true"]')?.textContent || 'none',
 );
 
-/** The preselected day: the one with the grey background, where Tab enters the grid. */
-export const preselected = $(
-  (root: HTMLElement) => calendarOf(root)?.querySelector('[data-preselected]')?.getAttribute('data-value') ?? 'none',
+/** The day marked as today (`aria-current="date"`, the grey one). */
+export const todayMarked = $(
+  (root: HTMLElement) =>
+    calendarOf(root)?.querySelector('[aria-current="date"]')?.getAttribute('data-value') ?? 'none in this month',
 );
 
 /** WCAG contrast ratio of an element's text against the first opaque background up its tree (as tests/e2e/helpers.ts). */
@@ -170,10 +171,10 @@ export const Probe = component$<{ label: string; read$: QRL<(root: HTMLElement) 
   );
 });
 
-/** The values a calendar handed to `onDateChange$`, in order. */
+/** The values a calendar handed to `onChange$`, in order. */
 export const Changes = component$<{ values: string[] }>(({ values }) => (
   <p class='pg-probe'>
-    onDateChange$ calls ({values.length}): <output>{values.length ? values.join(', ') : 'none'}</output>
+    onChange$ calls ({values.length}): <output>{values.length ? values.join(', ') : 'none'}</output>
   </p>
 ));
 

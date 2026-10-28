@@ -41,7 +41,7 @@ export const NavigationCases = component$(() => {
           </li>
         </Steps>
         <Demo>
-          <Calendar date='2024-08-15' />
+          <Calendar value='2024-08-15' />
           <Probe
             label='title aria-live'
             read$={(root) => calendarOf(root)?.querySelector('header > div')?.getAttribute('aria-live') ?? 'none'}
@@ -67,7 +67,7 @@ export const NavigationCases = component$(() => {
         </Steps>
         <Demo>
           <Focus on={prevButton}>Focus ‹</Focus>
-          <Calendar date='2024-08-15' />
+          <Calendar value='2024-08-15' />
           <Probe label='selected cell (aria-selected)' read$={selectedCell} />
         </Demo>
       </Case>
@@ -98,7 +98,7 @@ export const NavigationCases = component$(() => {
         </Steps>
         <Demo>
           <Focus on={prevButton}>Focus ‹</Focus>
-          <Calendar date='2024-08-15' />
+          <Calendar value='2024-08-15' />
         </Demo>
       </Case>
 
@@ -130,7 +130,7 @@ export const NavigationCases = component$(() => {
         </Steps>
         <Demo>
           <Calendar
-            date='2024-08-15'
+            value='2024-08-15'
             nextIcon={ArrowIcon}
             navButtonProps={{ class: 'nav' }}
             prevButtonProps={{

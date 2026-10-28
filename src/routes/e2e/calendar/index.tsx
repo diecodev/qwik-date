@@ -17,8 +17,8 @@ export default component$(() => {
     <main style={{ fontFamily: 'Georgia, serif', display: 'grid', gap: '32px', padding: '32px 32px 1200px' }}>
       <section id='basic'>
         <Calendar
-          date='2024-08-15'
-          onDateChange$={$((date) => {
+          value='2024-08-15'
+          onChange$={$((date) => {
             changes.value = [...changes.value, date];
           })}
         />
@@ -28,20 +28,20 @@ export default component$(() => {
         </button>
       </section>
       <section id='full-weeks'>
-        <Calendar date='2024-08-15' fullWeeks showWeekNumber />
+        <Calendar value='2024-08-15' fullWeeks showWeekNumber />
       </section>
       <section id='es'>
-        <Calendar date='2024-08-15' locale='es' />
+        <Calendar value='2024-08-15' locale='es' />
       </section>
       <section id='no-weekdays'>
-        <Calendar date='2024-08-15' showDaysOfWeek={false} />
+        <Calendar value='2024-08-15' showDaysOfWeek={false} />
       </section>
       <section id='rtl'>
-        <Calendar date='2024-08-15' containerProps={{ dir: 'rtl' }} />
+        <Calendar value='2024-08-15' containerProps={{ dir: 'rtl' }} />
       </section>
       <section id='custom-nav'>
         <Calendar
-          date='2024-08-15'
+          value='2024-08-15'
           nextIcon={ArrowIcon}
           navButtonProps={{ class: 'nav' }}
           prevButtonProps={{

@@ -64,7 +64,7 @@ export const TimezoneCases = component$(() => (
           <Focus on={day('2024-03-15')}>Focus Mar 15</Focus>
           <Focus on={day('2024-03-30')}>Focus Mar 30</Focus>
         </p>
-        <Calendar date='2024-03-15' />
+        <Calendar value='2024-03-15' />
         <BrowserTimezone />
       </Demo>
     </Case>
@@ -93,7 +93,7 @@ export const TimezoneCases = component$(() => (
       </Steps>
       <Demo>
         <Focus on={day('2024-02-15')}>Focus Feb 15</Focus>
-        <Calendar date='2024-02-15' />
+        <Calendar value='2024-02-15' />
         <BrowserTimezone />
       </Demo>
     </Case>

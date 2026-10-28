@@ -5,12 +5,13 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/e2e/calendar/');
 });
 
-test('shows the month of the given date', async ({ page }) => {
+test('shows the month of the given value, with that day selected', async ({ page }) => {
   const calendar = calendarIn(page, 'basic');
   await expect(title(calendar)).toHaveText('August 2024');
   await expect(calendar.locator('th')).toHaveText(['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']);
   await expect(calendar.locator('button[data-value]')).toHaveCount(31);
-  await expect(calendar.locator('button[data-preselected]')).toHaveAttribute('data-value', '2024-08-15');
+  await expect(calendar.locator('td[aria-selected="true"]')).toHaveText('15');
+  await expect(calendar.locator('button[data-selected]')).toHaveAttribute('data-value', '2024-08-15');
 });
 
 test('labels every day with its full date', async ({ page }) => {

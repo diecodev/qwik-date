@@ -34,7 +34,7 @@ export const A11yCases = component$(() => (
       </Steps>
       <Demo>
         <Focus on={prevButton}>Focus ‹</Focus>
-        <Calendar date='2024-08-15' />
+        <Calendar value='2024-08-15' />
         <Probe
           label='grid name'
           read$={(root) => {
@@ -60,9 +60,10 @@ export const A11yCases = component$(() => (
     >
       <Steps>
         <li>
-          <p>Read the label below.</p>
+          <p>Read the label below (the calendar is rendered with value="2024-08-15").</p>
           <p>
-            The calendar is a group named <b>Calendar</b>.
+            The calendar is a group named <b>Calendar, selected date: Thursday, August 15, 2024</b>. Without a value
+            it's just <b>Calendar</b>.
           </p>
         </li>
         <li>
@@ -75,7 +76,7 @@ export const A11yCases = component$(() => (
         </li>
       </Steps>
       <Demo>
-        <Calendar date='2024-08-15' />
+        <Calendar value='2024-08-15' />
         <Probe
           label='group (role / aria-label)'
           read$={(root) => {
@@ -116,7 +117,7 @@ export const A11yCases = component$(() => (
         </li>
       </Steps>
       <Demo>
-        <Calendar date='2024-08-15' />
+        <Calendar value='2024-08-15' />
         <Probe label='selected cell (aria-selected)' read$={selectedCell} />
         <Probe
           label='buttons with data-selected'

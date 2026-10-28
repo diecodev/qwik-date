@@ -19,8 +19,8 @@ export const StylesCases = component$(() => {
         </Steps>
         <Demo>
           <div class='pg-row' style={{ fontFamily: 'Georgia, serif' }}>
-            <Calendar date='2024-08-06' />
-            <DatePicker date='2024-08-06' />
+            <Calendar value='2024-08-06' />
+            <DatePicker value='2024-08-06' />
           </div>
           <Probe
             label='font-family of the title / weekday / day / trigger'
@@ -54,7 +54,7 @@ export const StylesCases = component$(() => {
           </li>
         </Steps>
         <Demo>
-          <Calendar date='2024-08-15' fullWeeks showWeekNumber />
+          <Calendar value='2024-08-15' fullWeeks showWeekNumber />
           <Probe
             label='contrast of the weekday / week number'
             read$={(root) => {
@@ -88,8 +88,8 @@ export const StylesCases = component$(() => {
         </Steps>
         <Demo>
           <div class='pg-row'>
-            <Calendar date='2024-08-15' containerProps={{ dir: 'rtl' }} />
-            <Calendar date='2024-08-15' />
+            <Calendar value='2024-08-15' containerProps={{ dir: 'rtl' }} />
+            <Calendar value='2024-08-15' />
           </div>
           <Probe
             label='transform of ‹ and › (rtl) / ‹ (ltr)'
@@ -141,7 +141,7 @@ export const StylesCases = component$(() => {
           >
             Toggle unstyled
           </button>
-          <Calendar date='2024-08-15' unstyled={unstyled.value} />
+          <Calendar value='2024-08-15' unstyled={unstyled.value} />
           <p class='pg-probe'>
             unstyled: <output>{String(unstyled.value)}</output>
           </p>

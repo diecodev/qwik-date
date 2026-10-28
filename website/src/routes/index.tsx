@@ -1,6 +1,6 @@
 import { component$, useSignal } from '@qwik.dev/core'
 import type { DocumentHead } from '@qwik.dev/router'
-import { Calendar } from 'qwik-date'
+import { Calendar, type LocalDate } from 'qwik-date'
 import { ScriptCode } from '~/components/script'
 
 import '@fontsource-variable/onest'
@@ -10,7 +10,7 @@ import { Docs } from '~/components/docs'
 import { Footer } from '~/components/footer'
 
 export default component$(() => {
-  const date = useSignal<`${number}-${number}-${number}`>('2024-08-01')
+  const date = useSignal<LocalDate | null>(null)
 
   return (
     <>
@@ -25,10 +25,10 @@ export default component$(() => {
         </header>
         <section class="flex justify-center gap-8">
           <Calendar
-            bind:date={date}
+            bind:value={date}
             containerProps={{}}
             fullWeeks
-            onDateChange$={(date) => {
+            onChange$={(date) => {
               toast('Date selected successfully', {
                 description: date,
               })

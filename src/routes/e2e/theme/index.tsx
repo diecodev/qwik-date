@@ -8,16 +8,16 @@ export default component$(() => {
   return (
     <main style={{ display: 'grid', gap: '32px', padding: '32px' }}>
       <section id='default'>
-        <Calendar date='2024-08-15' />
+        <Calendar value='2024-08-15' />
       </section>
       <section id='dark' style={{ background: 'black', padding: '16px' }}>
-        <Calendar date='2024-08-15' theme='dark' showWeekNumber />
+        <Calendar value='2024-08-15' theme='dark' showWeekNumber />
       </section>
       <section id='auto'>
-        <Calendar date='2024-08-15' theme='auto' />
+        <Calendar value='2024-08-15' theme='auto' />
       </section>
       <section id='signal'>
-        <Calendar date='2024-08-15' theme={theme} />
+        <Calendar value='2024-08-15' theme={theme} />
         <button
           id='toggle-theme'
           type='button'
@@ -29,7 +29,7 @@ export default component$(() => {
         </button>
       </section>
       <section id='picker' style={{ background: 'black', padding: '16px' }}>
-        <DatePicker date='2024-08-15' theme='dark' />
+        <DatePicker value='2024-08-15' theme='dark' />
       </section>
     </main>
   );

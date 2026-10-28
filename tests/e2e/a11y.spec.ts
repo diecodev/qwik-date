@@ -20,7 +20,9 @@ test('the header buttons are labelled', async ({ page }) => {
 
 test('the calendar group is labelled with the selected date', async ({ page }) => {
   const section = page.locator('#basic');
-  await expect(section.getByRole('group', { name: 'Calendar', exact: true })).toBeVisible();
+  await expect(
+    section.getByRole('group', { name: 'Calendar, selected date: Thursday, August 15, 2024' }),
+  ).toBeVisible();
   await day(calendarIn(page, 'basic'), '2024-08-20').click();
   await expect(section.getByRole('group', { name: 'Calendar, selected date: Tuesday, August 20, 2024' })).toBeVisible();
 });
@@ -36,11 +38,11 @@ test('the browser accessibility tree has gridcells and the selection', async ({ 
   await day(calendarIn(page, 'basic'), '2024-08-20').click();
   await expect(page.locator('#changes')).toHaveText('2024-08-20');
   const cdp = await page.context().newCDPSession(page);
-  const { nodes } = await cdp.send('Accessibility.getFullAXTree');
-  const selected = nodes.filter(
-    (node) =>
-      node.role?.value === 'gridcell' &&
-      node.properties?.some((property) => property.name === 'selected' && property.value?.value === true),
+  // only this calendar: the others on the page have a selected day too
+  const { result } = await cdp.send('Runtime.evaluate', { expression: "document.querySelector('#basic')" });
+  const { nodes } = await cdp.send('Accessibility.queryAXTree', { objectId: result.objectId, role: 'gridcell' });
+  const selected = nodes.filter((node) =>
+    node.properties?.some((property) => property.name === 'selected' && property.value?.value === true),
   );
   expect(selected.map((node) => node.name?.value)).toEqual(['Tuesday, August 20, 2024']);
 });

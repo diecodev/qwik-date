@@ -70,15 +70,15 @@ export const PickerCases = component$(() => {
               Click <b>20</b>.
             </p>
             <p>
-              onDateChange$ is called with <b>2024-08-20</b>. The popup stays open: the DatePicker doesn't close on
-              select yet.
+              onChange$ is called with <b>2024-08-20</b>. The popup stays open: the DatePicker doesn't close on select
+              yet.
             </p>
           </li>
         </Steps>
         <Demo>
           <DatePicker
-            date='2024-08-06'
-            onDateChange$={$((date) => {
+            value='2024-08-06'
+            onChange$={$((date) => {
               picked.value = [...picked.value, date];
             })}
           />
@@ -106,7 +106,7 @@ export const PickerCases = component$(() => {
           </li>
         </Steps>
         <Demo>
-          <DatePicker date='2024-08-06' />
+          <DatePicker value='2024-08-06' />
           <Probe label='popup' read$={popupGap} />
         </Demo>
       </Case>
@@ -144,8 +144,8 @@ export const PickerCases = component$(() => {
           </li>
         </Steps>
         <Demo>
-          <Calendar date='2024-08-06' />
-          <DatePicker date='2024-08-06' />
+          <Calendar value='2024-08-06' />
+          <DatePicker value='2024-08-06' />
         </Demo>
       </Case>
 
@@ -165,7 +165,7 @@ export const PickerCases = component$(() => {
           </li>
         </Steps>
         <Demo>
-          <DatePicker date='2024-08-15' containerProps={{ id: 'my-picker' }} />
+          <DatePicker value='2024-08-15' containerProps={{ id: 'my-picker' }} />
           <Probe
             label='popup id / trigger popovertarget'
             read$={(root) =>
@@ -200,7 +200,7 @@ export const PickerCases = component$(() => {
           </li>
         </Steps>
         <Demo>
-          <DatePicker date='2024-08-15' unstyled />
+          <DatePicker value='2024-08-15' unstyled />
           <Probe
             label='box-shadow of the trigger / popup'
             read$={(root) => {
@@ -253,7 +253,7 @@ export const PickerCases = component$(() => {
           >
             {mounted.value ? 'Unmount the DatePicker' : 'Mount a DatePicker'}
           </button>
-          {mounted.value && <DatePicker date='2024-08-15' />}
+          {mounted.value && <DatePicker value='2024-08-15' />}
           <LiveListeners />
           <Probe label='popup' read$={popupGap} />
         </Demo>

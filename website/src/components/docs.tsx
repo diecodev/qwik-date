@@ -2,9 +2,16 @@ import { component$ } from '@qwik.dev/core'
 
 const calendarInlinePropsInfo = [
   {
-    name: 'date',
-    description: 'Default date to be used in the calendar',
-    defaultValue: 'today',
+    name: 'value',
+    description:
+      "The selected day as 'YYYY-MM-DD', or null for none. Without one the calendar opens on today's month",
+    defaultValue: 'null',
+  },
+  {
+    name: 'bind:value',
+    description:
+      'Signal kept in sync with the selected day, in both directions',
+    defaultValue: 'undefined',
   },
   {
     name: 'fullWeeks',
@@ -117,9 +124,8 @@ const calendarInlinePropsInfo = [
     defaultValue: '-',
   },
   {
-    name: 'onDateChange$',
-    description:
-      'Callback function triggered when the date changes in the calendar',
+    name: 'onChange$',
+    description: 'Called with the day the user chooses',
     defaultValue: 'undefined',
   },
   {
@@ -132,11 +138,6 @@ const calendarInlinePropsInfo = [
     description:
       "Color theme: 'light', 'dark' or 'auto' (follows the OS). Also accepts a Signal",
     defaultValue: "'light'",
-  },
-  {
-    name: 'bind:date',
-    description: 'Signal with the default date',
-    defaultValue: 'undefined',
   },
 ] as const
 

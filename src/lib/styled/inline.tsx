@@ -36,8 +36,9 @@ export interface CalendarProps {
   locale?: Locale;
   showWeekNumber?: boolean;
   fullWeeks?: boolean;
-  date?: LocalDate;
-  'bind:date'?: Signal<LocalDate>; // TODO: validate user is passing a signal
+  /** the selected day, `null` (the default) for none */
+  value?: LocalDate | null;
+  'bind:value'?: Signal<LocalDate | null>;
   showDaysOfWeek?: boolean;
   unstyled?: boolean;
   theme?: Theme | Signal<Theme>;
@@ -61,7 +62,7 @@ export interface CalendarProps {
   cellProps?: PropsOf<'td'>;
   dayButtonProps?: PropsOf<'button'>;
   weekNumberProps?: PropsOf<'td'>;
-  onDateChange$?: QRL<(date: LocalDate) => void>;
+  onChange$?: QRL<(value: LocalDate) => void>;
 }
 
 const ACTION_KEYS = [
@@ -86,7 +87,7 @@ const dateFormatter = (locale: Locale) =>
 
 export const Calendar = component$<CalendarProps>(
   ({
-    date: dateProp,
+    value: valueProp = null,
     fullWeeks = false,
     locale = 'en',
     showWeekNumber = false,
@@ -109,7 +110,7 @@ export const Calendar = component$<CalendarProps>(
     iconProps = {},
     titleProps = {},
     weekNumberProps = {},
-    onDateChange$,
+    onChange$,
     unstyled,
     theme = 'light',
     ...props
@@ -118,17 +119,19 @@ export const Calendar = component$<CalendarProps>(
     useStyles$(styles);
 
     // root constants
-    const date = toLocalDateString(new Date()) as LocalDate;
     const themeValue = isSignal(theme) ? theme.value : theme;
     const labelStr = containerProps['aria-label'] ?? ARIA_LABELS[locale].root;
 
     // signals
-    const dateSignal = useSignal<LocalDate>(dateProp ?? date);
-    const defaultDate = props['bind:date'] ?? dateSignal;
-    const activeDate = useSignal<LocalDate | null>(null);
-    const monthToRender = useSignal<Month>(defaultDate.value.split('-')[1] as Month);
-    const yearToRender = useSignal<number>(+defaultDate.value.split('-')[0]);
-    const dateToFocus = useSignal<LocalDate>(defaultDate.value);
+    const valueSignal = useSignal<LocalDate | null>(valueProp);
+    const selected = props['bind:value'] ?? valueSignal;
+    // the day where the component rendered: with SSR that's the server's, the visible task below switches it
+    const today = useSignal(toLocalDateString(new Date()) as LocalDate);
+    // the calendar opens on the selected day, or on today without one
+    const initial = selected.value ?? today.value;
+    const monthToRender = useSignal<Month>(initial.split('-')[1] as Month);
+    const yearToRender = useSignal<number>(+initial.split('-')[0]);
+    const dateToFocus = useSignal<LocalDate>(initial);
     const focusDayOnMonthChange = useSignal(false);
     const rootRef = useSignal<HTMLDivElement>();
 
@@ -138,10 +141,10 @@ export const Calendar = component$<CalendarProps>(
 
     // computed
     const labelSignal = useComputed$(() => {
-      if (!activeDate.value) return labelStr;
+      if (!selected.value) return labelStr;
 
-      const selected = dateFormatter(locale).format(parseLocalDate(activeDate.value));
-      return `${labelStr}, ${ARIA_LABELS[locale].selected} ${selected}`;
+      const date = dateFormatter(locale).format(parseLocalDate(selected.value));
+      return `${labelStr}, ${ARIA_LABELS[locale].selected} ${date}`;
     });
     const datesArray = useComputed$(() => {
       const dates = daysArrGenerator({
@@ -152,29 +155,32 @@ export const Calendar = component$<CalendarProps>(
       return dates;
     });
 
-    if (!isValidLocalDate(defaultDate.value))
+    if (selected.value !== null && !isValidLocalDate(selected.value))
       throw new Error('Invalid date in Calendar. Please use an existing date in YYYY-MM-DD format.');
 
-    // follow the date when it changes from outside (e.g. a parent writes to `bind:date`)
+    // show the selected day when it changes from outside (e.g. a parent writes to `bind:value`)
     useTask$(({ track }) => {
-      const value = track(() => defaultDate.value);
-      if (!isValidLocalDate(value)) return;
+      const value = track(() => selected.value);
+      if (!value || !isValidLocalDate(value)) return;
 
       const [year, month] = value.split('-');
       monthToRender.value = month as Month;
       yearToRender.value = +year;
       dateToFocus.value = value;
-      // a selection made before the external change no longer matches the date
-      if (activeDate.value && activeDate.value !== value) activeDate.value = null;
     });
 
-    // without `date` / `bind:date` the default is "today" where the component rendered: with SSR that is
-    // the server's day (frozen at build time with SSG), so switch to the visitor's day on the client
+    // "today" is the visitor's day, not the server's (frozen at build time with SSG); without a selected day
+    // the calendar opened on today's month, so it moves to the visitor's one too
     useVisibleTask$(() => {
-      if (dateProp || props['bind:date']) return;
+      const visitorToday = toLocalDateString(new Date()) as LocalDate;
+      if (today.value === visitorToday) return;
 
-      const today = toLocalDateString(new Date()) as LocalDate;
-      if (dateSignal.value !== today) dateSignal.value = today;
+      today.value = visitorToday;
+      if (selected.value) return;
+      const [year, month] = visitorToday.split('-');
+      monthToRender.value = month as Month;
+      yearToRender.value = +year;
+      dateToFocus.value = visitorToday;
     });
 
     // taks
@@ -474,29 +480,30 @@ export const Calendar = component$<CalendarProps>(
                   {week.map((day) => {
                     const label = day ? dateFormatter(locale).format(new Date(`${day}T12:00:00`)) : undefined; // the T12:00:00 is to avoid timezone issues
                     const disabled = day?.split('-')[1] !== monthToRender.value;
+                    // the days of the adjacent months (fullWeeks) are never selected nor today: they're disabled
+                    const isSelected = !disabled && day === selected.value;
 
                     return (
                       <td
                         key={`${week.toString()}-${day}`}
-                        aria-selected={day && day === activeDate.value ? 'true' : undefined}
+                        aria-selected={isSelected ? 'true' : undefined}
                         aria-disabled={disabled}
                         {...cellProps}
                       >
                         {day && (
                           <button
                             type='button'
-                            data-preselected={day === defaultDate.value}
-                            data-selected={day === activeDate.value}
+                            data-selected={isSelected}
                             data-value={day}
                             aria-label={label}
+                            aria-current={!disabled && day === today.value ? 'date' : undefined}
                             disabled={disabled}
                             tabIndex={day === dateToFocus.value ? 0 : -1}
                             {...dayButtonProps}
                             onClick$={[
                               $(() => {
-                                activeDate.value = day as LocalDate;
-                                defaultDate.value = day as LocalDate;
-                                onDateChange$?.(day as LocalDate);
+                                selected.value = day as LocalDate;
+                                onChange$?.(day as LocalDate);
                               }),
                               dayButtonProps.onClick$,
                             ]}

@@ -9,22 +9,22 @@ export default component$(() => {
   return (
     <main style={{ fontFamily: 'Georgia, serif', display: 'grid', gap: '32px', padding: '32px' }}>
       <section id='inline'>
-        <Calendar date='2024-08-06' />
+        <Calendar value='2024-08-06' />
       </section>
       <section id='picker'>
         <DatePicker
-          date='2024-08-06'
-          onDateChange$={$((date) => {
+          value='2024-08-06'
+          onChange$={$((date) => {
             picked.value = date;
           })}
         />
         <output id='picked'>{picked.value}</output>
       </section>
       <section id='custom-id'>
-        <DatePicker date='2024-08-15' containerProps={{ id: 'my-picker' }} />
+        <DatePicker value='2024-08-15' containerProps={{ id: 'my-picker' }} />
       </section>
       <section id='unstyled'>
-        <DatePicker date='2024-08-15' unstyled />
+        <DatePicker value='2024-08-15' unstyled />
       </section>
       <section id='late'>
         <button
@@ -36,7 +36,7 @@ export default component$(() => {
         >
           toggle picker
         </button>
-        {showLate.value && <DatePicker date='2024-08-15' />}
+        {showLate.value && <DatePicker value='2024-08-15' />}
       </section>
     </main>
   );
