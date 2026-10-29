@@ -1,5 +1,5 @@
-import { $, component$ } from '@qwik.dev/core';
-import { Calendar } from '../lib';
+import { $, component$, useSignal } from '@qwik.dev/core';
+import { Calendar, type LocalDate } from '../lib';
 import { Calendar as Headless, useCalendar } from '../lib/headless';
 import { Case, Demo, Focus, Probe, Steps } from './ui';
 
@@ -23,6 +23,27 @@ const GridTitles = component$(() => {
     <p class='pg-probe'>
       useCalendar().grids: <output>{calendar.grids.value.map((grid) => grid.title).join(' | ')}</output>
     </p>
+  );
+});
+
+/** Two months bound to a signal, and buttons that write it from outside. */
+const OutsideDemo = component$(() => {
+  const date = useSignal<LocalDate | null>('2024-08-15');
+  return (
+    <>
+      <Calendar months={2} bind:value={date} />
+      <p>
+        <button type='button' onClick$={() => (date.value = '2024-09-10')}>
+          Write Sep 10, 2024
+        </button>{' '}
+        <button type='button' onClick$={() => (date.value = '2025-03-10')}>
+          Write Mar 10, 2025
+        </button>{' '}
+        <button type='button' onClick$={() => (date.value = '2024-05-10')}>
+          Write May 10, 2024
+        </button>
+      </p>
+    </>
   );
 });
 
@@ -207,6 +228,38 @@ export const MonthsCases = component$(() => (
       </Steps>
       <Demo>
         <Calendar months={2} value='2024-08-15' />
+        <Probe label='grids' read$={gridNames} />
+      </Demo>
+    </Case>
+
+    <Case
+      id='months-outside'
+      title='A value written from outside'
+      tests={['a value written from outside shows in the first month, unless its month is on show']}
+    >
+      <Steps>
+        <li>
+          <p>Click Write Sep 10, 2024: its month is on show.</p>
+          <p>
+            The 10 of September is selected and <b>nothing moves</b>: August and September.
+          </p>
+        </li>
+        <li>
+          <p>Click Write Mar 10, 2025.</p>
+          <p>
+            <b>March 2025</b> in the first grid and April in the second, as when a calendar opens on that value; not
+            February and March, as the keyboard would move.
+          </p>
+        </li>
+        <li>
+          <p>Click Write May 10, 2024.</p>
+          <p>
+            <b>May 2024</b> first, June second.
+          </p>
+        </li>
+      </Steps>
+      <Demo>
+        <OutsideDemo />
         <Probe label='grids' read$={gridNames} />
       </Demo>
     </Case>

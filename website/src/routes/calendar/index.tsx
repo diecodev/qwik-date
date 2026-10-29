@@ -140,9 +140,7 @@ export default component$(() => {
           They stack on narrow screens.
         </p>
         <Preview code={MONTHS}>
-          {/* a new calendar on the visitor's day: an outside value of a later month would show in the second panel */}
           <Calendar
-            key={today.value}
             mode="range"
             months={2}
             bind:value={twoMonths}

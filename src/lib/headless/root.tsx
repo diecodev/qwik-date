@@ -458,13 +458,15 @@ export const Root = component$<RootProps>(
       );
 
     // show the selected day (the start of a range) when the value changes from outside, e.g. a parent writes
-    // to `bind:value`
+    // to `bind:value`: where it is if its month is on show, or else in the first month, as when the calendar
+    // opens on a value (the keyboard moves as few months as it takes instead: firstShownFor)
     useTask$(({ track }) => {
       const value = track(() => selected.value);
       const day = openingDay(value);
       if (value === null || day === null || value === chosen.value || !isValidValue(value)) return;
 
-      const first = firstShownFor(day, { year: yearToRender.value, month: monthToRender.value }, months);
+      const shown = { year: yearToRender.value, month: monthToRender.value };
+      const first = isShown(day, shown, months) ? shown : { year: +day.slice(0, 4), month: day.slice(5, 7) as Month };
       view.value = 'days';
       showMonth(state, first);
       dateToFocus.value = day;

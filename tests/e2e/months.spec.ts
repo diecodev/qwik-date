@@ -38,6 +38,20 @@ test('the buttons move one month', async ({ page }) => {
   await expectMonths(page, 'two', ['August 2024', 'September 2024']);
 });
 
+test('a value written from outside shows in the first month, unless its month is on show', async ({ page }) => {
+  const calendar = calendarIn(page, 'outside');
+  await expectMonths(page, 'outside', ['August 2024', 'September 2024']);
+  // its month is on show: nothing moves
+  await page.locator('#outside-shown').click();
+  await expect(day(calendar, '2024-09-10')).toHaveAttribute('data-selected');
+  await expectMonths(page, 'outside', ['August 2024', 'September 2024']);
+  // a later month opens first, as on load, not last (the keyboard's as few months as it takes)
+  await page.locator('#outside-later').click();
+  await expectMonths(page, 'outside', ['March 2025', 'April 2025']);
+  await page.locator('#outside-earlier').click();
+  await expectMonths(page, 'outside', ['May 2024', 'June 2024']);
+});
+
 test('the keyboard goes from one grid to the next without jumps', async ({ page }) => {
   const section = page.locator('#two');
   const calendar = calendarIn(page, 'two');
