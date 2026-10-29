@@ -5,6 +5,7 @@
   --background-color: 0, 0%, 0%;
   --accent-color: 240, 4.8%, 95.9%;
   --muted-color: 0, 0%, 45%; /* 4.7:1 on white, WCAG AA for the weekday names and week numbers */
+  --disabled-color: 0, 0%, 75%; /* the days that can't be chosen: faded towards the background */
 
   --shadow-opacity: 0.25;
   --shadow-color: 0, 0%, 43%;
@@ -19,6 +20,7 @@
   --background-color: 240, 4.8%, 95.9%;
   --accent-color: 0, 0%, 20%;
   --muted-color: 0, 0%, 50%; /* 5.3:1 on black */
+  --disabled-color: 0, 0%, 30%;
 
   --shadow-opacity: 0.25;
   --shadow-color: 0, 0%, 100%;
@@ -35,6 +37,7 @@
     --background-color: 240, 4.8%, 95.9%;
     --accent-color: 0, 0%, 20%;
     --muted-color: 0, 0%, 50%; /* 5.3:1 on black */
+    --disabled-color: 0, 0%, 30%;
 
     --shadow-opacity: 0.25;
     --shadow-color: 0, 0%, 100%;
@@ -72,9 +75,9 @@
   border: none;
 }
 
-:where([data-qwik-date]:not([data-unstyled])):not([popover]),
-:where([data-qwik-date]:not([data-unstyled])):popover-open {
-
+/* inside :where(), the popover's state too: a rule of the page on a part or a data attribute wins over these */
+:where([data-qwik-date]:not([data-unstyled]):not([popover])),
+:where([data-qwik-date]:not([data-unstyled]):popover-open) {
   padding-inline: var(--padding-inline);
   padding-block: var(--padding-block);
   width: max-content;
@@ -123,45 +126,46 @@
         box-shadow: inset 0 0 0 0.1rem hsla(var(--background-color), 0.2);
       }
     }
+  }
 
-    & button:has(svg) {
+  /* the month buttons: in the header, or at the corners of the panels with `months` */
+  & [data-header-action] {
+    background-color: transparent;
+    border: none;
+    margin: 0;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: hsla(var(--background-color), 1);
+    border-radius: calc(var(--radius) - 0.4rem);
+
+    /* the text color of the theme, so the outline also shows on the dark theme */
+    box-shadow: inset 0 0 0 0.075rem hsla(var(--background-color), 0.15);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: all 150ms ease-in-out;
+    }
+
+    &:hover {
+      background-color: hsla(var(--accent-color), 1);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: inset 0 0 0 0.1rem hsla(var(--background-color), 0.2);
+    }
+
+    /* at min or max: still focusable, so the focus doesn't drop when it gets there */
+    &[aria-disabled="true"] {
+      opacity: 0.35;
+      cursor: not-allowed;
       background-color: transparent;
-      border: none;
-      margin: 0;
-      padding: 0.25rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: hsla(var(--background-color), 1);
-      border-radius: calc(var(--radius) - 0.4rem);
+    }
 
-      /* the text color of the theme, so the outline also shows on the dark theme */
-      box-shadow: inset 0 0 0 0.075rem hsla(var(--background-color), 0.15);
-
-      @media (prefers-reduced-motion: no-preference) {
-        transition: all 150ms ease-in-out;
-      }
-
-      &:hover {
-        background-color: hsla(var(--accent-color), 1);
-      }
-
-      &:focus-visible {
-        outline: none;
-        box-shadow: inset 0 0 0 0.1rem hsla(var(--background-color), 0.2);
-      }
-
-      /* at min or max: still focusable, so the focus doesn't drop when it gets there */
-      &[aria-disabled="true"] {
-        opacity: 0.35;
-        cursor: not-allowed;
-        background-color: transparent;
-      }
-
-      & svg {
-        width: var(--icon-size);
-        height: var(--icon-size);
-      }
+    & svg {
+      width: var(--icon-size);
+      height: var(--icon-size);
     }
   }
 
@@ -183,7 +187,7 @@
       }
 
       & td {
-        color: hsl(0, 0%, 75%);
+        color: hsla(var(--disabled-color), 1);
       }
 
       & td[aria-disabled="false"] {
@@ -239,20 +243,58 @@
           cursor: not-allowed;
         }
 
-        /* the days between the start and the end of a range: darker than today's grey */
-        &[data-in-range] {
-          background-color: hsla(var(--background-color), 0.12);
+        /* inside a range the band is the cell's (below): a day only shows its own shape on hover */
+        &:is([data-in-range], [data-preview]) {
+          background-color: transparent;
         }
 
-        /* the range a choice would make, while a range has no end: lighter than the days in range */
-        &[data-preview] {
-          background-color: hsla(var(--background-color), 0.07);
+        &:is([data-in-range], [data-preview]):hover {
+          background-color: hsla(var(--background-color), 0.08);
+        }
+
+        /* today inside a range: a ring, its grey would be lost on the band */
+        &[aria-current="date"]:is([data-in-range], [data-preview]):not(:focus-visible) {
+          box-shadow: inset 0 0 0 0.075rem hsla(var(--background-color), 0.35);
         }
 
         &[data-selected] {
           background-color: hsla(var(--background-color), 1);
           color: hsla(var(--foreground-color), 1);
         }
+      }
+
+      /*
+       * A range is one band: the cells carry it, so it runs from day to day without seams, round at the ends of
+       * each stretch (the range's, the row's, the month's). The days between the ends are darker than the
+       * preview of a range without an end.
+       */
+      & td:has(> [data-in-range]) {
+        background-color: hsla(var(--background-color), 0.1);
+      }
+
+      & td:has(> [data-preview]) {
+        background-color: hsla(var(--background-color), 0.05);
+      }
+
+      & td:is(:first-child, :not(:has(> :is([data-in-range], [data-preview], [data-selected]))) + td):has(> :is([data-in-range], [data-preview])) {
+        border-start-start-radius: var(--radius);
+        border-end-start-radius: var(--radius);
+      }
+
+      & td:has(> :is([data-in-range], [data-preview])):not(:has(+ td > :is([data-in-range], [data-preview], [data-selected]))) {
+        border-start-end-radius: var(--radius);
+        border-end-end-radius: var(--radius);
+      }
+
+      /* a selected day joins the band next to it, and the selected days next to it with mode="multiple" */
+      & td:has(> [data-selected]):has(+ td > :is([data-selected], [data-in-range], [data-preview]))>button {
+        border-start-end-radius: 0;
+        border-end-end-radius: 0;
+      }
+
+      & td:has(> :is([data-selected], [data-in-range], [data-preview]))+td>button[data-selected] {
+        border-start-start-radius: 0;
+        border-end-start-radius: 0;
       }
 
       & td:has(span) {
@@ -271,10 +313,12 @@
     max-width: 100%;
   }
 
+  /* stacked, the calendar takes the width it's given: the panels stay in its middle */
   & [data-month-panels] {
     position: relative;
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 1rem 1.5rem;
   }
 
@@ -351,7 +395,7 @@
 
       /* past min or max */
       &:disabled {
-        color: hsl(0, 0%, 75%);
+        color: hsla(var(--disabled-color), 1);
         text-decoration: line-through;
         cursor: not-allowed;
         background-color: transparent;
