@@ -42,8 +42,8 @@ bite in this repo:
 - Qwik loads each event handler lazily and doesn't order handlers of different elements, nor, while it
   loads them and resumes the page, those of consecutive events: wait for one interaction to land before
   the next one. The calendar's keys don't need it: their `sync$` handlers queue them for `keys$`.
-- WebKit, like Safari, only tabs to elements with an explicit `tabindex`, so tab order differs from
-  Chromium.
+- WebKit on macOS, like Safari, only tabs to elements with an explicit `tabindex`, so tab order differs
+  from Chromium (and from WebKit on Linux, where the CI runs it): don't count Tab presses per browser.
 - The Qwik v2 dev server hangs on an error thrown while rendering, so cover invalid input with unit
   tests instead of fixture pages.
 
@@ -62,6 +62,9 @@ pnpm build.types && pnpm build.lib # typecheck + build the library
 pnpm exec biome check              # lint and format (`pnpm lint` applies the fixes)
 pnpm test
 ```
+
+The CI (`.github/workflows/ci.yml`) runs the same on every pull request, whatever its base (in a stack,
+each one targets the branch below), and builds the website too. It runs on Linux and in UTC.
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/) with a gitmoji, like the
 history: `fix(styled): 🐛 keep the focus on the month buttons after changing month`.

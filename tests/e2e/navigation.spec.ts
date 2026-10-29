@@ -24,14 +24,17 @@ test('the header buttons keep the focus, so they can be pressed repeatedly', asy
   await expect(calendar.locator('[aria-selected="true"]')).toHaveCount(0);
 });
 
-test('after changing month, Tab enters the grid on the 1st', async ({ page, browserName }) => {
+test('after changing month, Tab enters the grid on the 1st', async ({ page }) => {
   const calendar = calendarIn(page, 'basic');
   await prevButton(calendar).focus();
   await page.keyboard.press('Enter');
   await expect(title(calendar)).toHaveText('July 2024');
   await expect(calendar.locator('button[data-value][tabindex="0"]')).toHaveAttribute('data-value', '2024-07-01');
-  // WebKit, like Safari, only tabs to elements with an explicit tabindex, so it skips the title and ">" buttons
-  for (let i = 0; i < (browserName === 'webkit' ? 1 : 3); i++) await page.keyboard.press('Tab');
+  // Tab until the focus enters the grid: how many presses depends on the browser and its platform (WebKit on macOS,
+  // like Safari, only tabs to elements with an explicit tabindex, so it skips the title and ">" buttons; the CI runs
+  // it on Linux)
+  const inGrid = () => page.evaluate(() => !!document.activeElement?.closest('#basic [role="grid"]'));
+  for (let i = 0; i < 3 && !(await inGrid()); i++) await page.keyboard.press('Tab');
   await expect(day(calendar, '2024-07-01')).toBeFocused();
 });
 
