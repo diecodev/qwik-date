@@ -14,7 +14,7 @@
 | 2.x (beta) | v2, `@qwik.dev/core` 2.0.0-rc.4 or later (peer dependency) | `qwik-date@beta` |
 | 1.x | v1, `@builder.io/qwik` | `qwik-date@1` |
 
-2.x is ESM only, needs Node 20.19+ or 22.12+, and has no runtime dependencies. Until 2.0 is stable, installing `qwik-date` without a tag gives 1.0.0, which is for Qwik v1: keep `@beta`.
+2.x is ESM only, needs Node 22.12+, and has no runtime dependencies. Until 2.0 is stable, installing `qwik-date` without a tag gives 1.0.0, which is for Qwik v1: keep `@beta`.
 
 ```sh
 npm install -D -E qwik-date@beta

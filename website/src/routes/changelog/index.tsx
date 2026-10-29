@@ -6,6 +6,7 @@ import { pageAt } from '~/data/site'
 
 const BREAKING = [
   'Needs Qwik v2 (`@qwik.dev/core`). The CommonJS build is gone.',
+  'Needs Node 22.12 or later: Node 20 is no longer supported.',
   'Everything is exported from `qwik-date`. `qwik-date/inline` and `qwik-date/picker` are gone.',
   '`DatePicker` is removed. Put the `Calendar` in a popover instead.',
   '`date`, `bind:date` and `onDateChange$` are now `value`, `bind:value` and `onChange$`. The value is selected from the start.',
@@ -14,6 +15,8 @@ const BREAKING = [
   '`CalendarProps` is a type alias: extend it with an intersection, not an interface.',
   '`labels` has new texts, required for locales other than `en` and `es`.',
   'An `aria-label` in `containerProps` is now followed by the selection, and `containerProps` no longer takes `onChange$`.',
+  'The title is a button that opens the months and the years: Tab stops on it in browsers that tab to buttons.',
+  "The selected day's button has `data-selected`: `aria-selected` moved to its cell, the `gridcell`.",
 ]
 
 const FEATURES = [
@@ -75,6 +78,7 @@ const RENAMES: [string, string][] = [
     'your own trigger + formatDate()',
   ],
   ['[data-preselected]', '[aria-current="date"]'],
+  ['button[aria-selected="true"]', 'button[data-selected]'],
   [
     'interface Props extends CalendarProps',
     'type Props = CalendarProps & Extra',
@@ -112,7 +116,7 @@ export default component$(() => (
           2.0.0-beta.0
         </h2>
         <p class="meta">
-          tag: <b>beta</b> · qwik v2
+          tag: <b>beta</b> · qwik v2 · 2026-10-29
         </p>
         <p class="p">
           qwik-date 2 is built for Qwik v2 and only does the calendar now: the
@@ -151,7 +155,8 @@ export default component$(() => (
         <ol class="steps">
           <li>
             Move your app to Qwik v2. qwik-date 2 needs{' '}
-            <code class="c">@qwik.dev/core</code> and ships ESM only.
+            <code class="c">@qwik.dev/core</code> and Node 22.12 or later, and
+            ships ESM only.
           </li>
           <li>
             Install <code class="c">qwik-date@beta</code>.
