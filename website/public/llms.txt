@@ -8,7 +8,7 @@ Key facts for writing code with it:
 - Import from `qwik-date` (styled `Calendar`, `formatDate`, `formatDateRange`, types) or `qwik-date/headless` (`Calendar.Root` and the other parts, `useCalendar`). There is no `DatePicker` component in 2.x: put the `Calendar` in a popover (see the date picker recipe).
 - Dates are `'YYYY-MM-DD'` strings (`LocalDate`), without time or timezone. `mode="range"` takes `{ start, end }` (`DateRange`, `end` is `null` until chosen); `mode="multiple"` takes `LocalDate[]`.
 - Bind state with `bind:value={signal}`, or `value` and `onChange$`.
-- ESM only. Requires Node 20.19+ or 22.12+.
+- ESM only. Requires Node 22.12+.
 
 ## Docs
 

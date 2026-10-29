@@ -102,8 +102,7 @@ export default component$(() => {
           </table>
         </div>
         <p class="p">
-          2.x is ESM only, needs Node 20.19+ or 22.12+, and has zero runtime
-          dependencies.
+          2.x is ESM only, needs Node 22.12+, and has zero runtime dependencies.
         </p>
 
         <H2 id="next">next</H2>

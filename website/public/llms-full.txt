@@ -5,7 +5,7 @@
 - Docs: https://qwik-date.dieco.dev
 - Source: https://github.com/diecodev/qwik-date
 - npm: https://www.npmjs.com/package/qwik-date
-- This file: generated from the docs on 2026-10-28. The dates in the examples count from that day.
+- This file: generated from the docs on 2026-10-29. The dates in the examples count from that day.
 
 ## Versions
 
@@ -14,7 +14,7 @@
 | 2.x (beta) | v2, `@qwik.dev/core` 2.0.0-rc.4 or later (peer dependency) | `qwik-date@beta` |
 | 1.x | v1, `@builder.io/qwik` | `qwik-date@1` |
 
-2.x is ESM only, needs Node 20.19+ or 22.12+, and has no runtime dependencies. Until 2.0 is stable, installing `qwik-date` without a tag gives 1.0.0, which is for Qwik v1: keep `@beta`.
+2.x is ESM only, needs Node 22.12+, and has no runtime dependencies. Until 2.0 is stable, installing `qwik-date` without a tag gives 1.0.0, which is for Qwik v1: keep `@beta`.
 
 ```sh
 npm install -D -E qwik-date@beta
@@ -130,7 +130,7 @@ While a range has a start and no end, the days up to the pointer or the focus ge
 ### Booking a stay across two months
 
 ```tsx
-const stay = useSignal<DateRange | null>({ start: '2026-10-28', end: '2026-11-04' });
+const stay = useSignal<DateRange | null>({ start: '2026-10-29', end: '2026-11-05' });
 
 <Calendar mode="range" months={2} bind:value={stay} />
 ```
@@ -154,7 +154,7 @@ A click, Enter or Space marks a day, and unmarks it if it was marked. There's no
 const now = new Date();
 const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}` as LocalDate;
 
-<Calendar min={today} max="2027-01-26" bind:value={date} />
+<Calendar min={today} max="2027-01-27" bind:value={date} />
 ```
 
 `min` and `max` are the first and the last day that can be chosen. The month buttons stop at their months, and the months and years views disable the ones past them.
@@ -181,7 +181,7 @@ import { Form, routeAction$ } from '@qwik.dev/router';
 import { Calendar, type LocalDate } from 'qwik-date';
 
 export const useBook = routeAction$((data) => {
-  // { days: ['2026-10-28', '2026-11-04'] }
+  // { days: ['2026-10-29', '2026-11-05'] }
   return { days: data.days };
 });
 
@@ -233,10 +233,10 @@ const fr: Labels = {
 ```tsx
 import { formatDate, formatDateRange } from 'qwik-date';
 
-formatDate('2026-10-28'); // 'Oct 28, 2026'
-formatDate('2026-10-28', 'es'); // '28 Oct 2026'
-formatDateRange({ start: '2026-10-28', end: '2026-11-04' }); // 'Oct 28, 2026 – Nov 04, 2026'
-formatDateRange({ start: '2026-10-28', end: null }); // 'Oct 28, 2026 – …'
+formatDate('2026-10-29'); // 'Oct 29, 2026'
+formatDate('2026-10-29', 'es'); // '29 Oct 2026'
+formatDateRange({ start: '2026-10-29', end: '2026-11-05' }); // 'Oct 29, 2026 – Nov 05, 2026'
+formatDateRange({ start: '2026-10-29', end: null }); // 'Oct 29, 2026 – …'
 ```
 
 ### Dark mode
@@ -342,7 +342,7 @@ const PriceDays = component$<{ prices: Record<string, number> }>(({ prices }) =>
   <Calendar.Title />
   <Calendar.Grid>
     <Calendar.GridHead />
-    <PriceDays prices={{ '2026-10-28': 120, '2026-11-04': 95 }} />
+    <PriceDays prices={{ '2026-10-29': 120, '2026-11-05': 95 }} />
   </Calendar.Grid>
 </Calendar.Root>;
 ```
@@ -417,10 +417,10 @@ Use `qwik-date@1`: `CalendarInline` from `qwik-date/inline` (`date`, `onDateChan
 | Prop | Type | Default | Description | Example |
 | --- | --- | --- | --- | --- |
 | `mode` | `'single' \| 'range' \| 'multiple'` | `'single'` | What a click selects: one day, a start and an end, or any days. It sets the type of `value`, `bind:value` and `onChange$`. | `<Calendar mode="range" bind:value={range} />` |
-| `value` | `LocalDate \| DateRange \| LocalDate[] \| null` | `null` | The selected value, selected from the start: a day, a `DateRange` with `mode="range"`, or the days with `mode="multiple"` (`[]` by default). The calendar opens on its month, or on today's without one. (1.x: `date`) | `<Calendar value="2026-10-28" />` |
+| `value` | `LocalDate \| DateRange \| LocalDate[] \| null` | `null` | The selected value, selected from the start: a day, a `DateRange` with `mode="range"`, or the days with `mode="multiple"` (`[]` by default). The calendar opens on its month, or on today's without one. (1.x: `date`) | `<Calendar value="2026-10-29" />` |
 | `bind:value` | `Signal<…>` |  | A signal of the value's type, kept in sync in both directions: write to it and the calendar shows that month. (1.x: `bind:date`) | `const date = useSignal<LocalDate \| null>(null);  <Calendar bind:value={date} />` |
 | `onChange$` | `(value) => void` |  | Called with the new value on every choice. In a range, also after the first day, with `end: null`; with `mode="multiple"`, on every mark and unmark, with the days in order. (1.x: `onDateChange$`) | `<Calendar onChange$={(value) => console.log(value)} />` |
-| `min, max` | `LocalDate` |  | The first and the last day that can be chosen. The month buttons stop at their months, and the months and years views disable the ones past them. | `<Calendar min="2026-10-28" max="2027-01-26" />` |
+| `min, max` | `LocalDate` |  | The first and the last day that can be chosen. The month buttons stop at their months, and the months and years views disable the ones past them. | `<Calendar min="2026-10-29" max="2027-01-27" />` |
 | `disabledDates` | `readonly LocalDate[]` |  | Days that can't be chosen. The keyboard skips them, and a range can't cross them: it ends right before the first one, as with every day ruled out. | `<Calendar disabledDates={['2026-12-25', '2027-01-01']} />` |
 | `disabledWeekdays` | `readonly WeekDay[]` |  | Weekdays that can't be chosen, `0` for Sunday: `[0, 6]` disables the weekends. | `<Calendar disabledWeekdays={[0, 6]} />` |
 | `months` | `number` | `1` | How many months show side by side, with one Tab stop for all of them. The buttons move one month, and they stack on narrow screens. | `<Calendar mode="range" months={2} />` |
