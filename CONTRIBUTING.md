@@ -52,8 +52,11 @@ bite in this repo:
 The docs live in `website/` (Qwik Router, built as static pages): `pnpm -C website dev` runs it, and
 `pnpm build.website` builds the library and the site as Vercel does. The props, data attributes,
 headless parts and `useCalendar()` fields are data in `website/src/data/`: the pages, the search and
-`llms-full.txt` read them. After changing them, or the use cases in `website/scripts/llms-full.md`,
-run `pnpm -C website llms` to write `website/public/llms-full.txt` again.
+`llms-full.txt` read them. `llms.txt` and `llms-full.txt` (from `website/scripts/llms.md` and
+`llms-full.md`) aren't in the repo: `pnpm build.website` writes them; for `pnpm -C website dev`, run
+`pnpm -C website llms` first. The versions the site shows (the version menu, the install commands, the
+changelog's dates) come from npm when it builds (`website/src/data/npm.ts`): nothing to change when a
+version comes out.
 
 Vercel hosts it. Production deploys from GitHub Actions (`.github/workflows/website.yml`): after each
 release, once the new version is on npm, and on each push to `main` that changes `website/` or

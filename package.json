@@ -56,7 +56,7 @@
   "type": "module",
   "scripts": {
     "build": "qwik build",
-    "build.website": "pnpm build.types && pnpm build.lib && pnpm -C website build.client && pnpm -C website build.server",
+    "build.website": "pnpm build.types && pnpm build.lib && pnpm -C website llms && pnpm -C website build.client && pnpm -C website build.server",
     "build.lib": "vite build --mode lib",
     "build.types": "tsc --emitDeclarationOnly -p ./tsconfig.lib.json",
     "dev": "vite --mode ssr",

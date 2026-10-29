@@ -1,11 +1,13 @@
 import { component$ } from '@qwik.dev/core'
 import { Link, useLocation } from '@qwik.dev/router'
+import { CURRENT, V1 } from '~/data/release'
 import { SearchButton } from './search'
 import { Sidebar } from './sidebar'
 
+// the docs of each major, with the version npm has of it
 const VERSIONS = [
-  { spec: 'qwik-date@beta', name: '2.0.0-beta.0', qwik: 'qwik v2', href: '/' },
-  { spec: 'qwik-date@1', name: '1.0.0', qwik: 'qwik v1', href: '/v1/' },
+  { ...CURRENT, qwik: 'qwik v2', href: '/' },
+  { ...V1, qwik: 'qwik v1', href: '/v1/' },
 ]
 
 const Check = () => (
@@ -48,9 +50,9 @@ export const Header = component$(() => {
             type="button"
             class="spec"
             popovertarget="version-menu"
-            aria-label={`Version: ${version.name}`}
+            aria-label={`Version: ${version.version}`}
           >
-            {v1 ? '@1' : '@beta'}
+            {version.label}
             <svg
               class="i"
               style="width: 14px; height: 14px"
@@ -68,7 +70,7 @@ export const Header = component$(() => {
           <div id="version-menu" popover="auto" class="menu">
             {VERSIONS.map((item) => (
               <Link
-                key={item.spec}
+                key={item.href}
                 class="mi"
                 href={item.href}
                 aria-current={item === version ? 'page' : undefined}
@@ -81,10 +83,10 @@ export const Header = component$(() => {
                 </span>
                 <span style="display: flex; flex-direction: column; min-width: 0">
                   <span class="mono" style="font-size: 13px">
-                    {item.spec}
+                    qwik-date{item.label}
                   </span>
                   <span style="font-size: 12px; color: var(--muted)">
-                    {item.name}
+                    {item.version}
                   </span>
                 </span>
                 <span class="mono" style="font-size: 12px; color: var(--muted)">

@@ -5,6 +5,7 @@ import { fillDates, useToday } from '~/components/dates'
 import { H2 } from '~/components/docs'
 import { docHead } from '~/components/seo'
 import { Toc } from '~/components/toc'
+import { CURRENT } from '~/data/release'
 import { pageAt } from '~/data/site'
 
 // the docs of qwik-date 1.0.0, from its README
@@ -103,7 +104,7 @@ export default component$(() => {
             Qwik v1.
           </span>
           <Link class="link" href="/">
-            Go to @beta →
+            Go to {CURRENT.label} →
           </Link>
         </div>
 

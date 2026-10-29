@@ -1,8 +1,11 @@
 // The pages of the docs: their titles, what search engines show of them, and their sections. The head of each
 // page, "on this page", the search and the structured data read them.
 
+import { CURRENT, SERIES_1_0, SERIES_2_0 } from './release'
+
 export const SITE = 'https://qwik-date.dieco.dev'
-export const VERSION = '2.0.0-beta.0'
+/** the version these docs are for, as npm has it (the repo's while it isn't published) */
+export const VERSION = CURRENT.version
 
 export type Section = { id: string; label: string; sub?: boolean }
 
@@ -140,15 +143,14 @@ export const PAGES: Page[] = [
   {
     path: '/changelog/',
     title: 'Changelog',
-    description:
-      'Release notes of qwik-date: 2.0.0-beta.0 for Qwik v2 and 1.0.0 for Qwik v1, with the breaking changes and the upgrade from 1.x.',
+    description: `Release notes of qwik-date: ${SERIES_2_0.version} for Qwik v2 and ${SERIES_1_0.version} for Qwik v1, with the breaking changes and the upgrade from 1.x.`,
     sections: [
-      { id: 'v2-0-0-beta-0', label: '2.0.0-beta.0' },
+      { id: 'v2-0', label: SERIES_2_0.version },
       { id: 'breaking', label: 'Breaking', sub: true },
       { id: 'new', label: 'New', sub: true },
       { id: 'fixes', label: 'Fixes', sub: true },
       { id: 'upgrading', label: 'Upgrading from 1.x', sub: true },
-      { id: 'v1-0-0', label: '1.0.0' },
+      { id: 'v1-0', label: SERIES_1_0.version },
     ],
   },
   {
