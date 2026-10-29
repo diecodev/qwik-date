@@ -20,9 +20,24 @@ From the repo root, `pnpm build.website` runs the whole chain (library + client 
 
 ## Deployment (Vercel)
 
-The site is fully prerendered, so Vercel serves `dist/` as static files: no functions. Its GitHub
-integration builds every push (production for `main`, a preview for the other branches); there is no
-GitHub Actions workflow for it.
+The site is fully prerendered, so Vercel serves `dist/` as static files: no functions.
+
+**Production** deploys from GitHub Actions ([`website.yml`](../.github/workflows/website.yml)), which
+builds with the Vercel CLI (`vercel build --prod`, then `vercel deploy --prebuilt --prod`):
+
+- after each release, once the new version is public on npm (`release.yml` calls it);
+- on each push to `main` that changes `website/` or `vercel.json`;
+- by hand (Actions → Website → Run workflow).
+
+It needs three repository secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID` (the team's ID) and
+`VERCEL_PROJECT_ID`.
+
+**Previews** come from Vercel's Git integration, which builds nothing for `main`
+(`git.deploymentEnabled`). Its Ignored Build Step, [`scripts/vercel-preview.sh`](./scripts/vercel-preview.sh),
+skips every branch that doesn't change `website/` or `vercel.json` compared with `main`. The previews
+are only seen in Vercel's dashboard: in the project's Git settings, the pull request and commit comments,
+the `deployment_status` events and the commit statuses are off. A pull request from a fork waits for a
+maintainer to authorize it there (Git Fork Protection, in the Security settings).
 
 The build settings live in [`vercel.json`](../vercel.json) at the repo root:
 
@@ -34,11 +49,8 @@ The build settings live in [`vercel.json`](../vercel.json) at the repo root:
 | Build command    | `pnpm build.website`                                          |
 | Output directory | `website/dist`                                                |
 
-Both run the pnpm of `package.json`'s `packageManager`: Vercel reads it and picks pnpm 12 (without it,
-it would pick pnpm 10 for this lockfile), which then switches to that exact version.
+pnpm is the one in `package.json`'s `packageManager`: the CI's setup installs it, and Vercel reads it
+for the previews (without it, it would pick pnpm 10 for this lockfile).
 
 `trailingSlash` matches the URLs of the pages (`/calendar/`), `404.html` answers the missing ones, and
 `/build/` and `/assets/` (hashed file names) are cached for a year.
-
-One-time setup in the dashboard: import the `diecodev/qwik-date` repo, keep the root directory as the
-repo root, and add the custom domain `qwik-date.dieco.dev` (a `CNAME` to Vercel at the DNS provider).

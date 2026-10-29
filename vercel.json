@@ -1,6 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
+  "git": { "deploymentEnabled": { "main": false } },
+  "ignoreCommand": "sh website/scripts/vercel-preview.sh",
   "buildCommand": "pnpm build.website",
   "outputDirectory": "website/dist",
   "trailingSlash": true,

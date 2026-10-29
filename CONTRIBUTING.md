@@ -55,9 +55,12 @@ headless parts and `useCalendar()` fields are data in `website/src/data/`: the p
 `llms-full.txt` read them. After changing them, or the use cases in `website/scripts/llms-full.md`,
 run `pnpm -C website llms` to write `website/public/llms-full.txt` again.
 
-Vercel builds it on every push (`vercel.json`). pnpm's version is the one in `package.json`'s
-`packageManager`, for Vercel, the CI and your installs alike: to update it, change that line and run
-`pnpm install`, which records it in the lockfile.
+Vercel hosts it. Production deploys from GitHub Actions (`.github/workflows/website.yml`): after each
+release, once the new version is on npm, and on each push to `main` that changes `website/` or
+`vercel.json`. Vercel builds nothing from Git for `main`; a branch that changes the website gets a
+preview, seen in Vercel's dashboard only (`website/scripts/vercel-preview.sh`). pnpm's version is the
+one in `package.json`'s `packageManager`, for the deploys, the CI and your installs alike: to update it,
+change that line and run `pnpm install`, which records it in the lockfile.
 
 ## Before opening a pull request
 
@@ -86,4 +89,7 @@ npm stage list qwik-date
 npm stage approve <stage-id> # asks for the one-time password
 ```
 
-Then publish the draft release on GitHub. To drop a staged version, `npm stage reject <stage-id>`.
+The release workflow waits for that (up to 6 hours), then publishes the GitHub release and deploys the
+website, which reads the new version from npm. If the approval takes longer, publish the draft release
+by hand and run the Website workflow (Actions → Website → Run workflow). To drop a staged version,
+`npm stage reject <stage-id>`.
