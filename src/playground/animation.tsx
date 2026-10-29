@@ -3,7 +3,7 @@ import { Calendar } from '../lib';
 import { Calendar as Headless, useCalendar } from '../lib/headless';
 import { Case, Demo, Focus, Probe, Steps, calendarOf } from './ui';
 
-// the README's animations, slowed down to 600ms so the eye can follow them, for the calendars inside .pg-animated
+// the animations of the docs (qwik-date.dieco.dev/animations), slowed down to 600ms so the eye can follow them, for the calendars inside .pg-animated
 const ANIMATIONS = `
 @media (prefers-reduced-motion: no-preference) {
   .pg-animated [data-qwik-date] table:not([data-period]) > tbody > tr[data-direction='next'] { animation: pg-month-next 600ms ease-out; }
@@ -66,7 +66,7 @@ export const AnimationCases = component$(() => {
     <>
       <p class='pg-note'>
         The library doesn't animate: it exposes data-direction, and new rows of days for each month, and the calendars
-        of this area take the README's CSS (slowed down to 600ms). With your OS set to reduce motion, nothing moves.
+        of this area take the CSS of the docs (slowed down to 600ms). With your OS set to reduce motion, nothing moves.
       </p>
 
       <Case
@@ -192,7 +192,7 @@ export const AnimationCases = component$(() => {
         <Steps>
           <li>
             <p>
-              Click <b>›</b> in the second calendar, which doesn't take the README's CSS.
+              Click <b>›</b> in the second calendar, which doesn't take the CSS of the docs.
             </p>
             <p>
               The month changes without moving: the theme only fades the colors of the days (150ms), and the log stays

@@ -4,7 +4,7 @@ import { Calendar, type DateRange, type Labels, type LocalDate, formatDate, form
 import type * as QwikDate from '../../src/lib';
 import { Calendar as Headless, useCalendar } from '../../src/lib/headless';
 
-// @ts-expect-error: the DatePicker is gone, a popover around the Calendar replaces it (README recipes)
+// @ts-expect-error: the DatePicker is gone, a popover around the Calendar replaces it (the date picker recipes of the docs)
 export type RemovedDatePicker = typeof QwikDate.DatePicker;
 
 const fr: Labels = {

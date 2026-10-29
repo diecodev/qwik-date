@@ -10,7 +10,7 @@ const announced = $((root: HTMLElement) => {
   return `aria-haspopup=${trigger?.getAttribute('aria-haspopup')} · aria-expanded=${trigger?.getAttribute('aria-expanded')} · popup role=${popup?.getAttribute('role')}`;
 });
 
-/** The README's native recipe (src/recipes/popover.tsx): a native popover placed with CSS anchor positioning. */
+/** The native recipe of the docs (src/recipes/popover.tsx, qwik-date.dieco.dev/date-picker): a native popover placed with CSS anchor positioning. */
 export const PopoverCases = component$(() => {
   const opened = useSignal<LocalDate | null>('2024-08-06');
   const flipped = useSignal<LocalDate | null>('2024-08-06');

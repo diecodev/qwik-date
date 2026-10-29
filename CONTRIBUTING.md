@@ -46,6 +46,14 @@ bite in this repo:
 - The Qwik v2 dev server hangs on an error thrown while rendering, so cover invalid input with unit
   tests instead of fixture pages.
 
+## Docs site
+
+The docs live in `website/` (Qwik Router, built as static pages): `pnpm -C website dev` runs it, and
+`pnpm build.website` builds the library and the site as Deno Deploy does. The props, data attributes,
+headless parts and `useCalendar()` fields are data in `website/src/data/`: the pages, the search and
+`llms-full.txt` read them. After changing them, or the use cases in `website/scripts/llms-full.md`,
+run `pnpm -C website llms` to write `website/public/llms-full.txt` again.
+
 ## Before opening a pull request
 
 ```sh

@@ -1,8 +1,8 @@
 import { $, type Signal, component$, useId, useSignal } from '@qwik.dev/core';
 import { Calendar, type DateRange, type LocalDate, formatDate, formatDateRange } from '../lib';
 
-// The README's native recipe (a native popover placed with CSS anchor positioning), as code: tests/e2e/popover.spec.ts
-// and the catalog render it, so keep it and the README in sync.
+// The native recipe of the docs (a native popover placed with CSS anchor positioning), as code: tests/e2e/popover.spec.ts
+// and the catalog render it, so keep it and the docs (website/src/components/recipes.ts) in sync.
 
 /** Under the trigger, 8px away, or above it when there's no room below. */
 const placement = (id: string) =>

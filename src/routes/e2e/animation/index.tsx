@@ -2,7 +2,7 @@ import { component$, useStyles$ } from '@qwik.dev/core';
 import { Calendar } from '../../../lib';
 import { Calendar as Headless, useCalendar } from '../../../lib/headless';
 
-// the README's animations, for the calendars inside .animated
+// the animations of the docs, for the calendars inside .animated
 export const ANIMATIONS = `
 @media (prefers-reduced-motion: no-preference) {
   .animated [data-qwik-date] table:not([data-period]) > tbody > tr[data-direction='next'] { animation: month-next 200ms ease-out; }

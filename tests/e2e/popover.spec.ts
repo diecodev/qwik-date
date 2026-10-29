@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { day, popoverGap } from './helpers';
 
-// the README's native recipe (src/recipes/popover.tsx): a native popover placed with CSS anchor positioning
+// the native recipe of the docs (src/recipes/popover.tsx): a native popover placed with CSS anchor positioning
 test.beforeEach(async ({ page }) => {
   await page.goto('/e2e/popover/');
 });

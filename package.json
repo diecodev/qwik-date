@@ -1,7 +1,7 @@
 {
   "name": "qwik-date",
   "version": "1.0.0",
-  "description": "Qwik calendar, simple integration.",
+  "description": "Calendar and date picker component for Qwik: a day, a range or several days, accessible, in any locale, with headless parts.",
   "keywords": [
     "qwik",
     "qwik library",
@@ -12,11 +12,20 @@
     "qwik date picker",
     "qwik calendar picker",
     "date picker",
-    "calendar picker"
+    "calendar picker",
+    "date range picker",
+    "headless calendar",
+    "qwik component",
+    "qwik v2",
+    "datepicker"
   ],
   "author": {
     "name": "diecodev",
     "url": "https://github.com/diecodev"
+  },
+  "homepage": "https://qwik-date.dieco.dev",
+  "bugs": {
+    "url": "https://github.com/diecodev/qwik-date/issues"
   },
   "repository": {
     "type": "git",
