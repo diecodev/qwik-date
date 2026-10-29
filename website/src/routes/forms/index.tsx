@@ -155,8 +155,8 @@ export default component$(() => {
                   <code class="c">range</code>
                 </td>
                 <td>
-                  <code class="c">stay[start]</code>,{' '}
-                  <code class="c">stay[end]</code>
+                  <code class="c">stay.start</code>,{' '}
+                  <code class="c">stay.end</code>
                 </td>
                 <td>empty, and the end until it's chosen</td>
               </tr>
@@ -176,10 +176,12 @@ export default component$(() => {
         <H2 id="actions">qwik router actions</H2>
         <p class="p">
           A <code class="c">routeAction$</code> gets the value with the rest of
-          the form. Qwik Router builds arrays from names ending in{' '}
-          <code class="c">[]</code>, so <code class="c">mode="multiple"</code>{' '}
-          arrives as <code class="c">{'{ days: [...] }'}</code>: a name repeated
-          without <code class="c">[]</code> would keep only the last day.
+          the form. Qwik Router builds objects from dotted names and arrays from
+          names ending in <code class="c">[]</code>: a range arrives as{' '}
+          <code class="c">{'{ stay: { start, end } }'}</code>, and{' '}
+          <code class="c">mode="multiple"</code> as{' '}
+          <code class="c">{'{ days: [...] }'}</code>. A name repeated without{' '}
+          <code class="c">[]</code> would keep only the last day.
         </p>
         <Code
           code={ACTION.replace('%today%', today.value).replace(

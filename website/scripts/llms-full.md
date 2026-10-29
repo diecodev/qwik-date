@@ -173,7 +173,7 @@ The keyboard skips the days that can't be chosen, and a range can't cross them: 
 
 ### Submit with a form, or a Qwik Router action
 
-`name` adds hidden inputs with the value as `YYYY-MM-DD`: `name` for a day (empty without one), `name[start]` and `name[end]` for a range, a `name[]` per day for `mode="multiple"` (nothing without days). Qwik Router builds arrays from names ending in `[]`.
+`name` adds hidden inputs with the value as `YYYY-MM-DD`: `name` for a day (empty without one), `name.start` and `name.end` for a range, a `name[]` per day for `mode="multiple"` (nothing without days). Qwik Router builds objects from dotted names and arrays from names ending in `[]`: a range arrives as `{ stay: { start, end } }`, several days as `{ days: [...] }`.
 
 ```tsx
 import { component$, useSignal } from '@qwik.dev/core';

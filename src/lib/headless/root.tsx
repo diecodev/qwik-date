@@ -98,7 +98,7 @@ export type ModeOptions =
 interface BaseOptions extends Availability {
   /**
    * submits the value with the form around the calendar, in a hidden input with this name (`YYYY-MM-DD`, empty
-   * without a value); a range submits `name[start]` and `name[end]`
+   * without a value); a range submits `name.start` and `name.end`, which Qwik Router reads as an object
    */
   name?: string;
   /**
@@ -735,9 +735,10 @@ export const Root = component$<RootProps>(
       >
         <Slot />
         {name && mode === 'range' ? (
+          // `name.start` and `name.end`: Qwik Router actions read them as `{ name: { start, end } }`
           <>
-            <input type='hidden' name={`${name}[start]`} value={(selected.value as DateRange | null)?.start ?? ''} />
-            <input type='hidden' name={`${name}[end]`} value={(selected.value as DateRange | null)?.end ?? ''} />
+            <input type='hidden' name={`${name}.start`} value={(selected.value as DateRange | null)?.start ?? ''} />
+            <input type='hidden' name={`${name}.end`} value={(selected.value as DateRange | null)?.end ?? ''} />
           </>
         ) : name && mode === 'multiple' ? (
           // one input per day, as `name[]`: Qwik Router actions read it as an array (a repeated name keeps the last)

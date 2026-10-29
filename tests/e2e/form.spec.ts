@@ -11,7 +11,7 @@ const submit = async (page: import('@playwright/test').Page) => {
 };
 
 test('name submits the value with the form, empty without one', async ({ page }) => {
-  await expect(await submit(page)).toHaveText('day=2024-08-15&stay[start]=2024-08-05&stay[end]=2024-08-12&none=');
+  await expect(await submit(page)).toHaveText('day=2024-08-15&stay.start=2024-08-05&stay.end=2024-08-12&none=');
 });
 
 test('the submitted value follows the choices', async ({ page }) => {
@@ -19,8 +19,13 @@ test('the submitted value follows the choices', async ({ page }) => {
   await expect(page.locator('#single input[type="hidden"]')).toHaveValue('2024-08-20');
   const range = calendarIn(page, 'range');
   await day(range, '2024-08-18').click();
-  await expect(page.locator('#range input[name="stay[end]"]')).toHaveValue('');
+  await expect(page.locator('#range input[name="stay.end"]')).toHaveValue('');
   await day(range, '2024-08-22').click();
-  await expect(page.locator('#range input[name="stay[end]"]')).toHaveValue('2024-08-22');
-  await expect(await submit(page)).toHaveText('day=2024-08-20&stay[start]=2024-08-18&stay[end]=2024-08-22&none=');
+  await expect(page.locator('#range input[name="stay.end"]')).toHaveValue('2024-08-22');
+  await expect(await submit(page)).toHaveText('day=2024-08-20&stay.start=2024-08-18&stay.end=2024-08-22&none=');
+});
+
+test('a Qwik Router action gets a range as an object', async ({ page }) => {
+  await page.locator('#action-submit').click();
+  await expect(page.locator('#action-json')).toHaveText('{"trip":{"start":"2024-08-05","end":"2024-08-12"}}');
 });

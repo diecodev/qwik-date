@@ -178,7 +178,7 @@ export const PROPS: Prop[] = [
     default: '–',
     badge: 'new',
     description:
-      'Submits the value with the form around the calendar, in hidden inputs: `name` for a day (empty without one), `name[start]` and `name[end]` for a range, a `name[]` per day for multiple (nothing without days).',
+      'Submits the value with the form around the calendar, in hidden inputs: `name` for a day (empty without one), `name.start` and `name.end` for a range, a `name[]` per day for multiple (nothing without days). A Qwik Router action gets an object for a range and an array for multiple.',
     example: '<form>\n  <Calendar name="due" />\n</form>',
   },
   {

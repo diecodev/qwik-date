@@ -173,7 +173,7 @@ The keyboard skips the days that can't be chosen, and a range can't cross them: 
 
 ### Submit with a form, or a Qwik Router action
 
-`name` adds hidden inputs with the value as `YYYY-MM-DD`: `name` for a day (empty without one), `name[start]` and `name[end]` for a range, a `name[]` per day for `mode="multiple"` (nothing without days). Qwik Router builds arrays from names ending in `[]`.
+`name` adds hidden inputs with the value as `YYYY-MM-DD`: `name` for a day (empty without one), `name.start` and `name.end` for a range, a `name[]` per day for `mode="multiple"` (nothing without days). Qwik Router builds objects from dotted names and arrays from names ending in `[]`: a range arrives as `{ stay: { start, end } }`, several days as `{ days: [...] }`.
 
 ```tsx
 import { component$, useSignal } from '@qwik.dev/core';
@@ -431,7 +431,7 @@ Use `qwik-date@1`: `CalendarInline` from `qwik-date/inline` (`date`, `onDateChan
 | `locale` | `Locale` | `'en'` | `'en'`, `'es'`, or any BCP 47 tag (`'fr-FR'`). Other languages take their month and weekday names from `Intl`, and need `labels`. | `<Calendar locale="es" />` |
 | `labels` | `Labels \| Partial<Labels>` |  | The texts `Intl` can't give: the calendar's name and the labels of the buttons. With `en` and `es` they're built in, and `labels` overrides some of them; any other locale needs all of them, and TypeScript asks for them. | `<Calendar locale="fr-FR" labels={fr} weekStartsOn={1} />` |
 | `weekStartsOn` | `WeekDay` | `0` | The first column, from `0` (Sunday) to `6`. | `<Calendar weekStartsOn={1} />` |
-| `name` | `string` |  | Submits the value with the form around the calendar, in hidden inputs: `name` for a day (empty without one), `name[start]` and `name[end]` for a range, a `name[]` per day for multiple (nothing without days). | `<form>   <Calendar name="due" /> </form>` |
+| `name` | `string` |  | Submits the value with the form around the calendar, in hidden inputs: `name` for a day (empty without one), `name.start` and `name.end` for a range, a `name[]` per day for multiple (nothing without days). A Qwik Router action gets an object for a range and an array for multiple. | `<form>   <Calendar name="due" /> </form>` |
 | `autoFocus` | `boolean` | `false` | Focuses the day where Tab enters every time the calendar shows up: on load, or when a popover, dialog or details around it opens. Without it, the calendar never takes the focus. | `<Calendar autoFocus containerProps={{ popover: 'auto' }} />` |
 | `theme` | `Theme \| Signal<Theme>` | `'light'` | `'light'`, `'dark'` or `'auto'`, which follows `prefers-color-scheme` with CSS only. A signal changes it at runtime. | `<Calendar theme="auto" />` |
 | `unstyled` | `boolean` | `false` | Leaves the calendar without the library styles: style it through the props of its parts and its data attributes. (1.x: `unStyled`) | `<Calendar unstyled />` |
