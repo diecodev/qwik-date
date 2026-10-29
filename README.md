@@ -1,106 +1,44 @@
 # qwik-date
 
-**Qwik calendar, simple integration**
+**Calendar and date picker component for Qwik.**
 
-`qwik-date` is an opinionated calendar component designed for the Qwik framework. It offers two main versions: an `inline` calendar and a `popup` date picker, providing flexibility in how you integrate it into your applications.
+Pick one day, a range or several days, with the keyboard, for screen readers and in any locale. Send it with a form, theme it, or build your own from its headless parts. No runtime dependencies.
 
-## Installation
+**[Docs](https://qwik-date.dieco.dev)** · [Changelog](https://qwik-date.dieco.dev/changelog/) · [npm](https://www.npmjs.com/package/qwik-date)
 
-You can install `qwik-date` using any of the following package managers:
+## Install
+
+qwik-date 2 is in beta, for Qwik v2 (`@qwik.dev/core`):
 
 ```sh
-npm install -D -E qwik-date
-pnpm add -D -E qwik-date
-bun add -D -E qwik-date
-yarn add -D -E qwik-date
+npm install -D -E qwik-date@beta
 ```
+
+Keep `@beta`: until 2.0 is stable, `qwik-date` without a tag installs 1.0.0, which is for Qwik v1. On Qwik v1 (`@builder.io/qwik`), install `qwik-date@1` and read [its docs](https://qwik-date.dieco.dev/v1/).
 
 ## Usage
 
-### Inline Calendar
-
-The inline calendar can be imported in two ways:
-
-```ts
-import { Calendar } from 'qwik-date';
-import { CalendarInline } from 'qwik-date/inline';
-```
-
-#### Inline Calendar Example
-
-Here's a basic example of how to use the inline calendar:
-
 ```tsx
-import { component$, useSignal } from '@builder.io/qwik';
-import { CalendarInline } from 'qwik-date/inline';
+import { component$, useSignal } from '@qwik.dev/core';
+import { Calendar, type LocalDate } from 'qwik-date';
 
 export default component$(() => {
-  const date = useSignal('2023-07-23');
-  
-  return (
-    <CalendarInline 
-      date={date.value} 
-      onDateChange$={(newDate) => console.log({ newDate })} 
-    />
-  );
+  const date = useSignal<LocalDate | null>(null);
+
+  return <Calendar bind:value={date} />;
 });
 ```
 
-#### Props
+Dates are `'YYYY-MM-DD'` strings, without time or timezone. `mode="range"` selects a start and an end, and `mode="multiple"` several days.
 
-- `date`: Initial date to display (default: current date).
-- `fullWeeks`: If true, shows full weeks (default: false).
-- `locale`: Locale for the calendar (default: 'en').
-- `showWeekNumber`: If true, shows week numbers (default: false).
-- `showDaysOfWeek`: If true, shows days of the week ~Mo, Tu, We, etc.~ (default: true).
-- `iconLeft`, `iconRight`: Custom icons for navigation buttons.
-- `containerProps`, `headerProps`, `actionButtonProps`, `actionLeftProps`, `actionRightProps`, `calendarProps`, `theadProps`, `tbodyProps`, `theadRowProps`, `tbodyRowProps`, `headerCellProps`, `cellProps`, `dayButtonProps`, `iconProps`, `titleProps`, `weekNumberProps`: Custom props for various parts of the component.
-- `onDateChange$`: Callback for when the date changes.
-- `unStyled`: If true, removes default styling (default: false).
+## Docs
 
-### Popup Date Picker
+- [Calendar](https://qwik-date.dieco.dev/calendar/): the modes, months side by side, limits, display options, and the API (props, data attributes, keyboard, types).
+- [Date picker](https://qwik-date.dieco.dev/date-picker/): the calendar in a popover, with a trigger of your own.
+- [Headless](https://qwik-date.dieco.dev/headless/): `qwik-date/headless`, the calendar in parts, and `useCalendar()`.
+- Guides: [forms](https://qwik-date.dieco.dev/forms/), [localization](https://qwik-date.dieco.dev/localization/), [theming](https://qwik-date.dieco.dev/theming/), [animations](https://qwik-date.dieco.dev/animations/) and [accessibility](https://qwik-date.dieco.dev/accessibility/).
+- For LLMs and agents: [llms.txt](https://qwik-date.dieco.dev/llms.txt) and [llms-full.txt](https://qwik-date.dieco.dev/llms-full.txt), every use case in one file.
 
-The popup date picker can be imported in two ways:
+## Contributing
 
-```ts
-import { DatePicker } from 'qwik-date';
-import { DatePicker } from 'qwik-date/picker';
-```
-
-#### Popup Date Picker Example
-
-Here's a basic example of how to use the popup date picker:
-
-```tsx
-import { component$, useSignal } from '@builder.io/qwik';
-import { DatePicker } from 'qwik-date/picker';
-
-export default component$(() => {
-  const date = useSignal('2023-07-23');
-  
-  return (
-    <DatePicker 
-      date={date.value} 
-      onDateChange$={(newDate) => console.log({ newDate })}
-      triggerLabel="Select Date"
-    />
-  );
-});
-```
-
-#### Props
-
-- `triggerProps`: Custom props for the trigger button.
-- `triggerLabel`: Label for the trigger button.
-- `triggerIcon`: Custom icon for the trigger button.
-- `mode`: Mode of the date picker (`'popup'` or `'inline'`, default: `'popup'`).
-- All other props from `CalendarInline` can also be used.
-
-## Roadmap
-
-- [ ] Add support for additional locales.
-- [ ] range date selection
-- [ ] month and year navigation
-- [ ] Custom date ranges (last 7 days, next 30d)
-- [ ] Fancy animations (styled version)
-- [ ] website docs: easy to read, understand and implement.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the development setup and how to run the tests.

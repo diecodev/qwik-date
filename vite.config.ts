@@ -1,35 +1,38 @@
 import { defineConfig } from "vite";
-import pkg from "./package.json";
-import { qwikVite } from "@builder.io/qwik/optimizer";
-import tsconfigPaths from "vite-tsconfig-paths";
+import pkg from "./package.json" with { type: "json" };
+import { qwikVite } from "@qwik.dev/core/optimizer";
+import { qwikRouter } from "@qwik.dev/router/vite";
 
-const { dependencies = {}, peerDependencies = {} } = pkg as any;
-const makeRegex = (dep) => new RegExp(`^${dep}(/.*)?$`);
-const excludeAll = (obj) => Object.keys(obj).map(makeRegex);
+type DepMap = Record<string, string>;
+const { dependencies = {}, peerDependencies = {} } = pkg as {
+  dependencies?: DepMap;
+  peerDependencies?: DepMap;
+};
+const makeRegex = (dep: string) => new RegExp(`^${dep}(/.*)?$`);
+const excludeAll = (obj: DepMap) => Object.keys(obj).map(makeRegex);
 
 export default defineConfig(({ command }) => {
   return {
-    plugins: [qwikVite(), tsconfigPaths()],
+    // In Qwik v2 the dev SSR server lives in qwikRouter(), so the playground in
+    // src/routes needs it. It is left out of builds: the lib never uses the router.
+    plugins: [qwikVite(), ...(command === "serve" ? [qwikRouter()] : [])],
     build: {
-      target: "esnext",
+      target: "es2020",
       outDir: "lib",
       lib: {
-        entry: [
-          "src/lib/styled/inline.tsx",
-          "src/lib/styled/popup.tsx",
-          "src/lib/index.ts",
-        ],
-        fileName: (format, entry) => {
-          const ext = format === 'es' ? 'mjs' : 'cjs';
-          const name = entry;
-          return `${name}.qwik.${ext}`;
+        // Entry names map 1:1 to the paths in package.json#exports.
+        entry: {
+          index: "src/lib/index.ts",
+          headless: "src/lib/headless/index.ts",
         },
+        // Qwik v2 (@qwik.dev/core) is ESM-only, so there is no CJS output.
+        formats: ["es"],
+        fileName: (_format, entryName) => `${entryName}.qwik.mjs`,
       },
       emptyOutDir: true,
-      rollupOptions: {
+      rolldownOptions: {
         output: {
-          preserveModules: true,
-          preserveModulesRoot: 'src/lib',
+          chunkFileNames: "[name]-[hash].qwik.mjs",
         },
         // externalize deps that shouldn't be bundled into the library
         external: [

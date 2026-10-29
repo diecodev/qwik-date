@@ -1,0 +1,585 @@
+# qwik-date: full documentation
+
+> Calendar and date picker component for Qwik. Pick one day, a range or several days, with full keyboard support, screen reader names, any locale through Intl, form submission and headless parts. No runtime dependencies.
+
+- Docs: https://qwik-date.dieco.dev
+- Source: https://github.com/diecodev/qwik-date
+- npm: https://www.npmjs.com/package/qwik-date
+- This file: generated from the docs on 2026-10-28. The dates in the examples count from that day.
+
+## Versions
+
+| qwik-date | Qwik | Install |
+| --- | --- | --- |
+| 2.x (beta) | v2, `@qwik.dev/core` 2.0.0-rc.4 or later (peer dependency) | `qwik-date@beta` |
+| 1.x | v1, `@builder.io/qwik` | `qwik-date@1` |
+
+2.x is ESM only, needs Node 20.19+ or 22.12+, and has no runtime dependencies. Until 2.0 is stable, installing `qwik-date` without a tag gives 1.0.0, which is for Qwik v1: keep `@beta`.
+
+```sh
+npm install -D -E qwik-date@beta
+pnpm add -D -E qwik-date@beta
+yarn add -D -E qwik-date@beta
+bun add -D -E qwik-date@beta
+```
+
+## Core concepts
+
+- **Entry points.** `qwik-date` has the styled `Calendar`, `formatDate`, `formatDateRange` and the types. `qwik-date/headless` has the same calendar in parts (`Calendar.Root`, `Calendar.Grid`…), `useCalendar()`, the types and the formatters.
+- **Dates are strings.** A day is a `LocalDate`, `'YYYY-MM-DD'`, without time or timezone. Compare them as strings: they sort like the days.
+- **Modes and values.** `mode="single"` (default): `LocalDate | null`. `mode="range"`: `DateRange | null`, `{ start, end }`, with `end: null` until the second day. `mode="multiple"`: `LocalDate[]`, `[]` for none, in order.
+- **State.** `bind:value={signal}` keeps a signal in sync both ways (write to it and the calendar shows that month), or use `value` and `onChange$`. `onChange$` runs on every choice: in a range, also after the first day with `end: null`.
+- **Opening month.** The calendar opens on the month of its value, or on today's without one. Today is the visitor's day: with static generation (SSG) the HTML has the build's day, and the calendar moves to the visitor's when it runs.
+- **No DatePicker in 2.x.** A date picker is the `Calendar` in a popover with a trigger of your own: see "Date picker" below.
+
+## Use cases
+
+### Pick one day
+
+```tsx
+import { component$, useSignal } from '@qwik.dev/core';
+import { Calendar, type LocalDate } from 'qwik-date';
+
+export default component$(() => {
+  const date = useSignal<LocalDate | null>(null);
+
+  return <Calendar bind:value={date} />;
+});
+```
+
+### Date picker: a trigger and a popover
+
+No dependencies: the calendar is itself a native popover, placed under the trigger with CSS anchor positioning (Baseline since January 2026: Chrome and Edge 125, Safari 26, Firefox 147). The trigger has `aria-haspopup="dialog"` and `aria-expanded`, opening focuses a day (`autoFocus`), Escape or a click outside closes it, a choice closes it and the focus goes back to the trigger.
+
+`onToggle$` goes inside `containerProps`, an object: the optimizer only turns `$` props of JSX attributes into QRLs, so wrap it in `$()`.
+
+```tsx
+import { $, type Signal, component$, useId, useSignal } from '@qwik.dev/core';
+import { Calendar, type LocalDate, formatDate } from 'qwik-date';
+
+/** Under the trigger, 8px away, or above it when there's no room below. */
+const placement = (id: string) =>
+  `position-anchor: --${id}; position-area: bottom span-right; position-try-fallbacks: flip-block; margin: 8px 0`;
+
+export const DatePicker = component$<{ 'bind:value': Signal<LocalDate | null>; name?: string }>((props) => {
+  const id = useId();
+  const date = props['bind:value'];
+  const open = useSignal(false);
+  const trigger = useSignal<HTMLButtonElement>();
+
+  return (
+    <>
+      <button
+        ref={trigger}
+        type="button"
+        popovertarget={id}
+        aria-haspopup="dialog"
+        aria-expanded={open.value}
+        style={`anchor-name: --${id}`}
+      >
+        {date.value ? formatDate(date.value) : 'Pick a date'}
+      </button>
+      <Calendar
+        autoFocus
+        bind:value={date}
+        name={props.name}
+        onChange$={() => document.getElementById(id)?.hidePopover()}
+        containerProps={{
+          id,
+          popover: 'auto',
+          role: 'dialog',
+          style: placement(id),
+          onToggle$: $((event, popover) => {
+            open.value = event.newState === 'open';
+            // closed with Escape, a choice or the trigger: the focus goes back to the trigger
+            const focused = document.activeElement;
+            if (!open.value && (focused === document.body || popover.contains(focused))) trigger.value?.focus();
+          }),
+        }}
+      />
+    </>
+  );
+});
+
+// usage
+const date = useSignal<LocalDate | null>(null);
+<DatePicker bind:value={date} name="due" />;
+```
+
+For browsers without CSS anchor positioning (Safari before 26, Firefox before 147), place the same popover with `@floating-ui/dom` (`computePosition` and `autoUpdate` in `onToggle$`, `style: 'inset: auto; margin: 0'`): see https://qwik-date.dieco.dev/date-picker/#floating-ui. Qwik UI's Popover doesn't run on Qwik v2 yet.
+
+### Date range picker
+
+Same popover, with `mode="range"`, `formatDateRange` in the trigger, and close it once the range has an end:
+
+```tsx
+const range = useSignal<DateRange | null>(null);
+
+<button /* the same trigger */>{range.value ? formatDateRange(range.value) : 'Pick dates'}</button>
+<Calendar
+  autoFocus
+  mode="range"
+  bind:value={range}
+  onChange$={(value) => value.end && document.getElementById(id)?.hidePopover()}
+  containerProps={/* the same */}
+/>
+```
+
+While a range has a start and no end, the days up to the pointer or the focus get `data-preview`: the range a click would make.
+
+### Booking a stay across two months
+
+```tsx
+const stay = useSignal<DateRange | null>({ start: '2026-10-28', end: '2026-11-04' });
+
+<Calendar mode="range" months={2} bind:value={stay} />
+```
+
+`months={2}` shows two months side by side (they stack on narrow screens). The buttons move one month, the keyboard goes across the grids, and there's a single Tab stop.
+
+### Several days
+
+```tsx
+const days = useSignal<LocalDate[]>([]);
+
+<Calendar mode="multiple" bind:value={days} />
+```
+
+A click, Enter or Space marks a day, and unmarks it if it was marked. There's no maximum.
+
+### Only future days, or a booking window
+
+```tsx
+// today in local time: toISOString() would give the UTC day
+const now = new Date();
+const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}` as LocalDate;
+
+<Calendar min={today} max="2027-01-26" bind:value={date} />
+```
+
+`min` and `max` are the first and the last day that can be chosen. The month buttons stop at their months, and the months and years views disable the ones past them.
+
+### Disable weekends and holidays
+
+```tsx
+<Calendar
+  disabledWeekdays={[0, 6]} // 0 is Sunday
+  disabledDates={['2026-12-25', '2027-01-01']}
+  bind:value={date}
+/>
+```
+
+The keyboard skips the days that can't be chosen, and a range can't cross them: it ends right before the first one.
+
+### Submit with a form, or a Qwik Router action
+
+`name` adds hidden inputs with the value as `YYYY-MM-DD`: `name` for a day (empty without one), `name.start` and `name.end` for a range, a `name[]` per day for `mode="multiple"` (nothing without days). Qwik Router builds objects from dotted names and arrays from names ending in `[]`: a range arrives as `{ stay: { start, end } }`, several days as `{ days: [...] }`.
+
+```tsx
+import { component$, useSignal } from '@qwik.dev/core';
+import { Form, routeAction$ } from '@qwik.dev/router';
+import { Calendar, type LocalDate } from 'qwik-date';
+
+export const useBook = routeAction$((data) => {
+  // { days: ['2026-10-28', '2026-11-04'] }
+  return { days: data.days };
+});
+
+export default component$(() => {
+  const book = useBook();
+  const days = useSignal<LocalDate[]>([]);
+
+  return (
+    <Form action={book}>
+      <Calendar mode="multiple" bind:value={days} name="days" />
+      <button type="submit">Book</button>
+    </Form>
+  );
+});
+```
+
+Check the days on the server too: the inputs are plain text.
+
+### Another language
+
+`en` (default) and `es` have every text built in. Any other BCP 47 tag takes the month and weekday names from `Intl`, with a capital letter, and needs the texts `Intl` can't give in `labels` (TypeScript asks for them).
+
+```tsx
+import { Calendar, type Labels } from 'qwik-date';
+
+const fr: Labels = {
+  calendar: 'Calendrier',
+  previousMonth: 'Mois précédent',
+  nextMonth: 'Mois suivant',
+  previousYear: 'Année précédente',
+  nextYear: 'Année suivante',
+  previousYears: 'Années précédentes',
+  nextYears: 'Années suivantes',
+  selectedDate: 'date sélectionnée :',
+  selectedRange: 'période sélectionnée :',
+  selectedDates: 'dates sélectionnées :',
+};
+
+<Calendar locale="fr-FR" labels={fr} weekStartsOn={1} />;
+
+// en and es take some of the texts: the others stay built in
+<Calendar locale="es" labels={{ calendar: 'Fecha de entrega' }} />;
+```
+
+`weekStartsOn` is the first column, from `0` (Sunday, the default) to `6`. It doesn't follow the locale.
+
+### Show a date in a trigger or a label
+
+```tsx
+import { formatDate, formatDateRange } from 'qwik-date';
+
+formatDate('2026-10-28'); // 'Oct 28, 2026'
+formatDate('2026-10-28', 'es'); // '28 Oct 2026'
+formatDateRange({ start: '2026-10-28', end: '2026-11-04' }); // 'Oct 28, 2026 – Nov 04, 2026'
+formatDateRange({ start: '2026-10-28', end: null }); // 'Oct 28, 2026 – …'
+```
+
+### Dark mode
+
+```tsx
+import { component$, useSignal } from '@qwik.dev/core';
+import { Calendar, type Theme } from 'qwik-date';
+
+export default component$(() => {
+  const theme = useSignal<Theme>('auto'); // 'light' (default), 'dark' or 'auto'
+
+  return <Calendar theme={theme} />;
+});
+```
+
+`'auto'` follows `prefers-color-scheme` with CSS only. A signal changes the theme at runtime.
+
+### Brand colors over the default styles
+
+Every rule of the stylesheet goes through `:where()`, so a rule of yours on a part or a data attribute wins without `!important`. A class on the root through `containerProps` keeps it to one calendar.
+
+```tsx
+<Calendar mode="range" bind:value={range} containerProps={{ class: 'brand' }} />
+```
+
+```css
+.brand [data-selected] { background: #2563eb; color: white; }
+.brand td:has(> [data-in-range]) { background: #2563eb14; }
+.brand [data-in-range] { color: #2563eb; }
+.brand td > button { border-radius: 4px; }
+```
+
+### A look of your own: unstyled
+
+```tsx
+<Calendar unstyled containerProps={{ class: 'calendar' }} dayButtonProps={{ class: 'day' }} />
+```
+
+`unstyled` drops the library styles; the markup, the keyboard and the attributes stay. The chevrons are `1em` wide.
+
+### Markup of your own: headless parts, with Tailwind
+
+```tsx
+import { component$, useSignal } from '@qwik.dev/core';
+import { Calendar, type LocalDate } from 'qwik-date/headless';
+
+export default component$(() => {
+  const date = useSignal<LocalDate | null>(null);
+
+  return (
+    <Calendar.Root bind:value={date} class="flex flex-col gap-3">
+      <header class="flex items-center justify-between">
+        <Calendar.PrevButton>‹</Calendar.PrevButton>
+        <Calendar.Title />
+        <Calendar.NextButton>›</Calendar.NextButton>
+      </header>
+      <Calendar.Grid>
+        <Calendar.GridHead cellProps={{ class: 'text-xs text-neutral-500' }} />
+        <Calendar.GridBody
+          dayProps={{ class: 'size-9 rounded data-[selected]:bg-black data-[selected]:text-white' }}
+        />
+      </Calendar.Grid>
+      <Calendar.MonthGrid />
+      <Calendar.YearGrid />
+    </Calendar.Root>
+  );
+});
+```
+
+The root of the headless parts has no `data-qwik-date`, so the stylesheet of a styled `Calendar` on the same page leaves it alone.
+
+### Content in the days: prices or event dots
+
+Render the body yourself with `useCalendar()`, inside the root (Qwik's context only reaches its descendants). `Calendar.Cell` and `Calendar.Day` keep each day's attributes, the choice and the keyboard.
+
+```tsx
+import { component$ } from '@qwik.dev/core';
+import { Calendar, type LocalDate, useCalendar } from 'qwik-date/headless';
+
+const PriceDays = component$<{ prices: Record<string, number> }>(({ prices }) => {
+  const calendar = useCalendar();
+
+  return (
+    <tbody>
+      {calendar.grids.value[0].weeks.map((week) => (
+        <tr key={week.number}>
+          {week.days.map((day, i) => (
+            <Calendar.Cell key={day?.date ?? i} day={day?.date}>
+              {day && (
+                <Calendar.Day day={day.date}>
+                  {day.date.slice(8)} <small>{prices[day.date]}</small>
+                </Calendar.Day>
+              )}
+            </Calendar.Cell>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  );
+});
+
+<Calendar.Root bind:value={date}>
+  <Calendar.Title />
+  <Calendar.Grid>
+    <Calendar.GridHead />
+    <PriceDays prices={{ '2026-10-28': 120, '2026-11-04': 95 }} />
+  </Calendar.Grid>
+</Calendar.Root>;
+```
+
+`useCalendar()` returns signals and QRLs only, so handlers can use it. The value takes the type of the mode: `useCalendar<DateRange>()`.
+
+### Animate the changes of month
+
+The calendar doesn't move by itself. After each move it sets `data-direction="next"` or `"prev"` on the root and on the rows of days, and the rows are new for each month, so an animation on them plays on every change. The months and years grids (`table[data-period]`) are new when their view opens.
+
+```css
+@media (prefers-reduced-motion: no-preference) {
+  [data-qwik-date] table:not([data-period]) > tbody > tr[data-direction='next'] {
+    animation: month-next 200ms ease-out;
+  }
+  [data-qwik-date] table:not([data-period]) > tbody > tr[data-direction='prev'] {
+    animation: month-prev 200ms ease-out;
+  }
+  [data-qwik-date] table[data-period] {
+    animation: view-in 150ms ease-out;
+  }
+}
+
+@keyframes month-next { from { opacity: 0; translate: 1rem 0; } }
+@keyframes month-prev { from { opacity: 0; translate: -1rem 0; } }
+@keyframes view-in { from { opacity: 0; scale: 0.96; } }
+```
+
+With the headless parts and Tailwind: `rowProps={{ class: 'motion-safe:data-[direction=next]:animate-month-next motion-safe:data-[direction=prev]:animate-month-prev' }}` on `Calendar.GridBody`. `useCalendar().direction` has the same value. View Transitions aren't built in.
+
+### Right to left
+
+In a right-to-left page, or with `containerProps={{ dir: 'rtl' }}`, the chevrons turn around and the left and right arrow keys swap.
+
+### Week numbers, full weeks, weekday names
+
+```tsx
+<Calendar fullWeeks showWeekNumber showDaysOfWeek={false} weekStartsOn={1} />
+```
+
+`fullWeeks` fills the first and the last week with the days of the months around (disabled) and shows six weeks in every month. `showWeekNumber` adds a column with the ISO week number. `showDaysOfWeek={false}` hides the weekday names.
+
+### Months and years
+
+The title is a button: a click shows the months of the year, another one twelve years, and a third one the days again. Choosing a month or a year shows its days; nothing is selected on the way. Nothing to set up.
+
+### Name the calendar for screen readers
+
+```tsx
+<Calendar containerProps={{ 'aria-label': 'Due date' }} bind:value={date} />
+```
+
+Its accessible name becomes "Due date, selected date: …" with the selection.
+
+### Qwik v1 apps
+
+Use `qwik-date@1`: `CalendarInline` from `qwik-date/inline` (`date`, `onDateChange$`, `unStyled`, `iconLeft`/`iconRight`, `actionLeftProps`…) and `DatePicker` from `qwik-date/picker` (`triggerLabel`, `triggerIcon`, `triggerProps`, `mode: 'popup' | 'inline'`). Docs: https://qwik-date.dieco.dev/v1/
+
+### Upgrading from 1.x to 2.x
+
+1. Move the app to Qwik v2 (`@qwik.dev/core`). 2.x is ESM only.
+2. Install `qwik-date@beta` and import everything from `qwik-date` (`/inline` and `/picker` are gone).
+3. Rename: `CalendarInline` → `Calendar`; `date`, `bind:date`, `onDateChange$` → `value`, `bind:value`, `onChange$` (the value is selected from the start); `unStyled` → `unstyled`; `iconLeft`, `iconRight` → `prevIcon`, `nextIcon`; `actionButtonProps` → `navButtonProps`; `actionLeftProps`, `actionRightProps` → `prevButtonProps`, `nextButtonProps`; `[data-preselected]` → today has `aria-current="date"`.
+4. Replace the `DatePicker` with the popover recipe above, and the trigger's text with `formatDate()`.
+5. `CalendarProps` is a type alias: extend it with an intersection, not an interface.
+6. For locales other than `en` and `es`, pass `labels`.
+
+## API reference
+
+### Props of the Calendar
+
+| Prop | Type | Default | Description | Example |
+| --- | --- | --- | --- | --- |
+| `mode` | `'single' \| 'range' \| 'multiple'` | `'single'` | What a click selects: one day, a start and an end, or any days. It sets the type of `value`, `bind:value` and `onChange$`. | `<Calendar mode="range" bind:value={range} />` |
+| `value` | `LocalDate \| DateRange \| LocalDate[] \| null` | `null` | The selected value, selected from the start: a day, a `DateRange` with `mode="range"`, or the days with `mode="multiple"` (`[]` by default). The calendar opens on its month, or on today's without one. (1.x: `date`) | `<Calendar value="2026-10-28" />` |
+| `bind:value` | `Signal<…>` |  | A signal of the value's type, kept in sync in both directions: write to it and the calendar shows that month. (1.x: `bind:date`) | `const date = useSignal<LocalDate \| null>(null);  <Calendar bind:value={date} />` |
+| `onChange$` | `(value) => void` |  | Called with the new value on every choice. In a range, also after the first day, with `end: null`; with `mode="multiple"`, on every mark and unmark, with the days in order. (1.x: `onDateChange$`) | `<Calendar onChange$={(value) => console.log(value)} />` |
+| `min, max` | `LocalDate` |  | The first and the last day that can be chosen. The month buttons stop at their months, and the months and years views disable the ones past them. | `<Calendar min="2026-10-28" max="2027-01-26" />` |
+| `disabledDates` | `readonly LocalDate[]` |  | Days that can't be chosen. The keyboard skips them, and a range can't cross them: it ends right before the first one, as with every day ruled out. | `<Calendar disabledDates={['2026-12-25', '2027-01-01']} />` |
+| `disabledWeekdays` | `readonly WeekDay[]` |  | Weekdays that can't be chosen, `0` for Sunday: `[0, 6]` disables the weekends. | `<Calendar disabledWeekdays={[0, 6]} />` |
+| `months` | `number` | `1` | How many months show side by side, with one Tab stop for all of them. The buttons move one month, and they stack on narrow screens. | `<Calendar mode="range" months={2} />` |
+| `fullWeeks` | `boolean` | `false` | Fills the first and the last week with the days of the months around, disabled, and shows six weeks in every month. | `<Calendar fullWeeks />` |
+| `showWeekNumber` | `boolean` | `false` | Adds a column with the ISO week number of each row. | `<Calendar showWeekNumber />` |
+| `showDaysOfWeek` | `boolean` | `true` | Shows the weekday names over the grid. | `<Calendar showDaysOfWeek={false} />` |
+| `prevIcon, nextIcon` | `Component<PropsOf<'svg'>>` | `chevrons` | Components for the icons of the month buttons. They get `iconProps`, and the library styles turn them around in right-to-left layouts. (1.x: `iconLeft, iconRight`) | `<Calendar prevIcon={ArrowLeft} nextIcon={ArrowRight} />` |
+| `locale` | `Locale` | `'en'` | `'en'`, `'es'`, or any BCP 47 tag (`'fr-FR'`). Other languages take their month and weekday names from `Intl`, and need `labels`. | `<Calendar locale="es" />` |
+| `labels` | `Labels \| Partial<Labels>` |  | The texts `Intl` can't give: the calendar's name and the labels of the buttons. With `en` and `es` they're built in, and `labels` overrides some of them; any other locale needs all of them, and TypeScript asks for them. | `<Calendar locale="fr-FR" labels={fr} weekStartsOn={1} />` |
+| `weekStartsOn` | `WeekDay` | `0` | The first column, from `0` (Sunday) to `6`. | `<Calendar weekStartsOn={1} />` |
+| `name` | `string` |  | Submits the value with the form around the calendar, in hidden inputs: `name` for a day (empty without one), `name.start` and `name.end` for a range, a `name[]` per day for multiple (nothing without days). A Qwik Router action gets an object for a range and an array for multiple. | `<form>   <Calendar name="due" /> </form>` |
+| `autoFocus` | `boolean` | `false` | Focuses the day where Tab enters every time the calendar shows up: on load, or when a popover, dialog or details around it opens. Without it, the calendar never takes the focus. | `<Calendar autoFocus containerProps={{ popover: 'auto' }} />` |
+| `theme` | `Theme \| Signal<Theme>` | `'light'` | `'light'`, `'dark'` or `'auto'`, which follows `prefers-color-scheme` with CSS only. A signal changes it at runtime. | `<Calendar theme="auto" />` |
+| `unstyled` | `boolean` | `false` | Leaves the calendar without the library styles: style it through the props of its parts and its data attributes. (1.x: `unStyled`) | `<Calendar unstyled />` |
+| `containerProps` | `Omit<PropsOf<'div'>, 'onChange$'>` | `{}` | The root, a `<div role="group">`. Its `aria-label` names the calendar, followed by the selection. No DOM `onChange$`: the calendar's is the value's. | `<Calendar containerProps={{ class: 'calendar', 'aria-label': 'Due date' }} />` |
+| `headerProps` | `PropsOf<'header'>` | `{}` | The `<header>` with the month buttons and the title. With `months`, each month's header, around its title. | `<Calendar headerProps={{ class: 'header' }} />` |
+| `navButtonProps` | `PropsOf<'button'>` | `{}` | Both month buttons. `prevButtonProps` and `nextButtonProps` win over it, and an `onClick$` in both runs both. (1.x: `actionButtonProps`) | `<Calendar navButtonProps={{ class: 'nav' }} />` |
+| `prevButtonProps, nextButtonProps` | `PropsOf<'button'>` | `{}` | The previous and the next button, one each. (1.x: `actionLeftProps, actionRightProps`) | `<Calendar prevButtonProps={{ title: 'Previous' }} />` |
+| `titleProps` | `PropsOf<'div'>` | `{}` | The title, the live region that announces each month and view. Its `id` names the first grid. | `<Calendar titleProps={{ class: 'title' }} />` |
+| `iconProps` | `PropsOf<'svg'>` | `{}` | Both icons: the chevrons, or `prevIcon` and `nextIcon`. The chevrons are `1em` wide, so the text around sizes them. | `<Calendar iconProps={{ 'stroke-width': 2 }} />` |
+| `calendarProps` | `PropsOf<'table'>` | `{}` | Each days grid, a `<table role="grid">`. | `<Calendar calendarProps={{ class: 'grid' }} />` |
+| `theadProps` | `PropsOf<'thead'>` | `{}` | The head of the grid, with the weekday names. | `<Calendar theadProps={{ class: 'weekdays' }} />` |
+| `theadRowProps` | `PropsOf<'tr'>` | `{}` | The row of the weekday names. | `<Calendar theadRowProps={{ class: 'weekdays-row' }} />` |
+| `headerCellProps` | `PropsOf<'th'>` | `{}` | Each weekday name. | `<Calendar headerCellProps={{ class: 'weekday' }} />` |
+| `tbodyProps` | `PropsOf<'tbody'>` | `{}` | The body of the grid, with the weeks. | `<Calendar tbodyProps={{ class: 'weeks' }} />` |
+| `tbodyRowProps` | `PropsOf<'tr'>` | `{}` | Each week. Rows get `data-direction` after a move, to animate them. | `<Calendar tbodyRowProps={{ class: 'week' }} />` |
+| `cellProps` | `PropsOf<'td'>` | `{}` | The cell around each day, with `aria-selected` and `aria-disabled`. | `<Calendar cellProps={{ class: 'cell' }} />` |
+| `dayButtonProps` | `PropsOf<'button'>` | `{}` | Each day button: style its states by the data attributes below. | `<Calendar dayButtonProps={{ class: 'day' }} />` |
+| `weekNumberProps` | `PropsOf<'td'>` | `{}` | Each week number cell, with `showWeekNumber`. | `<Calendar showWeekNumber weekNumberProps={{ class: 'week-number' }} />` |
+
+The headless `Calendar.Root` takes the same options, except `showDaysOfWeek`, `theme`, `unstyled`, the icons and the props of each part.
+
+### Data attributes
+
+The styled `Calendar` and the headless parts set these, to style each state with CSS or Tailwind's `data-[selected]:`.
+
+| Attribute | On | When |
+| --- | --- | --- |
+| `data-qwik-date` | root | Always, on the styled Calendar. The headless root doesn't have it. |
+| `data-theme` | root | light, dark or auto, from the theme prop. |
+| `data-unstyled` | root | With unstyled. |
+| `data-view` | root | days, months or years: the view on show. |
+| `data-direction` | root, rows | next or prev, after each move. None on load. |
+| `data-value` | day | The day, as YYYY-MM-DD. |
+| `data-selected` | day | The selected day, or an end of the range. |
+| `data-range-start` | day | The first day of the range. |
+| `data-range-end` | day | The last day of the range. |
+| `data-in-range` | day | The days between the ends. |
+| `data-preview` | day | The range a click would make, while the range has no end. |
+| `data-unavailable` | day | Ruled out by min, max or the disabled days. |
+| `aria-current="date"` | day | Today. |
+| `disabled` | day | Can't be chosen. |
+| `data-period` | table | The months and the years grids. |
+| `data-month, data-year` | month, year | The cell's month (2026-10) or year. |
+
+### Keyboard
+
+The grid is a single Tab stop, even with several months; days that can't be chosen are skipped.
+
+| Keys | Days | Months and years |
+| --- | --- | --- |
+| ← → | The previous or next day (mirrored in right-to-left layouts) | The previous or next month or year |
+| ↑ ↓ | The same weekday, a week before or after | A row up or down |
+| Home, End | The start or the end of the week | |
+| PageUp, PageDown | The same day in the previous or next month, or that month's last day | |
+| Enter, Space | Chooses the focused day | Shows that month's days, or the same month in that year |
+| Escape | | Back to the days, with the focus on the title (a popover around stays open) |
+| Tab | Enters on the selected day, or the first one that can be chosen | |
+
+### Types
+
+```ts
+import type { CalendarProps, DateRange, Labels, LocalDate, Locale, Theme, WeekDay } from 'qwik-date';
+
+type LocalDate = `${number}-${number}-${number}`; // 'YYYY-MM-DD'
+type DateRange = { start: LocalDate; end: LocalDate | null };
+type WeekDay = 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 is Sunday
+type Theme = 'light' | 'dark' | 'auto';
+type Locale = 'en' | 'es' | (string & {});
+
+interface Labels {
+  calendar: string; // the accessible name, before the selection
+  previousMonth: string;
+  nextMonth: string;
+  previousYear: string; // the month buttons while the months of a year show
+  nextYear: string;
+  previousYears: string; // the month buttons while twelve years show
+  nextYears: string;
+  selectedDate: string; // between the name and the selected day
+  selectedRange: string;
+  selectedDates: string;
+}
+```
+
+### Functions
+
+```ts
+formatDate(value: LocalDate, locale?: Locale): string; // locale = 'en'
+formatDateRange(range: DateRange, locale?: Locale): string; // '…' while end is null
+```
+
+They work in any locale, with a two-digit day and a capital letter on the month.
+
+## Headless
+
+```ts
+import { Calendar, useCalendar } from 'qwik-date/headless';
+```
+
+### Parts
+
+| Part | Renders | What it does |
+| --- | --- | --- |
+| `Calendar.Root` | `<div role="group">` | Takes the options of the `Calendar`, all but the styling ones: `mode`, `value`, `bind:value`, `onChange$`, `min`, `max`, `months`, `name`, `autoFocus`, `locale`, `labels`… Its name is its `aria-label` (`labels.calendar` by default) followed by the selection. With `name`, it adds the hidden inputs. |
+| `Calendar.PrevButton, Calendar.NextButton` | `<button>` | Change the month, a year or twelve years, as the view shows, with the matching label, and `aria-disabled` at `min` and `max`. The icon goes inside. |
+| `Calendar.Title` | `<div aria-live="polite">` | The title of the view: "August 2024", "2024" or "2016 – 2027". It names the grid. Its button shows the months, then the years: `button={false}` for a title without it, `buttonProps` for the button. With `months`, `offset` is its month. |
+| `Calendar.Grid` | `<table role="grid">` | The keyboard: arrows, Home and End, PageUp and PageDown, Enter and Space. With `months`, `offset` is its month, and its `GridBody` shows that month. |
+| `Calendar.GridHead` | `<thead>` | The weekday names. `rowProps` and `cellProps` go to its `<tr>` and its `<th>`s. |
+| `Calendar.GridBody` | `<tbody>` | A row per week and a button per day. `rowProps`, `cellProps`, `dayProps` and `weekNumberProps` go to every `<tr>`, `<td>`, day `<button>` and week number cell. |
+| `Calendar.MonthGrid, Calendar.YearGrid` | `<table role="grid">` | The months of a year and twelve years, only in their view (the days grid, only in its own). `rowProps`, `cellProps` and `buttonProps`. The buttons have `data-month` or `data-year`, `data-selected`, `aria-current="date"` and `disabled`. |
+| `Calendar.Cell, Calendar.Day` | `<td>, <button>` | For rows of your own: they keep the attributes of each day, the choice and the keyboard. |
+
+### useCalendar()
+
+| Field | What it is |
+| --- | --- |
+| `value` | The selected value, a signal you can write to: the calendar shows the month of a value written from outside. |
+| `mode` | The mode, as the root got it. |
+| `preview` | The range a choice of the day under the pointer or the focus would make, while a range has no end, or `null`. |
+| `direction` | `'next'` or `'prev'` after each move, `null` before the first one, as the root's `data-direction`. |
+| `month` | The month on show, `{ year, month }`. |
+| `view, title` | `'days'`, `'months'` or `'years'`, and the title of that view. |
+| `grids` | The months on show, each with its `title` and its `weeks`: `{ number, days }`, with a `CalendarDay` per day (`null` for the empty cells): `date`, `label`, `outside`, `unavailable`, `disabled`, `today`, `selected`, `rangeStart`, `rangeEnd`, `inRange`, `preview` and `tabbable`. |
+| `monthCells, yearCells` | The cells of the months and the years views: `year`, `month`, `text`, `label`, `disabled`, `selected`, `today` and `tabbable`. |
+| `today, tabDay` | Today, and the day where Tab enters the grid. |
+| `canGoBack, canGoForward` | Whether the view can move, within `min` and `max`. |
+| `weekdays, labels` | The weekday names in column order, `{ long, short }`, and the texts of the locale. |
+| `showWeekNumber, titleId` | The option, and the id of the first title. |
+| `select$(day)` | Chooses a day, as a click on it does. A day that can't be chosen is ignored. |
+| `setPreview$(day)` | Previews the range up to a day, as the pointer on it does: `null` for none. |
+| `prev$(), next$()` | A month, a year or twelve years away, as the view shows. |
+| `setView$(view)` | What the title does. |
+| `chooseMonth$(year, month), chooseYear$(year)` | What the month and year buttons do. |
+
+## Accessibility
+
+- The root is a `role="group"` named by its `aria-label` (`labels.calendar` by default) followed by the selection: "Calendar, selected date: …".
+- The title is an `aria-live="polite"` region that announces each month and view, and names the grid (`role="grid"`).
+- Each day button is named with its full date; today has `aria-current="date"`; the cell of a selected day, or of a day in a range, has `aria-selected`; the days that can't be chosen are `disabled`, with `aria-disabled` cells, and the ones ruled out by `min`, `max` or the disabled days are also struck through.
+- The month buttons are named ("go to previous month"…); at `min` and `max` they get `aria-disabled` and stay focusable.
+- The calendar never takes the focus on its own, except with `autoFocus`. Nothing moves by itself; the theme's color fade is off with `prefers-reduced-motion`.
+- Weekday names and week numbers reach 4.7:1 (light) and 5.3:1 (dark).
+
+## Gotchas
+
+- Install `qwik-date@beta` for Qwik v2: plain `qwik-date` is 1.0.0 until 2.0 is stable.
+- `$` handlers inside `containerProps` (like `onToggle$`) need `$()`: the optimizer doesn't reach into objects.
+- `useCalendar()` only works in a component inside `Calendar.Root`.
+- With `mode="multiple"` and `name`, the inputs are `name[]`: a repeated name without `[]` keeps only the last day in a Qwik Router action.
+- `labels` is required, and checked by TypeScript, for any locale other than `en` and `es`.
+- `containerProps` doesn't take a DOM `onChange$`: the calendar's `onChange$` is the value's.
+- `CalendarProps` is a type alias: `type Props = CalendarProps & { … }`, not `interface … extends`.

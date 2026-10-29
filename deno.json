@@ -1,0 +1,11 @@
+{
+  "lock": false,
+  "deploy": {
+    "install": "pnpm install --no-frozen-lockfile",
+    "build": "pnpm build.website",
+    "runtime": {
+      "type": "static",
+      "cwd": "./website/dist"
+    }
+  }
+}

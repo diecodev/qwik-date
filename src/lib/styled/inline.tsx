@@ -1,37 +1,36 @@
+import { type Component, type PropsOf, type Signal, component$, isSignal, useStyles$ } from '@qwik.dev/core';
+import type { Theme } from '../core';
 import {
-  $,
-  type Component,
-  type PropsOf,
-  type QRL,
-  type Signal,
-  component$,
-  useComputed$,
-  useSignal,
-  useStyles$,
-  useVisibleTask$,
-} from '@builder.io/qwik';
-import { ARIA_LABELS, type Locale, MONTHS_LG, type Month, WEEKDAYS, daysArrGenerator, getWeekNumber } from '../core';
+  Grid,
+  GridBody,
+  GridHead,
+  MonthGrid,
+  NextButton,
+  PrevButton,
+  Root,
+  Title,
+  YearGrid,
+} from '../headless/calendar';
+import type { CalendarOptions } from '../headless/root';
 import { ChevronLeft, ChevronRight } from './icons';
 import styles from './style.css?inline';
 
-type LocalDate = `${number}-${number}-${number}`;
+export type CalendarProps = CalendarOptions & CalendarStyleProps;
 
-export interface CalendarInlineProps {
-  locale?: Locale;
-  showWeekNumber?: boolean;
-  fullWeeks?: boolean;
-  date?: LocalDate;
-  'bind:date'?: Signal<LocalDate>; // TODO: validate user is passing a signal
+interface CalendarStyleProps {
   showDaysOfWeek?: boolean;
-  unStyled?: boolean;
-  iconLeft?: Component<PropsOf<'svg'>>;
-  iconRight?: Component<PropsOf<'svg'>>;
+  unstyled?: boolean;
+  theme?: Theme | Signal<Theme>;
+  prevIcon?: Component<PropsOf<'svg'>>;
+  nextIcon?: Component<PropsOf<'svg'>>;
   // props to override
-  containerProps?: PropsOf<'div'>;
+  /** without `onChange$`: the calendar's is the value's (the calendar has no input that fires a DOM change) */
+  containerProps?: Omit<PropsOf<'div'>, 'onChange$'>;
   headerProps?: PropsOf<'header'>;
-  actionButtonProps?: PropsOf<'button'>;
-  actionLeftProps?: PropsOf<'button'>;
-  actionRightProps?: PropsOf<'button'>;
+  /** both month buttons; `prevButtonProps` / `nextButtonProps` win over it */
+  navButtonProps?: PropsOf<'button'>;
+  prevButtonProps?: PropsOf<'button'>;
+  nextButtonProps?: PropsOf<'button'>;
   iconProps?: PropsOf<'svg'>;
   titleProps?: PropsOf<'div'>;
   calendarProps?: PropsOf<'table'>;
@@ -43,44 +42,24 @@ export interface CalendarInlineProps {
   cellProps?: PropsOf<'td'>;
   dayButtonProps?: PropsOf<'button'>;
   weekNumberProps?: PropsOf<'td'>;
-  onDateChange$?: QRL<(date: LocalDate) => void>;
 }
 
-const regex = /^\d{4}-(0[1-9]|1[0-2])-\d{2}$/;
-const ACTION_KEYS = [
-  'enter',
-  ' ',
-  'arrowup',
-  'arrowdown',
-  'arrowleft',
-  'arrowright',
-  'home',
-  'end',
-  'pageup',
-  'pagedown',
-] as const;
-const dateFormatter = (locale: Locale) =>
-  new Intl.DateTimeFormat(locale, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-
-export const CalendarInline = component$<CalendarInlineProps>(
+/** The headless parts (`qwik-date/headless`) with the library's styles. */
+export const Calendar = component$<CalendarProps>(
   ({
-    date: dateProp,
-    fullWeeks = false,
-    locale = 'en',
-    showWeekNumber = false,
+    months = 1,
     showDaysOfWeek = true,
-    iconLeft,
-    iconRight,
+    unstyled,
+    theme = 'light',
+    prevIcon,
+    nextIcon,
     containerProps = {},
     headerProps = {},
-    actionButtonProps = {},
-    actionLeftProps = {},
-    actionRightProps = {},
+    navButtonProps = {},
+    prevButtonProps = {},
+    nextButtonProps = {},
+    iconProps = {},
+    titleProps = {},
     calendarProps = {},
     theadProps = {},
     tbodyProps = {},
@@ -89,332 +68,93 @@ export const CalendarInline = component$<CalendarInlineProps>(
     headerCellProps = {},
     cellProps = {},
     dayButtonProps = {},
-    iconProps = {},
-    titleProps = {},
     weekNumberProps = {},
-    onDateChange$,
-    unStyled,
-    ...props
+    ...options
   }) => {
-    if (!unStyled) useStyles$(styles);
+    // always called: hooks can't be conditional, `unstyled` instances are excluded by the stylesheet itself
+    useStyles$(styles);
 
-    // root constants
-    const date = new Date().toISOString().split('T')[0] as LocalDate;
-    const labelStr = containerProps['aria-label'] ?? ARIA_LABELS[locale].root;
+    const PrevIcon = prevIcon ?? ChevronLeft;
+    const NextIcon = nextIcon ?? ChevronRight;
 
-    // signals
-    const dateSignal = useSignal<LocalDate>(dateProp ?? date);
-    const defaultDate = props['bind:date'] ?? dateSignal;
-    const activeDate = useSignal<LocalDate | null>(null);
-    const monthToRender = useSignal<Month>(defaultDate.value.split('-')[1] as Month);
-    const yearToRender = useSignal<number>(+defaultDate.value.split('-')[0]);
-    const dateToFocus = useSignal<LocalDate>(defaultDate.value);
-
-    // computed
-    const labelSignal = useComputed$(() => {
-      if (!activeDate.value) return labelStr;
-      const [year, month] = activeDate.value.split('-');
-
-      return `${labelStr} ${MONTHS_LG[locale][+month - 1]} ${year}`;
-    });
-    const datesArray = useComputed$(() => {
-      const dates = daysArrGenerator({
-        month: monthToRender.value,
-        year: yearToRender.value.toString(),
-        fullWeeks,
-      });
-      return dates;
-    });
-
-    if (!regex.test(defaultDate.value))
-      throw new Error('Invalid date format in Calendar. Please use YYYY-MM-DD format.');
-
-    // taks
-    useVisibleTask$(({ track, cleanup }) => {
-      track(() => datesArray.value);
-
-      // if (dateToFocus.value === defaultDate.value) return;
-
-      if (datesArray.value.flat().includes(dateToFocus.value)) {
-        const btn = document.querySelector(`button[data-value="${dateToFocus.value}"]`) as HTMLButtonElement | null;
-        btn?.focus();
-        btn?.setAttribute('tabindex', '0');
-      }
-
-      cleanup(() => {
-        const btn = document.querySelector(`button[data-value="${dateToFocus.value}"]`) as HTMLButtonElement | null;
-        btn?.setAttribute('tabindex', '-1');
-        btn?.blur();
-      });
-    });
-
-    // header utils
-    const hMonth = MONTHS_LG[locale][+monthToRender.value - 1];
-    const hTitle = `${hMonth} ${yearToRender.value}`;
-
-    // days of the week
-    const daysOfWeek = WEEKDAYS[locale];
-
-    // icons
-    const IconLeft = iconLeft ?? ChevronLeft;
-    const IconRight = iconRight ?? ChevronRight;
-
-    // events handlers
-    const decreaseDate = $(() => {
-      if (monthToRender.value === '01') {
-        monthToRender.value = '12';
-        yearToRender.value -= 1;
-        return;
-      }
-
-      monthToRender.value = String(+monthToRender.value - 1).padStart(2, '0') as Month;
-    });
-    const increaseDate = $(() => {
-      if (monthToRender.value === '12') {
-        monthToRender.value = '01';
-        yearToRender.value += 1;
-        return;
-      }
-
-      monthToRender.value = String(+monthToRender.value + 1).padStart(2, '0') as Month;
-    });
-    const updateDateFocused = $((e: KeyboardEvent, tbody: HTMLTableSectionElement) => {
-      if (!ACTION_KEYS.includes(e.key.toLowerCase() as (typeof ACTION_KEYS)[number])) return;
-
-      const elFocus = document.activeElement;
-
-      if (elFocus?.tagName.toLowerCase() !== 'button') return;
-
-      const buttons = Array.from(tbody.getElementsByTagName('button'));
-
-      const getNewIndex = ({ currentIdx, step }: { currentIdx: number; step: number }) => {
-        const newIdx = currentIdx + step;
-
-        if (newIdx < 0 || newIdx >= buttons.length) return currentIdx;
-
-        const btn = buttons[newIdx];
-
-        if (btn.hasAttribute('disabled')) return currentIdx;
-
-        return newIdx;
-      };
-
-      const idx = buttons.indexOf(elFocus as HTMLButtonElement);
-
-      // local helpers
-      let localIdx: number = idx;
-      let newDate: LocalDate | null = null;
-
-      switch (e.key.toLowerCase()) {
-        case 'arrowup': {
-          localIdx = getNewIndex({ currentIdx: idx, step: -7 });
-          if (idx === localIdx) {
-            const d = new Date(elFocus.getAttribute('data-value') as LocalDate);
-            newDate = new Date(d.setDate(d.getDate() - 7)).toISOString().split('T')[0] as LocalDate;
-
-            decreaseDate();
-          }
-          break;
-        }
-        case 'arrowdown': {
-          localIdx = getNewIndex({ currentIdx: idx, step: 7 });
-          if (idx === localIdx) {
-            const d = new Date(elFocus.getAttribute('data-value') as LocalDate);
-            newDate = new Date(d.setDate(d.getDate() + 7)).toISOString().split('T')[0] as LocalDate;
-
-            increaseDate();
-          }
-
-          break;
-        }
-        case 'arrowleft': {
-          localIdx = getNewIndex({ currentIdx: idx, step: -1 });
-          if (idx === localIdx) {
-            const d = new Date(elFocus.getAttribute('data-value') as LocalDate);
-            newDate = new Date(d.setDate(d.getDate() - 1)).toISOString().split('T')[0] as LocalDate;
-
-            decreaseDate();
-          }
-          break;
-        }
-        case 'arrowright': {
-          localIdx = getNewIndex({ currentIdx: idx, step: 1 });
-          if (idx === localIdx) {
-            const d = new Date(elFocus.getAttribute('data-value') as LocalDate);
-            newDate = new Date(d.setDate(d.getDate() + 1)).toISOString().split('T')[0] as LocalDate;
-
-            increaseDate();
-          }
-          break;
-        }
-        case ' ':
-        case 'enter': {
-          (elFocus as HTMLButtonElement).click();
-          break;
-        }
-        case 'pageup': {
-          const localDate = elFocus.getAttribute('data-value') as LocalDate;
-          const d = new Date(localDate);
-          newDate = new Date(d.setMonth(d.getMonth() - 1)).toISOString().split('T')[0] as LocalDate;
-
-          decreaseDate();
-          break;
-        }
-        case 'pagedown': {
-          const localDate = elFocus.getAttribute('data-value') as LocalDate;
-          const d = new Date(localDate);
-          newDate = new Date(d.setMonth(d.getMonth() + 1)).toISOString().split('T')[0] as LocalDate;
-
-          increaseDate();
-          break;
-        }
-        case 'home': {
-          // Find the start of the current row
-          const rowStartIndex = Math.floor(idx / 7) * 7;
-          const startButton = buttons[rowStartIndex];
-          newDate = startButton.getAttribute('data-value') as LocalDate;
-
-          // Check if the start of the row is in the previous month
-          if (newDate.split('-')[1] !== monthToRender.value) {
-            decreaseDate();
-          }
-
-          localIdx = rowStartIndex;
-          break;
-        }
-        case 'end': {
-          // Find the end of the current row
-          const rowEndIndex = Math.min(Math.ceil((idx + 1) / 7) * 7 - 1, buttons.length - 1);
-          const endButton = buttons[rowEndIndex];
-          newDate = endButton.getAttribute('data-value') as LocalDate;
-
-          // Check if the end of the row is in the next month
-          if (newDate.split('-')[1] !== monthToRender.value) {
-            increaseDate();
-          }
-
-          localIdx = rowEndIndex;
-          break;
-        }
-      }
-
-      dateToFocus.value = newDate ?? (buttons[localIdx].getAttribute('data-value') as LocalDate);
-      elFocus.setAttribute('tabindex', '-1');
-      buttons[localIdx].setAttribute('tabindex', '0');
-      // @ts-expect-error
-      buttons[localIdx].focus({ preventScroll: true, focusVisible: true });
-    });
+    const prev = (
+      <PrevButton
+        data-header-action
+        {...navButtonProps}
+        {...prevButtonProps}
+        onClick$={[navButtonProps.onClick$, prevButtonProps.onClick$]}
+      >
+        <PrevIcon {...iconProps} />
+      </PrevButton>
+    );
+    const next = (
+      <NextButton
+        data-header-action
+        {...navButtonProps}
+        {...nextButtonProps}
+        onClick$={[navButtonProps.onClick$, nextButtonProps.onClick$]}
+      >
+        <NextIcon {...iconProps} />
+      </NextButton>
+    );
+    const grid = (offset: number) => (
+      // a custom title id still names the first grid
+      <Grid offset={offset} aria-labelledby={offset ? undefined : titleProps.id} {...calendarProps}>
+        {showDaysOfWeek && <GridHead {...theadProps} rowProps={theadRowProps} cellProps={headerCellProps} />}
+        <GridBody
+          {...tbodyProps}
+          rowProps={tbodyRowProps}
+          cellProps={cellProps}
+          dayProps={dayButtonProps}
+          weekNumberProps={weekNumberProps}
+        />
+      </Grid>
+    );
+    // the title's views: the months of a year and twelve years
+    const periods = (
+      <>
+        <MonthGrid data-period />
+        <YearGrid data-period />
+      </>
+    );
 
     return (
-      <div data-qwik-date data-theme='light' aria-label={labelSignal.value} {...containerProps}>
-        <header {...headerProps}>
-          <button
-            type='button'
-            onClick$={[
-              decreaseDate,
-              $(() => {
-                dateToFocus.value = `${yearToRender.value}-${monthToRender.value}-01`;
-              }),
-              actionButtonProps.onClick$,
-              actionLeftProps.onClick$,
-            ]}
-            aria-label={ARIA_LABELS[locale].previous}
-          >
-            <IconLeft {...iconProps} />
-          </button>
-
-          <div aria-live='polite' role='presentation' {...titleProps}>
-            {hTitle}
+      <Root
+        {...options}
+        months={months}
+        // the stylesheet styles [data-qwik-date]: the headless parts don't have it
+        data-qwik-date
+        data-unstyled={unstyled}
+        data-theme={isSignal(theme) ? theme.value : theme}
+        {...containerProps}
+      >
+        {months > 1 ? (
+          // a panel per month, with the buttons at the corners: the panels stack when there's no room
+          <div data-month-panels>
+            {prev}
+            {next}
+            {[...Array(months).keys()].map((offset) => (
+              <div key={offset} data-month-panel>
+                <header {...headerProps}>
+                  <Title {...titleProps} id={offset ? undefined : titleProps.id} offset={offset} />
+                </header>
+                {grid(offset)}
+                {offset === 0 && periods}
+              </div>
+            ))}
           </div>
-
-          <button
-            type='button'
-            onClick$={[
-              increaseDate,
-              $(() => {
-                dateToFocus.value = `${yearToRender.value}-${monthToRender.value}-01`;
-              }),
-              actionButtonProps.onClick$,
-              actionRightProps.onClick$,
-            ]}
-            aria-label={ARIA_LABELS[locale].next}
-          >
-            <IconRight {...iconProps} />
-          </button>
-        </header>
-
-        <table tabIndex={-1} role='grid' {...calendarProps}>
-          {showDaysOfWeek && (
-            <thead {...theadProps}>
-              <tr {...theadRowProps}>
-                {showWeekNumber && <td />}
-                {daysOfWeek.map((day) => (
-                  <th key={day} scope='col' aria-label={day} {...headerCellProps}>
-                    {
-                      day
-                        .slice(0, 2)
-                        .normalize('NFD')
-                        .replace(/\p{M}/gu, '') // remove accents, special things on letters, etc.
-                    }
-                  </th>
-                ))}
-              </tr>
-            </thead>
-          )}
-          <tbody
-            {...tbodyProps}
-            preventdefault:keydown
-            onKeyDown$={[
-              $((e: KeyboardEvent, target: HTMLTableSectionElement) => {
-                updateDateFocused(e, target);
-              }),
-              tbodyProps.onKeyDown$,
-            ]}
-          >
-            {datesArray.value.map((week) => {
-              return (
-                <tr key={week.toString()} {...tbodyRowProps}>
-                  {showWeekNumber && (
-                    <td {...weekNumberProps}>
-                      <span>{getWeekNumber(week.filter((day) => day !== null)[0]).toString()}</span>
-                    </td>
-                  )}
-                  {week.map((day) => {
-                    const label = day ? dateFormatter(locale).format(new Date(`${day}T12:00:00`)) : undefined; // the T12:00:00 is to avoid timezone issues
-                    const disabled = day?.split('-')[1] !== monthToRender.value;
-
-                    return (
-                      <td key={`${week.toString()}-${day}`} role='presentation' aria-disabled={disabled} {...cellProps}>
-                        {day && (
-                          <button
-                            type='button'
-                            data-preselected={day === defaultDate.value}
-                            aria-selected={day === activeDate.value ? 'true' : undefined}
-                            data-value={day}
-                            aria-label={label}
-                            disabled={disabled}
-                            tabIndex={day === dateToFocus.value ? 0 : -1}
-                            {...dayButtonProps}
-                            onClick$={[
-                              $(() => {
-                                activeDate.value = day as LocalDate;
-                                onDateChange$?.(day as LocalDate);
-                              }),
-                              dayButtonProps.onClick$,
-                            ]}
-                          >
-                            {day.split('-')[2]}
-                          </button>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+        ) : (
+          <>
+            <header {...headerProps}>
+              {prev}
+              <Title {...titleProps} />
+              {next}
+            </header>
+            {grid(0)}
+            {periods}
+          </>
+        )}
+      </Root>
     );
   },
 );

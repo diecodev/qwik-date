@@ -1,220 +1,76 @@
-import { component$ } from '@builder.io/qwik'
+import { Slot, component$, useSignal } from '@qwik.dev/core'
+import { Code } from './code'
 
-const calendarInlinePropsInfo = [
-  {
-    name: 'date',
-    description: 'Default date to be used in the calendar',
-    defaultValue: 'today',
-  },
-  {
-    name: 'fullWeeks',
-    description: 'Displays full weeks in the calendar',
-    defaultValue: 'false',
-  },
-  {
-    name: 'locale',
-    description: 'Locale and regional settings for the calendar',
-    defaultValue: "'en'",
-  },
-  {
-    name: 'showWeekNumber',
-    description: 'Displays the week number in the calendar',
-    defaultValue: 'false',
-  },
-  {
-    name: 'showDaysOfWeek',
-    description: 'Displays the days of the week in the calendar',
-    defaultValue: 'true',
-  },
-  {
-    name: 'iconLeft',
-    description: 'Icon to display on the left side of the calendar',
-    defaultValue: 'undefined',
-  },
-  {
-    name: 'iconRight',
-    description: 'Icon to display on the right side of the calendar',
-    defaultValue: 'undefined',
-  },
-  {
-    name: 'containerProps',
-    description: "Props to be passed to the calendar's container",
-    defaultValue: '-',
-  },
-  {
-    name: 'headerProps',
-    description: "Props to be passed to the calendar's header",
-    defaultValue: '-',
-  },
-  {
-    name: 'actionButtonProps',
-    description: 'Props for action buttons in the calendar',
-    defaultValue: '-',
-  },
-  {
-    name: 'actionLeftProps',
-    description: 'Props for the left action',
-    defaultValue: '-',
-  },
-  {
-    name: 'actionRightProps',
-    description: 'Props for the right action',
-    defaultValue: '-',
-  },
-  {
-    name: 'calendarProps',
-    description: "Props to be passed to the calendar's container",
-    defaultValue: '-',
-  },
-  {
-    name: 'theadProps',
-    description: 'Props to be passed to the thead element of the calendar',
-    defaultValue: '-',
-  },
-  {
-    name: 'tbodyProps',
-    description: 'Props to be passed to the tbody element of the calendar',
-    defaultValue: '-',
-  },
-  {
-    name: 'theadRowProps',
-    description: 'Props to be passed to the rows of the thead',
-    defaultValue: '-',
-  },
-  {
-    name: 'tbodyRowProps',
-    description: 'Props to be passed to the rows of the tbody',
-    defaultValue: '-',
-  },
-  {
-    name: 'headerCellProps',
-    description: 'Props to be passed to the header cells',
-    defaultValue: '-',
-  },
-  {
-    name: 'cellProps',
-    description: 'Props to be passed to the body cells of the calendar',
-    defaultValue: '-',
-  },
-  {
-    name: 'dayButtonProps',
-    description: 'Props for the buttons representing each day in the calendar',
-    defaultValue: '-',
-  },
-  {
-    name: 'iconProps',
-    description: 'Props to be passed to the icons of the calendar',
-    defaultValue: '-',
-  },
-  {
-    name: 'titleProps',
-    description: "Props to be passed to the calendar's title",
-    defaultValue: '-',
-  },
-  {
-    name: 'weekNumberProps',
-    description: 'Props to be passed to the week numbers in the calendar',
-    defaultValue: '-',
-  },
-  {
-    name: 'onDateChange$',
-    description:
-      'Callback function triggered when the date changes in the calendar',
-    defaultValue: 'undefined',
-  },
-  {
-    name: 'unStyled',
-    description: 'Disables default styling',
-    defaultValue: 'false',
-  },
-  {
-    name: 'bind:date',
-    description: 'Signal with the default date',
-    defaultValue: 'undefined',
-  },
-] as const
+export const H2 = component$<{ id: string }>((props) => (
+  <h2 class="h2" id={props.id}>
+    <span class="hash" aria-hidden="true">
+      ##
+    </span>
+    <Slot />
+  </h2>
+))
 
-const datePickerProps = [
-  {
-    name: 'triggerProps',
-    description: 'Props to be passed to the trigger button',
-    defaultValue: 'undefined',
-  },
-  {
-    name: 'triggerIcon',
-    description: 'Icon component to be displayed in the trigger button',
-    defaultValue: 'undefined',
-  },
-  {
-    name: 'triggerLabel',
-    description: 'Label for the trigger button',
-    defaultValue: 'undefined',
-  },
-]
+export const H3 = component$<{ id: string }>((props) => (
+  <h3 class="h3" id={props.id}>
+    <span class="hash" aria-hidden="true">
+      ###
+    </span>
+    <Slot />
+  </h3>
+))
 
-export const Docs = component$(() => {
+/** The live example and its code, in two tabs. The example stays mounted while the code shows. */
+export const Preview = component$<{ code: string; file?: string }>((props) => {
+  const tab = useSignal<'preview' | 'code'>('preview')
+
   return (
-    <section class="space-y-3">
-      <h3 class="text-center font-medium">
-        {'> '}API Reference{' <'}
-      </h3>
-      <h4 class="text-center font-medium">~Inline mode~</h4>
-      <div class="overflow-clip rounded-lg border ">
-        <table class="min-w-full table-auto border-collapse text-sm">
-          <thead class="bg-neutral-100">
-            <tr>
-              <th class="border-r border-b px-4 py-2 text-left">Prop</th>
-              <th class="border-b px-4 py-2 text-left">Description</th>
-              <th class="border-b border-l px-4 py-2 text-left">Default</th>
-            </tr>
-          </thead>
-          <tbody>
-            {calendarInlinePropsInfo.map((prop, index) => (
-              <tr key={index} class="border-b text-neutral-700 last:border-b-0">
-                <td class="border-r px-4 py-2 font-semibold">{prop.name}</td>
-                <td class="px-4 py-2">{prop.description}</td>
-                <td class="border-l px-2 py-1.5">
-                  <span class="rounded-lg bg-neutral-100 px-2 py-0.5 font-mono text-xs">
-                    {prop.defaultValue}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div class="pv">
+      <div class="pv-h">
+        <button
+          type="button"
+          class="pt"
+          aria-pressed={tab.value === 'preview'}
+          onClick$={() => {
+            tab.value = 'preview'
+          }}
+        >
+          preview
+        </button>
+        <button
+          type="button"
+          class="pt"
+          aria-pressed={tab.value === 'code'}
+          onClick$={() => {
+            tab.value = 'code'
+          }}
+        >
+          code
+        </button>
+        {props.file && (
+          <span
+            class="mono"
+            style="margin-left: auto; font-size: 12px; color: var(--muted)"
+          >
+            {props.file}
+          </span>
+        )}
       </div>
-
-      <div class="!mt-12 space-y-2">
-        <h4 class="text-center font-medium">~Popup mode~</h4>
-        <p class="text-balance text-center text-neutral-600 text-sm">
-          Got the same props as the inline mode, but also accepts the following
-          props:
-        </p>
+      <div class="pv-b" hidden={tab.value !== 'preview'}>
+        <Slot />
       </div>
-      <div class="overflow-clip rounded-lg border ">
-        <table class="min-w-full table-auto border-collapse text-sm">
-          <thead class="bg-neutral-100">
-            <tr>
-              <th class="border-r border-b px-4 py-2 text-left">Prop</th>
-              <th class="border-b px-4 py-2 text-left">Description</th>
-              <th class="border-b border-l px-4 py-2 text-left">Default</th>
-            </tr>
-          </thead>
-          <tbody>
-            {datePickerProps.map((prop, index) => (
-              <tr key={index} class="border-b text-neutral-700 last:border-b-0">
-                <td class="border-r px-4 py-2 font-semibold">{prop.name}</td>
-                <td class="px-4 py-2">{prop.description}</td>
-                <td class="border-l px-2 py-1.5">
-                  <span class="rounded-lg bg-neutral-100 px-2 py-0.5 font-mono text-xs">
-                    {prop.defaultValue}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
+      {tab.value === 'code' && <Code code={props.code} />}
+    </div>
   )
 })
+
+/** Text with `inline code` between backticks. */
+export const md = (text: string) =>
+  text.split('`').map((part, i) =>
+    i % 2 ? (
+      <code key={i} class="c">
+        {part}
+      </code>
+    ) : (
+      part
+    ),
+  )

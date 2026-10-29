@@ -4,7 +4,7 @@
     "enabled": true
   },
   "files": {
-    "include": ["src/**"],
+    "include": ["src/**", "tests/**", "playwright.config.ts", "vitest.config.ts"],
     "ignore": ["website/**", "src/entry.*.tsx"]
   },
   "linter": {

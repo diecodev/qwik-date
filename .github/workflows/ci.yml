@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  # every base, not only main: in a stack each pull request targets the branch below it
+  pull_request:
+  # release.yml runs it before publishing
+  workflow_call:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  # a new push replaces the run of a pull request, never one of main
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint, types, unit tests and builds
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+
+      # `pnpm lint` writes the fixes: here it only checks
+      - name: Lint and format
+        run: pnpm exec biome check
+
+      - name: Library (types and build)
+        run: pnpm build.types && pnpm build.lib
+
+      - name: Unit tests
+        run: pnpm test.unit
+
+      # the website imports the library built above, as Deno Deploy builds it
+      - name: Website (types and build)
+        run: pnpm -C website build.types && pnpm -C website build.client && pnpm -C website build.server
+
+  e2e:
+    name: Playwright (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+
+      - name: Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the browser
+        id: cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ matrix.browser }}-${{ steps.playwright.outputs.version }}
+
+      - name: Install the browser and its system dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Install the system dependencies of the cached browser
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps ${{ matrix.browser }}
+
+      # the suite starts its own dev server, which renders the library from src/lib: no build needed
+      - name: Run the e2e tests
+        run: pnpm exec playwright test --project=${{ matrix.browser }}
+
+      - name: Upload the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: playwright-report/
+          retention-days: 7

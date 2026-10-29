@@ -1,0 +1,34 @@
+# qwik-date
+
+> Calendar and date picker component for Qwik. Pick one day, a range or several days, with full keyboard support, screen reader names, any locale through Intl, form submission and headless parts. No runtime dependencies. Version 2.x (beta) is for Qwik v2 (`@qwik.dev/core`); version 1.x is for Qwik v1 (`@builder.io/qwik`).
+
+Key facts for writing code with it:
+
+- Install for Qwik v2: `npm install -D -E qwik-date@beta` (until 2.0 is stable, `qwik-date` without a tag installs 1.0.0, which is for Qwik v1). For Qwik v1: `npm install -D -E qwik-date@1`.
+- Import from `qwik-date` (styled `Calendar`, `formatDate`, `formatDateRange`, types) or `qwik-date/headless` (`Calendar.Root` and the other parts, `useCalendar`). There is no `DatePicker` component in 2.x: put the `Calendar` in a popover (see the date picker recipe).
+- Dates are `'YYYY-MM-DD'` strings (`LocalDate`), without time or timezone. `mode="range"` takes `{ start, end }` (`DateRange`, `end` is `null` until chosen); `mode="multiple"` takes `LocalDate[]`.
+- Bind state with `bind:value={signal}`, or `value` and `onChange$`.
+- ESM only. Requires Node 20.19+ or 22.12+.
+
+## Docs
+
+- [Installation](https://qwik-date.dieco.dev/): install, first calendar, version compatibility
+- [Calendar](https://qwik-date.dieco.dev/calendar/): every mode and option with examples, and the API: props, data attributes, keyboard, types, functions
+- [Date Picker](https://qwik-date.dieco.dev/date-picker/): the Calendar in a native popover with CSS anchor positioning, or with floating-ui
+- [Headless](https://qwik-date.dieco.dev/headless/): `qwik-date/headless` parts, styling with data attributes or Tailwind, `useCalendar()` for custom rows
+
+## Guides
+
+- [Forms](https://qwik-date.dieco.dev/forms/): hidden inputs through `name`, Qwik Router actions
+- [Localization](https://qwik-date.dieco.dev/localization/): `locale`, `labels`, `weekStartsOn`
+- [Theming](https://qwik-date.dieco.dev/theming/): `theme`, overriding styles with CSS, `unstyled`, right to left
+- [Animations](https://qwik-date.dieco.dev/animations/): `data-direction` and CSS animations for month changes
+- [Accessibility](https://qwik-date.dieco.dev/accessibility/): names, announcements, keyboard and focus
+
+## Optional
+
+- [Full docs in one file](https://qwik-date.dieco.dev/llms-full.txt): everything above as Markdown, with a code example for each use case
+- [Changelog](https://qwik-date.dieco.dev/changelog/): release notes, breaking changes and the upgrade from 1.x
+- [qwik-date 1.x docs](https://qwik-date.dieco.dev/v1/): `CalendarInline` and `DatePicker` for Qwik v1
+- [Source code](https://github.com/diecodev/qwik-date)
+- [npm](https://www.npmjs.com/package/qwik-date)

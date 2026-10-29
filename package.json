@@ -1,7 +1,7 @@
 {
   "name": "qwik-date",
   "version": "1.0.0",
-  "description": "Qwik calendar, simple integration.",
+  "description": "Calendar and date picker component for Qwik: a day, a range or several days, accessible, in any locale, with headless parts.",
   "keywords": [
     "qwik",
     "qwik library",
@@ -12,11 +12,20 @@
     "qwik date picker",
     "qwik calendar picker",
     "date picker",
-    "calendar picker"
+    "calendar picker",
+    "date range picker",
+    "headless calendar",
+    "qwik component",
+    "qwik v2",
+    "datepicker"
   ],
   "author": {
     "name": "diecodev",
     "url": "https://github.com/diecodev"
+  },
+  "homepage": "https://qwik-date.dieco.dev",
+  "bugs": {
+    "url": "https://github.com/diecodev/qwik-date/issues"
   },
   "repository": {
     "type": "git",
@@ -27,40 +36,12 @@
   "types": "./lib-types/index.d.ts",
   "exports": {
     ".": {
-      "node": {
-        "import": "./lib/index.qwik.mjs",
-        "require": "./lib/index.qwik.cjs",
-        "types": "./lib-types/index.d.ts"
-      },
-      "default": {
-        "import": "./lib/index.qwik.mjs",
-        "require": "./lib/index.qwik.cjs",
-        "types": "./lib-types/index.d.ts"
-      }
+      "types": "./lib-types/index.d.ts",
+      "import": "./lib/index.qwik.mjs"
     },
-    "./inline": {
-      "node": {
-        "import": "./lib/styled/inline.qwik.mjs",
-        "require": "./lib/styled/inline.qwik.cjs",
-        "types": "./lib-types/styled/inline.d.ts"
-      },
-      "default": {
-        "import": "./lib/styled/inline.qwik.mjs",
-        "require": "./lib/styled/inline.qwik.cjs",
-        "types": "./lib-types/styled/inline.d.ts"
-      }
-    },
-    "./picker": {
-      "node": {
-        "import": "./lib/styled/popup.qwik.mjs",
-        "require": "./lib/styled/popup.qwik.cjs",
-        "types": "./lib-types/styled/popup.d.ts"
-      },
-      "default": {
-        "import": "./lib/styled/popup.qwik.mjs",
-        "require": "./lib/styled/popup.qwik.cjs",
-        "types": "./lib-types/styled/popup.d.ts"
-      }
+    "./headless": {
+      "types": "./lib-types/headless/index.d.ts",
+      "import": "./lib/headless.qwik.mjs"
     }
   },
   "files": [
@@ -68,12 +49,14 @@
     "lib-types"
   ],
   "engines": {
-    "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
+  "packageManager": "pnpm@12.15.0",
   "private": false,
   "type": "module",
   "scripts": {
     "build": "qwik build",
+    "build.website": "pnpm build.types && pnpm build.lib && pnpm -C website build.client && pnpm -C website build.server",
     "build.lib": "vite build --mode lib",
     "build.types": "tsc --emitDeclarationOnly -p ./tsconfig.lib.json",
     "dev": "vite --mode ssr",
@@ -81,26 +64,28 @@
     "fmt": "prettier --write .",
     "fmt.check": "prettier --check .",
     "lint": "biome check --write --unsafe",
-    "prepublishOnly": "pnpm build",
-    "release": "bumpp --commit --tag --push",
+    "prepublishOnly": "pnpm build.types && pnpm build.lib",
+    "release": "bumpp --commit \"chore(release): 🔖 v%s\" --tag --push",
     "start": "vite --open --mode ssr",
-    "test": "playwright test",
+    "test": "pnpm test.unit && pnpm test.e2e",
+    "test.unit": "vitest run",
+    "test.e2e": "playwright test",
     "qwik": "qwik"
   },
-  "dependencies": {
-    "@floating-ui/dom": "^1.6.8"
+  "peerDependencies": {
+    "@qwik.dev/core": "^2.0.0-rc.4"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
-    "@builder.io/qwik": "^1.7.3",
-    "@playwright/test": "^1.45.3",
-    "@types/node": "^22.0.2",
+    "@playwright/test": "^1.64.1",
+    "@qwik.dev/core": "2.0.0-rc.4",
+    "@qwik.dev/router": "2.0.0-rc.4",
+    "@types/node": "^22.12.0",
     "bumpp": "9.4.1",
-    "np": "^10.0.7",
     "tsx": "^4.16.3",
-    "typescript": "^5.5.4",
+    "typescript": "^5.9.3",
     "undici": "^6.19.5",
-    "vite": "^5.3.5",
-    "vite-tsconfig-paths": "^4.3.2"
+    "vite": "^8.3.5",
+    "vitest": "^4.1.12"
   }
 }

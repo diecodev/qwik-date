@@ -1,19 +1,14 @@
-import { Slot, component$ } from '@builder.io/qwik'
-import { routeLoader$ } from '@builder.io/qwik-city'
-import type { RequestHandler } from '@builder.io/qwik-city'
-import { Toaster } from 'qwik-sonner'
+import { Slot, component$ } from '@qwik.dev/core'
+import type { RequestHandler } from '@qwik.dev/router'
+import { Footer } from '~/components/footer'
+import { Header } from '~/components/header'
+import { SearchDialog } from '~/components/search'
+import { Sidebar } from '~/components/sidebar'
 
-export const onGet: RequestHandler = async ({
-  cacheControl,
-  redirect,
-  url,
-}) => {
-  const { host } = url
-  // redirect to custom domain
-  if (host === 'qwik-date.deno.dev') {
-    throw redirect(301, 'https://qwik-date.dieco.dev')
-  }
+import '@fontsource-variable/geist'
+import '@fontsource-variable/geist-mono'
 
+export const onGet: RequestHandler = async ({ cacheControl }) => {
   // Control caching for this request for best performance and to reduce hosting costs:
   // https://qwik.dev/docs/caching/
   cacheControl({
@@ -24,19 +19,16 @@ export const onGet: RequestHandler = async ({
   })
 }
 
-export const useServerTimeLoader = routeLoader$(() => {
-  return {
-    date: new Date().toISOString(),
-  }
-})
-
-export default component$(() => {
-  return (
-    <>
-      <main>
-        <Toaster />
-        <Slot />
-      </main>
-    </>
-  )
-})
+export default component$(() => (
+  <>
+    <Header />
+    <div class="shell">
+      <aside class="sidebar">
+        <Sidebar />
+      </aside>
+      <Slot />
+    </div>
+    <Footer />
+    <SearchDialog />
+  </>
+))

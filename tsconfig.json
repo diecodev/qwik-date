@@ -5,7 +5,7 @@
     "module": "ES2020",
     "lib": ["es2022", "DOM", "WebWorker", "DOM.Iterable"],
     "jsx": "react-jsx",
-    "jsxImportSource": "@builder.io/qwik",
+    "jsxImportSource": "@qwik.dev/core",
     "strict": true,
     "declaration": true,
     "declarationDir": "lib-types",
@@ -17,5 +17,5 @@
     "isolatedModules": true,
     "types": ["vite/client"]
   },
-  "include": ["src"]
+  "include": ["src", "tests", "playwright.config.ts", "vitest.config.ts"]
 }
