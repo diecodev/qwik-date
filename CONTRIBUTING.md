@@ -50,10 +50,14 @@ bite in this repo:
 ## Docs site
 
 The docs live in `website/` (Qwik Router, built as static pages): `pnpm -C website dev` runs it, and
-`pnpm build.website` builds the library and the site as Deno Deploy does. The props, data attributes,
+`pnpm build.website` builds the library and the site as Vercel does. The props, data attributes,
 headless parts and `useCalendar()` fields are data in `website/src/data/`: the pages, the search and
 `llms-full.txt` read them. After changing them, or the use cases in `website/scripts/llms-full.md`,
 run `pnpm -C website llms` to write `website/public/llms-full.txt` again.
+
+Vercel builds it on every push (`vercel.json`). pnpm's version is the one in `package.json`'s
+`packageManager`, for Vercel, the CI and your installs alike: to update it, change that line and run
+`pnpm install`, which records it in the lockfile.
 
 ## Before opening a pull request
 
