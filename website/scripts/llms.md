@@ -1,10 +1,10 @@
 # qwik-date
 
-> Calendar and date picker component for Qwik. Pick one day, a range or several days, with full keyboard support, screen reader names, any locale through Intl, form submission and headless parts. No runtime dependencies. Version 2.x (beta) is for Qwik v2 (`@qwik.dev/core`); version 1.x is for Qwik v1 (`@builder.io/qwik`).
+> Calendar and date picker component for Qwik. Pick one day, a range or several days, with full keyboard support, screen reader names, any locale through Intl, form submission and headless parts. No runtime dependencies. Version %line% is for Qwik v2 (`@qwik.dev/core`); version 1.x is for Qwik v1 (`@builder.io/qwik`).
 
 Key facts for writing code with it:
 
-- Install for Qwik v2: `npm install -D -E qwik-date@beta` (until 2.0 is stable, `qwik-date` without a tag installs 1.0.0, which is for Qwik v1). For Qwik v1: `npm install -D -E qwik-date@1`.
+- Install for Qwik v2: `npm install -D -E %spec%`%keep-short%. For Qwik v1: `npm install -D -E %v1-spec%`.
 - Import from `qwik-date` (styled `Calendar`, `formatDate`, `formatDateRange`, types) or `qwik-date/headless` (`Calendar.Root` and the other parts, `useCalendar`). There is no `DatePicker` component in 2.x: put the `Calendar` in a popover (see the date picker recipe).
 - Dates are `'YYYY-MM-DD'` strings (`LocalDate`), without time or timezone. `mode="range"` takes `{ start, end }` (`DateRange`, `end` is `null` until chosen); `mode="multiple"` takes `LocalDate[]`.
 - Bind state with `bind:value={signal}`, or `value` and `onChange$`.

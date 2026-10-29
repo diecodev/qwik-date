@@ -6,6 +6,8 @@ import { defineConfig, type UserConfig } from "vite";
 import { qwikVite } from "@qwik.dev/core/optimizer";
 import { qwikRouter } from "@qwik.dev/router/vite";
 import pkg from "./package.json" with { type: "json" };
+import library from "../package.json" with { type: "json" };
+import { readNpm } from "./src/data/npm";
 
 const { dependencies = {}, devDependencies = {} } = pkg as any as {
   dependencies: Record<string, string>;
@@ -13,12 +15,18 @@ const { dependencies = {}, devDependencies = {} } = pkg as any as {
   [key: string]: unknown;
 };
 
+// the published versions and their days, for src/data/release.ts: read once, when the site builds
+const npm = await readNpm(library.version);
+
 /**
  * Note that Vite normally starts from `index.html` but the qwikRouter plugin makes start at `src/entry.ssr.tsx` instead.
  */
 export default defineConfig(({ command, mode }): UserConfig => {
   return {
     plugins: [qwikRouter(), qwikVite()],
+    define: {
+      __NPM__: JSON.stringify(npm),
+    },
     // Resolves the `~/*` alias from tsconfig.json (built into Vite 8).
     resolve: {
       tsconfigPaths: true,

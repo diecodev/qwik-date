@@ -22,7 +22,7 @@
     "fmt": "prettier --write .",
     "fmt.check": "prettier --check .",
     "lint": "biome check --write --unsafe",
-    "llms": "node scripts/llms-full.ts",
+    "llms": "node scripts/llms.ts",
     "preview": "qwik build preview && vite preview --open",
     "start": "vite --open --mode ssr",
     "qwik": "qwik"

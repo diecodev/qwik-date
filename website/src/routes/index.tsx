@@ -5,6 +5,7 @@ import { Install } from '~/components/code'
 import { H2, Preview } from '~/components/docs'
 import { docHead } from '~/components/seo'
 import { Toc } from '~/components/toc'
+import { CURRENT, NPM, V1, majorOf } from '~/data/release'
 import { pageAt } from '~/data/site'
 
 const USAGE = `import { component$, useSignal } from '@qwik.dev/core';
@@ -30,18 +31,25 @@ export default component$(() => {
 
         <H2 id="install">install</H2>
         <p class="p">
-          qwik-date 2 is in beta and works with Qwik v2 (
-          <code class="c">@qwik.dev/core</code>).
+          qwik-date {CURRENT.major}{' '}
+          {CURRENT.prerelease
+            ? `is in ${CURRENT.label.slice(1)} and works`
+            : 'works'}{' '}
+          with Qwik v2 (<code class="c">@qwik.dev/core</code>).
         </p>
-        <Install pkg="qwik-date@beta" />
-        <p class="small">
-          Keep <code class="c">@beta</code>. Until 2.0 is stable, a plain{' '}
-          <code class="c">qwik-date</code> resolves to 1.0.0, which is for Qwik
-          v1.
-        </p>
+        <Install pkg={CURRENT.spec} />
+        {CURRENT.spec !== 'qwik-date' && NPM.tags.latest && (
+          // a plain install gives `latest`, an older major until this one is stable
+          <p class="small">
+            Keep <code class="c">{CURRENT.label}</code>. Until {CURRENT.major}.0
+            is stable, a plain <code class="c">qwik-date</code> resolves to{' '}
+            {NPM.tags.latest}
+            {majorOf(NPM.tags.latest) === 1 && ', which is for Qwik v1'}.
+          </p>
+        )}
         <div class="callout">
           <span class="label">note</span>On Qwik v1? Install{' '}
-          <code class="c">qwik-date@1</code> and{' '}
+          <code class="c">{V1.spec}</code> and{' '}
           <Link href="/v1/">read the 1.x docs</Link>.
         </div>
 
@@ -74,19 +82,21 @@ export default component$(() => {
             <tbody>
               <tr>
                 <td>
-                  2.x{' '}
-                  <span
-                    class="mono"
-                    style="font-size: 12px; color: var(--blue)"
-                  >
-                    beta
-                  </span>
+                  {CURRENT.major}.x{' '}
+                  {CURRENT.prerelease && (
+                    <span
+                      class="mono"
+                      style="font-size: 12px; color: var(--blue)"
+                    >
+                      {CURRENT.label.slice(1)}
+                    </span>
+                  )}
                 </td>
                 <td>
                   v2, <code class="c">@qwik.dev/core</code>
                 </td>
                 <td>
-                  <code class="c">qwik-date@beta</code>
+                  <code class="c">{CURRENT.spec}</code>
                 </td>
               </tr>
               <tr>
@@ -95,7 +105,7 @@ export default component$(() => {
                   v1, <code class="c">@builder.io/qwik</code>
                 </td>
                 <td>
-                  <code class="c">qwik-date@1</code>
+                  <code class="c">{V1.spec}</code>
                 </td>
               </tr>
             </tbody>

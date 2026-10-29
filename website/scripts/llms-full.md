@@ -11,16 +11,16 @@
 
 | qwik-date | Qwik | Install |
 | --- | --- | --- |
-| 2.x (beta) | v2, `@qwik.dev/core` 2.0.0-rc.4 or later (peer dependency) | `qwik-date@beta` |
-| 1.x | v1, `@builder.io/qwik` | `qwik-date@1` |
+| %line% | v2, `@qwik.dev/core` 2.0.0-rc.4 or later (peer dependency) | `%spec%` |
+| 1.x | v1, `@builder.io/qwik` | `%v1-spec%` |
 
-2.x is ESM only, needs Node 22.12+, and has no runtime dependencies. Until 2.0 is stable, installing `qwik-date` without a tag gives 1.0.0, which is for Qwik v1: keep `@beta`.
+2.x is ESM only, needs Node 22.12+, and has no runtime dependencies.%keep%
 
 ```sh
-npm install -D -E qwik-date@beta
-pnpm add -D -E qwik-date@beta
-yarn add -D -E qwik-date@beta
-bun add -D -E qwik-date@beta
+npm install -D -E %spec%
+pnpm add -D -E %spec%
+yarn add -D -E %spec%
+bun add -D -E %spec%
 ```
 
 ## Core concepts
@@ -399,12 +399,12 @@ Its accessible name becomes "Due date, selected date: …" with the selection.
 
 ### Qwik v1 apps
 
-Use `qwik-date@1`: `CalendarInline` from `qwik-date/inline` (`date`, `onDateChange$`, `unStyled`, `iconLeft`/`iconRight`, `actionLeftProps`…) and `DatePicker` from `qwik-date/picker` (`triggerLabel`, `triggerIcon`, `triggerProps`, `mode: 'popup' | 'inline'`). Docs: https://qwik-date.dieco.dev/v1/
+Use `%v1-spec%`: `CalendarInline` from `qwik-date/inline` (`date`, `onDateChange$`, `unStyled`, `iconLeft`/`iconRight`, `actionLeftProps`…) and `DatePicker` from `qwik-date/picker` (`triggerLabel`, `triggerIcon`, `triggerProps`, `mode: 'popup' | 'inline'`). Docs: https://qwik-date.dieco.dev/v1/
 
 ### Upgrading from 1.x to 2.x
 
 1. Move the app to Qwik v2 (`@qwik.dev/core`). 2.x is ESM only.
-2. Install `qwik-date@beta` and import everything from `qwik-date` (`/inline` and `/picker` are gone).
+2. Install `%spec%` and import everything from `qwik-date` (`/inline` and `/picker` are gone).
 3. Rename: `CalendarInline` → `Calendar`; `date`, `bind:date`, `onDateChange$` → `value`, `bind:value`, `onChange$` (the value is selected from the start); `unStyled` → `unstyled`; `iconLeft`, `iconRight` → `prevIcon`, `nextIcon`; `actionButtonProps` → `navButtonProps`; `actionLeftProps`, `actionRightProps` → `prevButtonProps`, `nextButtonProps`; `[data-preselected]` → today has `aria-current="date"`.
 4. Replace the `DatePicker` with the popover recipe above, and the trigger's text with `formatDate()`.
 5. `CalendarProps` is a type alias: extend it with an intersection, not an interface.
@@ -497,7 +497,7 @@ import { Calendar, useCalendar } from 'qwik-date/headless';
 
 ## Gotchas
 
-- Install `qwik-date@beta` for Qwik v2: plain `qwik-date` is 1.0.0 until 2.0 is stable.
+- Install `%spec%` for Qwik v2%keep-gotcha%.
 - `$` handlers inside `containerProps` (like `onToggle$`) need `$()`: the optimizer doesn't reach into objects.
 - `useCalendar()` only works in a component inside `Calendar.Root`.
 - With `mode="multiple"` and `name`, the inputs are `name[]`: a repeated name without `[]` keeps only the last day in a Qwik Router action.

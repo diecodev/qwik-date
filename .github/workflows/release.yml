@@ -93,7 +93,36 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 26
-      # a draft: publish it once the staged version is approved on npm
+      # a draft until the staged version is approved on npm: the job below publishes it
       - run: npx changelogithub@15.0.5 --draft ${{ contains(github.ref_name, '-') && '--prerelease' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  published:
+    name: Wait for the approval on npm
+    needs: github_release
+    runs-on: ubuntu-latest
+    # as long as GitHub lets a job run; past it, publish the release and run the Website workflow by hand
+    timeout-minutes: 360
+    permissions:
+      contents: write
+    steps:
+      # the version answers once a maintainer approves it (`npm stage approve`): a staged one isn't public
+      - name: Wait for the version on npm
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          until curl --silent --fail --output /dev/null "https://registry.npmjs.org/qwik-date/$VERSION"; do
+            sleep 30
+          done
+          echo "qwik-date@$VERSION is on npm"
+
+      - name: Publish the GitHub release
+        run: gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  # the docs show the new version (the menu, the install commands, the changelog read npm when they build)
+  website:
+    needs: published
+    uses: ./.github/workflows/website.yml
+    secrets: inherit

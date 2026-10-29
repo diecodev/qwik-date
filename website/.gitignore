@@ -34,3 +34,7 @@ lerna-debug.log*
 # Yarn
 .yarn/*
 !.yarn/releases
+
+# written by scripts/llms.ts when the site builds
+/public/llms.txt
+/public/llms-full.txt

@@ -2,6 +2,7 @@ import { component$ } from '@qwik.dev/core'
 import { H3, md } from '~/components/docs'
 import { docHead } from '~/components/seo'
 import { Toc } from '~/components/toc'
+import { CURRENT, SERIES_1_0, SERIES_2_0, type Series } from '~/data/release'
 import { pageAt } from '~/data/site'
 
 const BREAKING = [
@@ -85,6 +86,28 @@ const RENAMES: [string, string][] = [
   ],
 ]
 
+/** The line under a release: its dist-tag, its Qwik and its day, from npm, and the versions before it. */
+const Meta = (props: { series: Series; qwik: string }) => (
+  <>
+    <p class="meta">
+      {props.series.tag && (
+        <>
+          tag: <b>{props.series.tag}</b> ·{' '}
+        </>
+      )}
+      {props.qwik} · {props.series.date ?? 'unreleased'}
+    </p>
+    {props.series.earlier.length > 0 && (
+      <p class="meta">
+        before:{' '}
+        {props.series.earlier
+          .map(({ version, date }) => `${version} (${date})`)
+          .join(', ')}
+      </p>
+    )}
+  </>
+)
+
 const List = (props: { items: string[]; kind: 'brk' | 'add' | 'fix' }) => (
   <ul class={['log', props.kind]}>
     {props.items.map((item) => (
@@ -109,15 +132,13 @@ export default component$(() => (
       </div>
 
       <section class="rel">
-        <h2 class="rel-h" id="v2-0-0-beta-0">
+        <h2 class="rel-h" id="v2-0">
           <span class="hash" aria-hidden="true">
             ##
           </span>
-          2.0.0-beta.0
+          {SERIES_2_0.version}
         </h2>
-        <p class="meta">
-          tag: <b>beta</b> · qwik v2 · 2026-10-29
-        </p>
+        <Meta series={SERIES_2_0} qwik="qwik v2" />
         <p class="p">
           qwik-date 2 is built for Qwik v2 and only does the calendar now: the
           DatePicker is gone, and you put the <code class="c">Calendar</code> in
@@ -131,7 +152,7 @@ export default component$(() => (
           <pre class="tpre">
             <code>
               <span class="pr">$ </span>pnpm add -D -E{' '}
-              <span class="tk-n">qwik-date@beta</span>
+              <span class="tk-n">{CURRENT.spec}</span>
             </code>
           </pre>
         </div>
@@ -159,7 +180,7 @@ export default component$(() => (
             ships ESM only.
           </li>
           <li>
-            Install <code class="c">qwik-date@beta</code>.
+            Install <code class="c">{CURRENT.spec}</code>.
           </li>
           <li>
             Import everything from <code class="c">qwik-date</code>. The{' '}
@@ -208,20 +229,22 @@ export default component$(() => (
           </div>
         </div>
         <p class="p" style="font-size: 14px">
-          <a href="https://github.com/diecodev/qwik-date/compare/v1.0.0...v2.0.0-beta.0">
-            git log v1.0.0..v2.0.0-beta.0 →
+          <a
+            href={`https://github.com/diecodev/qwik-date/compare/v1.0.0...v${SERIES_2_0.version}`}
+          >
+            git log v1.0.0..v{SERIES_2_0.version} →
           </a>
         </p>
       </section>
 
       <section class="rel">
-        <h2 class="rel-h" id="v1-0-0">
+        <h2 class="rel-h" id="v1-0">
           <span class="hash" aria-hidden="true">
             ##
           </span>
-          1.0.0
+          {SERIES_1_0.version}
         </h2>
-        <p class="meta">tag: latest · qwik v1 · 2024-08-02</p>
+        <Meta series={SERIES_1_0} qwik="qwik v1" />
         <p class="p">
           The first release, for Qwik v1 (
           <code class="c">@builder.io/qwik</code>

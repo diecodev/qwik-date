@@ -1,10 +1,13 @@
-// Writes public/llms-full.txt: the docs in one Markdown file for LLMs and agents. The prose and the use cases
-// come from llms-full.md; the reference tables, from the same data as the site's pages, so they can't drift.
-// Run it after changing either: `pnpm llms` (Node 24 runs the TypeScript as is).
+// Writes public/llms.txt and public/llms-full.txt: the key facts, and the docs in one Markdown file, for LLMs and
+// agents. The prose comes from llms.md and llms-full.md; the reference tables, from the same data as the site's
+// pages, so they can't drift; the versions and install commands, from npm, as the site's. `pnpm build.website` runs
+// it before the site builds (Node 24 runs the TypeScript as is); `pnpm llms` alone writes them for `pnpm dev`.
 
 import { readFileSync, writeFileSync } from 'node:fs'
+import library from '../../package.json' with { type: 'json' }
 import { ATTRIBUTES, PROPS } from '../src/data/api.ts'
 import { PARTS, STATE } from '../src/data/headless.ts'
+import { lineOf, majorOf, readNpm } from '../src/data/npm.ts'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 const localDate = (date: Date) =>
@@ -31,7 +34,23 @@ const formatDate = (day: string, locale = 'en') => {
 
 const today = localDate(new Date())
 const week = addDays(today, 7)
+
+const npm = await readNpm(library.version)
+const current = lineOf(npm, majorOf(npm.version))
+const latest = npm.tags.latest
+// while the docs' major is only in prerelease, a plain install gives an older one
+const older =
+  current.spec !== 'qwik-date' && latest ? `${latest}${majorOf(latest) === 1 ? ', which is for Qwik v1' : ''}` : null
+
 const tokens: Record<string, string> = {
+  '%spec%': current.spec,
+  '%v1-spec%': lineOf(npm, 1).spec,
+  '%line%': `${current.major}.x${current.prerelease ? ` (${current.label.slice(1)})` : ''}`,
+  '%keep%': older
+    ? ` Until ${current.major}.0 is stable, installing \`qwik-date\` without a tag gives ${older}: keep \`${current.label}\`.`
+    : '',
+  '%keep-short%': older ? ` (until ${current.major}.0 is stable, \`qwik-date\` without a tag installs ${older})` : '',
+  '%keep-gotcha%': older ? `: plain \`qwik-date\` is ${latest} until ${current.major}.0 is stable` : '',
   '%today%': today,
   '%week%': week,
   '%max%': addDays(today, 90),
@@ -84,4 +103,5 @@ const output = fill(
   Object.entries(sections).reduce((out, [marker, content]) => out.replace(marker, () => content), template),
 )
 writeFileSync(new URL('../public/llms-full.txt', import.meta.url), output)
-console.log(`public/llms-full.txt: ${output.length} characters, dates from ${today}`)
+writeFileSync(new URL('../public/llms.txt', import.meta.url), fill(readFileSync(new URL('./llms.md', import.meta.url), 'utf8')))
+console.log(`public/llms.txt and llms-full.txt: ${current.spec} (${current.version}), dates from ${today}`)

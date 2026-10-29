@@ -44,3 +44,6 @@ bun.lockb
 # Tests
 playwright-report
 test-results
+
+# Vercel CLI
+.vercel
