@@ -1,51 +1,99 @@
 name: Release
 
-permissions:
-  contents: write
-
 on:
   push:
     tags:
       - "v*"
 
+concurrency:
+  group: release-${{ github.ref }}
+  # never interrupt a release halfway
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
 jobs:
-  npm_publish:
+  # the whole CI (lint, types, tests, builds) before anything leaves
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  stage:
+    name: Stage on npm
+    needs: ci
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # the OIDC token of Trusted Publishing: no NPM_TOKEN
+      id-token: write
     steps:
-      - name: clone repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
 
-      - name: installing pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      - name: The tag is the version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::the tag $GITHUB_REF_NAME doesn't match the version in package.json ($VERSION)"
+            exit 1
+          fi
 
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
-          registry-url: "https://registry.npmjs.org"
+      - name: Build the library
+        run: pnpm build.types && pnpm build.lib
 
-      - name: Building library
-        run: pnpm install --no-frozen-lockfile
+      # every file package.json points to (main, types, exports) goes in the package
+      - name: The package has the library
+        run: |
+          npm pack --dry-run --json > "$RUNNER_TEMP/pack.json"
+          node -e '
+            const pkg = require("./package.json");
+            const packed = new Set(require(process.env.RUNNER_TEMP + "/pack.json")[0].files.map((file) => file.path));
+            const entries = [pkg.main, pkg.qwik, pkg.types, ...Object.values(pkg.exports).flatMap(Object.values)];
+            const files = new Set(entries.map((entry) => entry.replace(/^\.\//, "")));
+            const missing = [...files].filter((file) => !packed.has(file));
+            if (missing.length) {
+              console.error(`::error::not in the package: ${missing.join(", ")}`);
+              process.exit(1);
+            }
+          '
 
-      - run: npm publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+      # staged publishing needs npm 11.15 or later
+      - name: Recent npm
+        run: npm install -g npm@12
 
-  gh_release:
-    needs: [npm_publish]
+      # a prerelease (2.0.0-beta.0) goes under its identifier (`beta`), so a plain install keeps the stable line
+      - name: npm dist-tag
+        id: dist-tag
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [[ "$VERSION" == *-* ]]; then
+            TAG="${VERSION#*-}"
+            TAG="${TAG%%.*}"
+          else
+            TAG=latest
+          fi
+          echo "$VERSION goes under '$TAG'"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      # staged, not published: a maintainer approves it with 2FA (`npm stage approve`, see CONTRIBUTING.md)
+      - name: Stage the version
+        run: npm stage publish --access public --tag ${{ steps.dist-tag.outputs.tag }}
+
+  github_release:
+    name: GitHub release (draft)
+    needs: stage
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
+          # the changelog compares this tag with the one before
           fetch-depth: 0
-
-      - uses: actions/setup-node@v4
-
-      - run: npx changelogithub # or changelogithub@0.12 if ensure the stable result
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      # a draft: publish it once the staged version is approved on npm
+      - run: npx changelogithub@15.0.5 --draft ${{ contains(github.ref_name, '-') && '--prerelease' || '' }}
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

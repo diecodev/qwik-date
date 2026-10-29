@@ -68,3 +68,18 @@ each one targets the branch below), and builds the website too. It runs on Linux
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/) with a gitmoji, like the
 history: `fix(styled): 🐛 keep the focus on the month buttons after changing month`.
+
+## Releases
+
+Maintainers only. On an up-to-date `main`, `pnpm release` asks for the new version (`2.0.0-beta.1`…),
+commits it, tags it and pushes. The tag runs `.github/workflows/release.yml`: the CI, then it stages the
+package on npm through Trusted Publishing (a prerelease under its identifier, like `beta`; a plain
+version under `latest`) and drafts a GitHub release with the changelog. Nothing is public until a
+maintainer approves the staged version with 2FA (npm 11.15 or later):
+
+```sh
+npm stage list qwik-date
+npm stage approve <stage-id> # asks for the one-time password
+```
+
+Then publish the draft release on GitHub. To drop a staged version, `npm stage reject <stage-id>`.
