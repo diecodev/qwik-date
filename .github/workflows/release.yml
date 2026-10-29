@@ -92,7 +92,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: 26
       # a draft: publish it once the staged version is approved on npm
       - run: npx changelogithub@15.0.5 --draft ${{ contains(github.ref_name, '-') && '--prerelease' || '' }}
         env:

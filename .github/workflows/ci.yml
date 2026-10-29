@@ -35,7 +35,7 @@ jobs:
       - name: Unit tests
         run: pnpm test.unit
 
-      # the website imports the library built above, as Deno Deploy builds it
+      # the website imports the library built above, as Vercel builds it
       - name: Website (types and build)
         run: pnpm -C website build.types && pnpm -C website build.client && pnpm -C website build.server
 

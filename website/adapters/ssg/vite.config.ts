@@ -1,22 +1,19 @@
-import { denoServerAdapter } from "@qwik.dev/router/adapters/deno-server/vite";
+import { ssgAdapter } from "@qwik.dev/router/adapters/ssg/vite";
 import { extendConfig } from "@qwik.dev/router/vite";
 import baseConfig from "../../vite.config";
 
+// every route prerendered into dist/: Vercel serves it as static files
 export default extendConfig(baseConfig, () => {
   return {
     build: {
       ssr: true,
       rolldownOptions: {
-        input: ["src/entry.deno.ts"],
+        input: ["@qwik-router-config"],
       },
-      minify: false,
     },
     plugins: [
-      denoServerAdapter({
-        ssg: {
-          include: ["/*"],
-          origin: "https://qwik-date.dieco.dev",
-        },
+      ssgAdapter({
+        origin: "https://qwik-date.dieco.dev",
       }),
     ],
   };
