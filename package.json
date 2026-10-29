@@ -1,6 +1,6 @@
 {
   "name": "qwik-date",
-  "version": "1.0.0",
+  "version": "2.0.0-beta.1",
   "description": "Calendar and date picker component for Qwik: a day, a range or several days, accessible, in any locale, with headless parts.",
   "keywords": [
     "qwik",
