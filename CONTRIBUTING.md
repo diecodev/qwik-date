@@ -39,8 +39,9 @@ the playground catalog (`src/playground/<area>.tsx`, with the test name in `test
 bite in this repo:
 
 - Prefer auto-waiting assertions (`toBeFocused`, `toHaveText`, `expect.poll`) over fixed timeouts.
-- Qwik loads each event handler lazily and doesn't order handlers of different elements: wait for one
-  interaction to land before the next one.
+- Qwik loads each event handler lazily and doesn't order handlers of different elements, nor, while it
+  loads them and resumes the page, those of consecutive events: wait for one interaction to land before
+  the next one. The calendar's keys don't need it: their `sync$` handlers queue them for `keys$`.
 - WebKit, like Safari, only tabs to elements with an explicit `tabindex`, so tab order differs from
   Chromium.
 - The Qwik v2 dev server hangs on an error thrown while rendering, so cover invalid input with unit

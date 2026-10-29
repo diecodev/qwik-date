@@ -384,8 +384,10 @@ export const KeyboardCases = component$(() => {
           </li>
           <li>
             <p>
-              Reload, click <b>Focus Aug 15</b> and press the same four keys as fast as you can: the first one waits for
-              its handler to load, so they run back to back.
+              In DevTools, set the network to <b>Slow 4G</b> and the CPU to a 6× slowdown. Reload, click{' '}
+              <b>Focus Aug 15</b> as soon as the calendar shows and press the same four keys as fast as you can: they
+              land while Qwik loads the handlers and resumes the page, when a key's handler can run before an earlier
+              one's.
             </p>
             <p>
               Same result: onChange$ gets <b>2024-08-22</b>, the calendar shows <b>September 2024</b> and the focus ends

@@ -94,7 +94,9 @@ test('the grid keys do not scroll the page', async ({ page }) => {
 
 test('a key right after choosing a day still lands where it should', async ({ page }) => {
   // pressed back to back, without waiting for Space to choose the day: the choice must not send the
-  // calendar back to its month nor drop the focus
+  // calendar back to its month nor drop the focus. Right after the page loads, while Qwik loads the handlers and
+  // resumes the page, a key's handler can run before an earlier key's (under load, about 3 in 100 runs in WebKit
+  // without the queue of keys$): they must still run in the order they were pressed
   const calendar = calendarIn(page, 'basic');
   await day(calendar, '2024-08-15').focus();
   for (const key of ['ArrowDown', 'Space', 'PageDown', 'End']) await page.keyboard.press(key);

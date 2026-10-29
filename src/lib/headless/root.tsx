@@ -309,13 +309,138 @@ const choose = (
 
 const PERIOD_KEYS = ['enter', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
 
+/** A key the sync$ handlers queued on the root (`qdKeys`), with the element that queued it: a grid, or the root. */
+type QueuedKey = [event: KeyboardEvent, element: HTMLElement];
+
+/** Takes the keys queued on the root of the calendar of `element`, in the order they were pressed. */
+const takeKeys = (element: HTMLElement) =>
+  ((element.closest('[data-view]') ?? element) as HTMLElement & { qdKeys?: QueuedKey[] }).qdKeys?.splice(0) ?? [];
+
 /**
  * Escape goes back to the days from the months or the years, and keeps a popover around the calendar open: sync$
- * (the default action can't wait for a chunk), so it reads the view from the DOM.
+ * (the default action can't wait for a chunk), so it reads the view from the DOM. It queues the key, as the grids
+ * queue theirs: the state says what it does.
  */
-const keepOpen = sync$((e: KeyboardEvent, root: HTMLElement) => {
-  if (e.key === 'Escape' && root.getAttribute('data-view') !== 'days') e.preventDefault();
+const keepOpen = sync$((e: KeyboardEvent, root: HTMLElement & { qdKeys?: unknown[] }) => {
+  if (e.key !== 'Escape') return;
+  if (root.getAttribute('data-view') !== 'days') e.preventDefault();
+  root.qdKeys ??= [];
+  root.qdKeys.push([e, root]);
 });
+
+/** What the keys read besides the state: the props. */
+interface KeyOptions {
+  availability: Availability;
+  mode: Mode;
+  onChange$: ModeOptions['onChange$'];
+  weekStartsOn: WeekDay;
+  fullWeeks: boolean;
+  months: number;
+}
+
+/** Escape: back to the days from the months or the years. */
+const escapeKey = (state: State, { availability, months }: KeyOptions) => {
+  const { view, rootRef } = state;
+  if (view.value === 'days') return;
+  view.value = 'days';
+  // back to the title that opened the view, or else where Tab enters the days
+  const toggle = rootRef.value?.querySelector<HTMLElement>('[data-view-toggle]');
+  if (toggle) toggle.focus();
+  else
+    focusWhenReady(
+      rootRef.value,
+      tabDaySelector(
+        { year: state.yearToRender.value, month: state.monthToRender.value },
+        months,
+        state.dateToFocus.value,
+        availability,
+      ),
+    );
+};
+
+/** The months and years grids' keys: arrows, and Enter or Space to choose. */
+const periodKey = (e: KeyboardEvent, grid: HTMLElement, state: State, { availability, months }: KeyOptions) => {
+  const key = e.key.toLowerCase();
+  const current = state.view.value;
+  if (current === 'days' || !PERIOD_KEYS.includes(key) || !(e.target as Element).closest('[data-month], [data-year]'))
+    return;
+
+  // as in the days: the focused cell, unless an earlier key moved to a year or a page that isn't rendered
+  // yet (the state, set synchronously by each key, doesn't lag behind)
+  const focus = state.periodFocus.value;
+  const active = grid.contains(document.activeElement) ? document.activeElement : null;
+  const activeMonth = active?.getAttribute('data-month');
+  const activeYear = Number(active?.getAttribute('data-year'));
+  const from: YearMonth =
+    current === 'months' && activeMonth?.startsWith(`${focus.year}-`)
+      ? { year: focus.year, month: activeMonth.slice(5, 7) as Month }
+      : current === 'years' && activeYear && yearPageStart(activeYear) === yearPageStart(focus.year)
+        ? { year: activeYear, month: focus.month }
+        : focus;
+
+  if (key === 'enter' || key === ' ') {
+    if (current === 'months') chooseMonth(from.year, from.month, state, availability, months);
+    else chooseYear(from.year, state, availability, months);
+    return;
+  }
+  // in right-to-left layouts the rows are mirrored, so left/right follow the visual direction
+  const mirrored: Record<string, PeriodKey> = { arrowleft: 'arrowright', arrowright: 'arrowleft' };
+  const periodKey = (getComputedStyle(grid).direction === 'rtl' ? mirrored[key] ?? key : key) as PeriodKey;
+  // stay put past min or max
+  const target = periodKeyTarget(current, from, periodKey, availability) ?? from;
+  focusPeriod(state, target);
+  focusWhenReady(state.rootRef.value, periodSelector(current, target));
+};
+
+/** The days grid's keys: arrows, Home/End, PageUp/PageDown, and Enter or Space to choose. */
+const dayKey = (e: KeyboardEvent, grid: HTMLElement, state: State, options: KeyOptions) => {
+  const key = e.key.toLowerCase();
+  // only the keys pressed on a day: the grid itself (focused by a click on it) keeps their default action
+  if (!ACTION_KEYS.includes(key as (typeof ACTION_KEYS)[number]) || !(e.target as Element).closest('[data-value]'))
+    return;
+
+  const { availability, months } = options;
+  // the day keeping the focus: the focused button, unless an earlier key moved to a month that isn't
+  // rendered yet. Keys pressed back to back run before Qwik renders again, so the DOM can lag behind: the
+  // state, set synchronously by each key, doesn't
+  const first = { year: state.yearToRender.value, month: state.monthToRender.value };
+  const root = state.rootRef.value ?? grid;
+  const active = root.contains(document.activeElement) ? document.activeElement?.getAttribute('data-value') : null;
+  const from = (active && isShown(active, first, months) ? active : state.dateToFocus.value) as LocalDate;
+
+  // Enter and Space choose it here, not through a click on its button: the click handler would load and
+  // run after the keys that follow
+  if (key === 'enter' || key === ' ') {
+    choose(from, options.mode, availability, state, options.onChange$);
+    return;
+  }
+
+  // in right-to-left layouts the rows are mirrored, so left/right follow the visual direction
+  const mirrored: Record<string, GridKey> = { arrowleft: 'arrowright', arrowright: 'arrowleft' };
+  const isRtl = getComputedStyle(grid).direction === 'rtl';
+  const gridKey = (isRtl ? mirrored[key] ?? key : key) as GridKey;
+  // skip the days that can't be chosen, and stay put when there's none left that way
+  const target =
+    nearestAvailable(
+      keyTarget(from, gridKey, { weekStartsOn: options.weekStartsOn, fullWeeks: options.fullWeeks }),
+      KEY_DIRECTIONS[gridKey],
+      availability,
+    ) ?? from;
+
+  state.focusDayOnMonthChange.value = true;
+  state.dateToFocus.value = target;
+  // as few months away as it takes: a month on show (another grid, maybe) doesn't move the calendar
+  const next = firstShownFor(target, first, months);
+  if (next.year === first.year && next.month === first.month) {
+    // focusVisible isn't in the DOM typings yet
+    const options = { preventScroll: true, focusVisible: true } as FocusOptions;
+    // enabled: with fullWeeks, the grid next to it shows the day too, disabled
+    root.querySelector<HTMLElement>(`[data-value="${target}"]:not([disabled])`)?.focus(options);
+    return;
+  }
+  // another month: the visible task focuses the day once it's rendered
+  showMonth(state, next);
+};
 
 /** The calendar's state and its `<div>`: the other parts go inside, and read the state through the context. */
 export const Root = component$<RootProps>(
@@ -560,44 +685,6 @@ export const Root = component$<RootProps>(
       if (month) chooseMonth(+month.slice(0, 4), month.slice(5, 7) as Month, state, availability, months);
       else chooseYear(Number(button.getAttribute('data-year')), state, availability, months);
     });
-    // the months and years grids: arrows, and Enter or Space to choose
-    const periodKeyDown$ = $((e: KeyboardEvent, grid: HTMLElement) => {
-      const key = e.key.toLowerCase();
-      const current = view.value;
-      if (
-        current === 'days' ||
-        !PERIOD_KEYS.includes(key) ||
-        !(e.target as Element).closest('[data-month], [data-year]')
-      )
-        return;
-
-      const availability = { min, max, disabledDates, disabledWeekdays };
-      // as in the days: the focused cell, unless an earlier key moved to a year or a page that isn't rendered
-      // yet (the state, set synchronously by each key, doesn't lag behind)
-      const focus = periodFocus.value;
-      const active = grid.contains(document.activeElement) ? document.activeElement : null;
-      const activeMonth = active?.getAttribute('data-month');
-      const activeYear = Number(active?.getAttribute('data-year'));
-      const from: YearMonth =
-        current === 'months' && activeMonth?.startsWith(`${focus.year}-`)
-          ? { year: focus.year, month: activeMonth.slice(5, 7) as Month }
-          : current === 'years' && activeYear && yearPageStart(activeYear) === yearPageStart(focus.year)
-            ? { year: activeYear, month: focus.month }
-            : focus;
-
-      if (key === 'enter' || key === ' ') {
-        if (current === 'months') chooseMonth(from.year, from.month, state, availability, months);
-        else chooseYear(from.year, state, availability, months);
-        return;
-      }
-      // in right-to-left layouts the rows are mirrored, so left/right follow the visual direction
-      const mirrored: Record<string, PeriodKey> = { arrowleft: 'arrowright', arrowright: 'arrowleft' };
-      const periodKey = (getComputedStyle(grid).direction === 'rtl' ? mirrored[key] ?? key : key) as PeriodKey;
-      // stay put past min or max
-      const target = periodKeyTarget(current, from, periodKey, availability) ?? from;
-      focusPeriod(state, target);
-      focusWhenReady(rootRef.value, periodSelector(current, target));
-    });
     const setPreview$ = $((day: LocalDate | null) => {
       previewDay.value = day;
     });
@@ -619,70 +706,24 @@ export const Root = component$<RootProps>(
       if (!day && e.type === 'pointerover' && root.querySelector('[role="grid"]:hover')) return;
       previewDay.value = day as LocalDate | null;
     });
-    const escape$ = $((e: KeyboardEvent) => {
-      if (e.key !== 'Escape' || view.value === 'days') return;
-      view.value = 'days';
-      // back to the title that opened the view, or else where Tab enters the days
-      const toggle = rootRef.value?.querySelector<HTMLElement>('[data-view-toggle]');
-      if (toggle) toggle.focus();
-      else
-        focusWhenReady(
-          rootRef.value,
-          tabDaySelector({ year: yearToRender.value, month: monthToRender.value }, months, dateToFocus.value, {
-            min,
-            max,
-            disabledDates,
-            disabledWeekdays,
-          }),
-        );
-    });
-    const keyDown$ = $((e: KeyboardEvent, grid: HTMLElement) => {
-      const key = e.key.toLowerCase();
-      // only the keys pressed on a day: the grid itself (focused by a click on it) keeps their default action
-      if (!ACTION_KEYS.includes(key as (typeof ACTION_KEYS)[number]) || !(e.target as Element).closest('[data-value]'))
-        return;
-
-      const availability = { min, max, disabledDates, disabledWeekdays };
-      // the day keeping the focus: the focused button, unless an earlier key moved to a month that isn't
-      // rendered yet. Keys pressed back to back (or queued while this handler loads) run before Qwik renders
-      // again, so the DOM can lag behind: the state, set synchronously by each key, doesn't
-      const first = { year: yearToRender.value, month: monthToRender.value };
-      const root = rootRef.value ?? grid;
-      const active = root.contains(document.activeElement) ? document.activeElement?.getAttribute('data-value') : null;
-      const from = (active && isShown(active, first, months) ? active : dateToFocus.value) as LocalDate;
-
-      // Enter and Space choose it here, not through a click on its button: the click handler would load and
-      // run after the keys that follow
-      if (key === 'enter' || key === ' ') {
-        choose(from, mode, availability, state, onChange$);
-        return;
+    // every key the calendar handles, on the root and on its grids: their sync$ handlers queue the keys as they're
+    // pressed, and whichever of these handlers runs first takes them all, in that order. Qwik loads handlers lazily,
+    // and while it loads them and resumes the page (the first keys after it loads), a key's handler can run before
+    // an earlier key's
+    const keys$ = $((_: KeyboardEvent, element: HTMLElement) => {
+      const options: KeyOptions = {
+        availability: { min, max, disabledDates, disabledWeekdays },
+        mode,
+        onChange$,
+        weekStartsOn,
+        fullWeeks,
+        months,
+      };
+      for (const [event, queuedOn] of takeKeys(element)) {
+        if (event.key === 'Escape') escapeKey(state, options);
+        else if ((event.target as Element).closest('[data-value]')) dayKey(event, queuedOn, state, options);
+        else periodKey(event, queuedOn, state, options);
       }
-
-      // in right-to-left layouts the rows are mirrored, so left/right follow the visual direction
-      const mirrored: Record<string, GridKey> = { arrowleft: 'arrowright', arrowright: 'arrowleft' };
-      const isRtl = getComputedStyle(grid).direction === 'rtl';
-      const gridKey = (isRtl ? mirrored[key] ?? key : key) as GridKey;
-      // skip the days that can't be chosen, and stay put when there's none left that way
-      const target =
-        nearestAvailable(
-          keyTarget(from, gridKey, { weekStartsOn, fullWeeks }),
-          KEY_DIRECTIONS[gridKey],
-          availability,
-        ) ?? from;
-
-      focusDayOnMonthChange.value = true;
-      dateToFocus.value = target;
-      // as few months away as it takes: a month on show (another grid, maybe) doesn't move the calendar
-      const next = firstShownFor(target, first, months);
-      if (next.year === first.year && next.month === first.month) {
-        // focusVisible isn't in the DOM typings yet
-        const options = { preventScroll: true, focusVisible: true } as FocusOptions;
-        // enabled: with fullWeeks, the grid next to it shows the day too, disabled
-        root.querySelector<HTMLElement>(`[data-value="${target}"]:not([disabled])`)?.focus(options);
-        return;
-      }
-      // another month: the visible task focuses the day once it's rendered
-      showMonth(state, next);
     });
 
     useContextProvider(CalendarContextId, {
@@ -713,10 +754,9 @@ export const Root = component$<RootProps>(
       toggleView$,
       previewSync$,
       pickPeriod$,
-      periodKeyDown$,
       showWeekNumber: weekNumbers,
       pick$,
-      keyDown$,
+      keys$,
     });
 
     return (
@@ -730,7 +770,7 @@ export const Root = component$<RootProps>(
         data-view={view.value}
         data-direction={direction.value ?? undefined}
         {...props}
-        onKeyDown$={[keepOpen, escape$, onKeyDown$]}
+        onKeyDown$={[keepOpen, keys$, onKeyDown$]}
         ref={rootRef}
       >
         <Slot />

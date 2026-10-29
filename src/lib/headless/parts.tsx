@@ -85,13 +85,18 @@ export const Title = component$<TitleProps>(({ id, offset = 0, button = true, bu
 });
 
 /**
- * Only cancels the default action of the keys the grid handles, pressed on a day (the same list as the root's
- * ACTION_KEYS: sync$ code can't reference outer variables), so Tab still moves the focus out and Escape still
- * closes a popover around the calendar. It must be sync$: a $ handler runs too late.
+ * Only takes the keys the grid handles, pressed on a day (the same list as the root's ACTION_KEYS: sync$ code can't
+ * reference outer variables), so Tab still moves the focus out and Escape still closes a popover around the
+ * calendar: it cancels their default action, and queues them on the root for `keys$`. It must be sync$: a $ handler
+ * runs too late, and maybe after the handler of a later key.
  */
-const preventGridKeys = sync$((e: KeyboardEvent) => {
+const takeGridKeys = sync$((e: KeyboardEvent, grid: HTMLElement) => {
   const keys = ['enter', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'home', 'end', 'pageup', 'pagedown'];
-  if (keys.includes(e.key.toLowerCase()) && (e.target as Element).closest('[data-value]')) e.preventDefault();
+  if (!keys.includes(e.key.toLowerCase()) || !(e.target as Element).closest('[data-value]')) return;
+  e.preventDefault();
+  const root = (grid.closest('[data-view]') ?? grid) as HTMLElement & { qdKeys?: unknown[] };
+  root.qdKeys ??= [];
+  root.qdKeys.push([e, grid]);
 });
 
 /**
@@ -122,8 +127,7 @@ export const Grid = component$<PropsOf<'table'> & { offset?: number }>(
         role='grid'
         aria-labelledby={labelledBy ?? titleIdOf(context, offset)}
         {...props}
-        // the handler itself, not a wrapper calling it: one less async hop keeps queued keys in order
-        onKeyDown$={[preventGridKeys, context.keyDown$, onKeyDown$]}
+        onKeyDown$={[takeGridKeys, context.keys$, onKeyDown$]}
         onPointerOver$={[range ? context.previewSync$ : undefined, onPointerOver$]}
         onFocusIn$={[range ? context.previewSync$ : undefined, onFocusIn$]}
         onPointerLeave$={[range ? context.previewSync$ : undefined, onPointerLeave$]}
@@ -256,13 +260,16 @@ export const Day = component$<PropsOf<'button'> & { day: LocalDate }>(({ day, on
 });
 
 /**
- * Only cancels the default action of the keys the months and years grids handle, pressed on a cell (Escape is the
- * root's), as the days grid does.
+ * Only takes the keys the months and years grids handle, pressed on a cell (Escape is the root's), as the days grid
+ * does.
  */
-const preventPeriodKeys = sync$((e: KeyboardEvent) => {
+const takePeriodKeys = sync$((e: KeyboardEvent, grid: HTMLElement) => {
   const keys = ['enter', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
-  if (keys.includes(e.key.toLowerCase()) && (e.target as Element).closest('[data-month], [data-year]'))
-    e.preventDefault();
+  if (!keys.includes(e.key.toLowerCase()) || !(e.target as Element).closest('[data-month], [data-year]')) return;
+  e.preventDefault();
+  const root = (grid.closest('[data-view]') ?? grid) as HTMLElement & { qdKeys?: unknown[] };
+  root.qdKeys ??= [];
+  root.qdKeys.push([e, grid]);
 });
 
 export interface PeriodGridProps extends PropsOf<'table'> {
@@ -283,7 +290,7 @@ const periodGrid = (
     role='grid'
     aria-labelledby={labelledBy ?? context.titleId}
     {...props}
-    onKeyDown$={[preventPeriodKeys, context.periodKeyDown$, onKeyDown$]}
+    onKeyDown$={[takePeriodKeys, context.keys$, onKeyDown$]}
   >
     <tbody>
       {[0, 3, 6, 9].map((start) => (

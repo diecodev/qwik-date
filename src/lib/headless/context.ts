@@ -78,12 +78,10 @@ export interface CalendarContext extends CalendarState {
   previewSync$: QRL<(event: Event) => void>;
   /** a month or year button's click */
   pickPeriod$: QRL<(event: Event, button: HTMLElement) => void>;
-  /** the months and years grids' keys */
-  periodKeyDown$: QRL<(event: KeyboardEvent, grid: HTMLElement) => void>;
   /** a day button's click: chooses the day of its `data-value` */
   pick$: QRL<(event: Event, button: HTMLElement) => void>;
-  /** the grid keys, from a day */
-  keyDown$: QRL<(event: KeyboardEvent, grid: HTMLElement) => void>;
+  /** the keys of the grids and the root: the ones their sync$ handlers queued, in the order they were pressed */
+  keys$: QRL<(event: KeyboardEvent, element: HTMLElement) => void>;
 }
 
 export const CalendarContextId = createContextId<CalendarContext>('qwik-date.calendar');
