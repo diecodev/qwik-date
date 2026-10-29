@@ -7,6 +7,7 @@ import { H2, Preview } from '~/components/docs'
 import { FLOATING, NATIVE, RANGE, USAGE } from '~/components/recipes'
 import { docHead } from '~/components/seo'
 import { Toc } from '~/components/toc'
+import { pageAt } from '~/data/site'
 
 export default component$(() => {
   const date = useSignal<LocalDate | null>(null)
@@ -112,19 +113,9 @@ export default component$(() => {
         </div>
       </article>
 
-      <Toc
-        items={[
-          { id: 'native', label: 'Native popover' },
-          { id: 'qwik-ui', label: 'Qwik UI' },
-          { id: 'floating-ui', label: 'floating-ui' },
-        ]}
-      />
+      <Toc items={pageAt('/date-picker/').sections} />
     </div>
   )
 })
 
-export const head = docHead(
-  'Date Picker',
-  'A date picker with qwik-date: the Calendar in a native popover, next to a trigger of your own.',
-  '/date-picker/',
-)
+export const head = docHead('/date-picker/')

@@ -2,6 +2,7 @@ import { component$ } from '@qwik.dev/core'
 import { H3, md } from '~/components/docs'
 import { docHead } from '~/components/seo'
 import { Toc } from '~/components/toc'
+import { pageAt } from '~/data/site'
 
 const BREAKING = [
   'Needs Qwik v2 (`@qwik.dev/core`). The CommonJS build is gone.',
@@ -241,21 +242,8 @@ export default component$(() => (
       </section>
     </article>
 
-    <Toc
-      items={[
-        { id: 'v2-0-0-beta-0', label: '2.0.0-beta.0' },
-        { id: 'breaking', label: 'Breaking', sub: true },
-        { id: 'new', label: 'New', sub: true },
-        { id: 'fixes', label: 'Fixes', sub: true },
-        { id: 'upgrading', label: 'Upgrading from 1.x', sub: true },
-        { id: 'v1-0-0', label: '1.0.0' },
-      ]}
-    />
+    <Toc items={pageAt('/changelog/').sections} />
   </div>
 ))
 
-export const head = docHead(
-  'Changelog',
-  'Every release of qwik-date, and how to upgrade from 1.x to 2.x.',
-  '/changelog/',
-)
+export const head = docHead('/changelog/')

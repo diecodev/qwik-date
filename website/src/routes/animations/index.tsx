@@ -5,6 +5,7 @@ import { Code } from '~/components/code'
 import { H2, Preview } from '~/components/docs'
 import { docHead } from '~/components/seo'
 import { Toc } from '~/components/toc'
+import { pageAt } from '~/data/site'
 
 const CSS = `@media (prefers-reduced-motion: no-preference) {
   [data-qwik-date] table:not([data-period]) > tbody > tr[data-direction='next'] {
@@ -118,19 +119,9 @@ export default component$(() => {
         </div>
       </article>
 
-      <Toc
-        items={[
-          { id: 'moments', label: 'The moments' },
-          { id: 'tailwind', label: 'Tailwind' },
-          { id: 'popover', label: 'The popover' },
-        ]}
-      />
+      <Toc items={pageAt('/animations/').sections} />
     </div>
   )
 })
 
-export const head = docHead(
-  'Animations',
-  'Animate the changes of month and view of a qwik-date Calendar with CSS: data-direction and new rows on every move.',
-  '/animations/',
-)
+export const head = docHead('/animations/')

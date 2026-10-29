@@ -22,6 +22,7 @@
     "fmt": "prettier --write .",
     "fmt.check": "prettier --check .",
     "lint": "biome check --write --unsafe",
+    "llms": "node scripts/llms-full.ts",
     "preview": "qwik build preview && vite preview --open",
     "serve": "deno run --allow-net --allow-read --allow-env server/entry.deno.js",
     "start": "vite --open --mode ssr",

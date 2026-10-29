@@ -3,6 +3,7 @@ import { Link } from '@qwik.dev/router'
 import { H2, md } from '~/components/docs'
 import { docHead } from '~/components/seo'
 import { Toc } from '~/components/toc'
+import { pageAt } from '~/data/site'
 
 const NAMES = [
   [
@@ -136,19 +137,8 @@ export default component$(() => (
       </div>
     </article>
 
-    <Toc
-      items={[
-        { id: 'names', label: 'Names and announcements' },
-        { id: 'focus', label: 'Keyboard and focus' },
-        { id: 'motion', label: 'Motion and contrast' },
-        { id: 'yours', label: 'Your part' },
-      ]}
-    />
+    <Toc items={pageAt('/accessibility/').sections} />
   </div>
 ))
 
-export const head = docHead(
-  'Accessibility',
-  'What the qwik-date Calendar does for the keyboard and screen readers, and what is left for you.',
-  '/accessibility/',
-)
+export const head = docHead('/accessibility/')

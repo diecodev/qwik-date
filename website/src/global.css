@@ -278,6 +278,127 @@ kbd,
   color: var(--fg);
 }
 
+/* search */
+
+.search-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 220px;
+  height: 32px;
+  padding: 0 6px 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.search-btn:hover {
+  border-color: var(--dash);
+  color: var(--fg);
+}
+
+.kbd {
+  margin-left: auto;
+  padding: 0 5px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--muted);
+}
+
+.search-dialog {
+  width: min(640px, calc(100vw - 32px));
+  max-height: min(560px, calc(100dvh - 96px));
+  margin: 72px auto auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--pop);
+  color: var(--fg);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+}
+
+.search-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border-bottom: 1px dashed var(--dash);
+  color: var(--muted);
+}
+
+.search-box input {
+  flex: 1;
+  min-width: 0;
+  height: 52px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--fg);
+}
+
+.search-list {
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.search-list a {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.search-list [aria-selected='true'] a {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.search-meta {
+  overflow: hidden;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.search-empty {
+  margin: 0;
+  padding: 20px 16px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.search-foot {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 8px 14px;
+  border-top: 1px dashed var(--dash);
+  font-size: 11px;
+  color: var(--muted);
+}
+
 /* layout */
 
 .shell {
@@ -910,7 +1031,7 @@ kbd,
   border-radius: 4px;
 }
 
-/* the animations guide: the README's CSS, on its demo */
+/* the animations guide: its CSS, on its demo */
 @media (prefers-reduced-motion: no-preference) {
   .anim [data-qwik-date] table:not([data-period]) > tbody > tr[data-direction='next'] {
     animation: month-next 200ms ease-out;
@@ -1479,6 +1600,19 @@ details:not([open]) > .sum .sum-open {
   .header-in {
     gap: 12px;
     padding: 0 16px;
+  }
+
+  /* only the icon: the menu, the search and the theme fit next to the logo */
+  .search-btn {
+    width: 32px;
+    padding: 0;
+    justify-content: center;
+    border: 0;
+  }
+
+  .search-btn-text,
+  .search-btn .kbd {
+    display: none;
   }
 
   .shell {

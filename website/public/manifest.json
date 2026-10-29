@@ -1,10 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/web-manifest-combined.json",
-  "name": "qwik date",
-  "short_name": "qwik date",
+  "name": "qwik-date",
+  "short_name": "qwik-date",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#fff",
   "theme_color": "#2563eb",
-  "description": "A calendar for Qwik: a day, a range or several days."
+  "description": "Calendar and date picker component for Qwik: a day, a range or several days."
 }

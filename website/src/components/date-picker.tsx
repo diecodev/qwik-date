@@ -1,4 +1,4 @@
-// The README's first recipe, "Native popover + CSS anchor positioning", as the site runs it (with theme="auto",
+// The first recipe, "Native popover + CSS anchor positioning", as the site runs it (with theme="auto",
 // to follow the site's theme)
 import { $, type Signal, component$, useId, useSignal } from '@qwik.dev/core'
 import {

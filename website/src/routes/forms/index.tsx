@@ -6,6 +6,7 @@ import { addDays, useToday } from '~/components/dates'
 import { H2, Preview } from '~/components/docs'
 import { docHead } from '~/components/seo'
 import { Toc } from '~/components/toc'
+import { pageAt } from '~/data/site'
 
 type Mode = 'single' | 'range' | 'multiple'
 
@@ -203,18 +204,9 @@ export default component$(() => {
         </div>
       </article>
 
-      <Toc
-        items={[
-          { id: 'inputs', label: 'Hidden inputs' },
-          { id: 'actions', label: 'Qwik Router actions' },
-        ]}
-      />
+      <Toc items={pageAt('/forms/').sections} />
     </div>
   )
 })
 
-export const head = docHead(
-  'Forms',
-  'Submit the value of a qwik-date Calendar with a form, and read it in a Qwik Router action.',
-  '/forms/',
-)
+export const head = docHead('/forms/')

@@ -1,5 +1,6 @@
 import { component$ } from '@qwik.dev/core'
 import { Link, useLocation } from '@qwik.dev/router'
+import { SearchButton } from './search'
 import { Sidebar } from './sidebar'
 
 const VERSIONS = [
@@ -135,6 +136,8 @@ export const Header = component$(() => {
         </nav>
 
         <div style="flex: 1" />
+
+        <SearchButton />
 
         <div style="display: flex; gap: 2px">
           <a

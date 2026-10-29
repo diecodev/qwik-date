@@ -2,6 +2,7 @@ import { Slot, component$ } from '@qwik.dev/core'
 import type { RequestHandler } from '@qwik.dev/router'
 import { Footer } from '~/components/footer'
 import { Header } from '~/components/header'
+import { SearchDialog } from '~/components/search'
 import { Sidebar } from '~/components/sidebar'
 
 import '@fontsource-variable/geist'
@@ -28,5 +29,6 @@ export default component$(() => (
       <Slot />
     </div>
     <Footer />
+    <SearchDialog />
   </>
 ))

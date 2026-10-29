@@ -6,6 +6,7 @@ import { Code } from '~/components/code'
 import { H2, Preview, md } from '~/components/docs'
 import { docHead } from '~/components/seo'
 import { Toc } from '~/components/toc'
+import { pageAt } from '~/data/site'
 
 const FR: Labels = {
   calendar: 'Calendrier',
@@ -199,20 +200,9 @@ export default component$(() => {
         </div>
       </article>
 
-      <Toc
-        items={[
-          { id: 'locale', label: 'Locale' },
-          { id: 'labels', label: 'Labels' },
-          { id: 'week', label: 'First day of the week' },
-          { id: 'formatting', label: 'Formatting' },
-        ]}
-      />
+      <Toc items={pageAt('/localization/').sections} />
     </div>
   )
 })
 
-export const head = docHead(
-  'Localization',
-  'qwik-date in any language: locale, labels and the first day of the week.',
-  '/localization/',
-)
+export const head = docHead('/localization/')

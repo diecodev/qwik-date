@@ -6,6 +6,7 @@ import { addDays, useToday } from '~/components/dates'
 import { H2, Preview } from '~/components/docs'
 import { docHead } from '~/components/seo'
 import { Toc } from '~/components/toc'
+import { pageAt } from '~/data/site'
 
 const THEME = `import { component$, useSignal } from '@qwik.dev/core';
 import { Calendar, type Theme } from 'qwik-date';
@@ -162,20 +163,9 @@ export default component$(() => {
         </div>
       </article>
 
-      <Toc
-        items={[
-          { id: 'theme', label: 'Theme' },
-          { id: 'your-styles', label: 'Your own styles' },
-          { id: 'unstyled', label: 'Unstyled' },
-          { id: 'rtl', label: 'Right to left' },
-        ]}
-      />
+      <Toc items={pageAt('/theming/').sections} />
     </div>
   )
 })
 
-export const head = docHead(
-  'Theming',
-  'The theme of a qwik-date Calendar, your own styles over it, unstyled, and right to left.',
-  '/theming/',
-)
+export const head = docHead('/theming/')

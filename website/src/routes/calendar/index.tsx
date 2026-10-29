@@ -7,6 +7,7 @@ import { addDays, fillDates, nextWeekday, useToday } from '~/components/dates'
 import { H2, H3, Preview } from '~/components/docs'
 import { docHead } from '~/components/seo'
 import { Toc } from '~/components/toc'
+import { pageAt } from '~/data/site'
 
 const SINGLE = `import { component$, useSignal } from '@qwik.dev/core';
 import { Calendar, type LocalDate } from 'qwik-date';
@@ -274,30 +275,9 @@ export default component$(() => {
         </div>
       </article>
 
-      <Toc
-        items={[
-          { id: 'usage', label: 'Usage' },
-          { id: 'examples', label: 'Examples' },
-          { id: 'range', label: 'Range', sub: true },
-          { id: 'multiple', label: 'Multiple', sub: true },
-          { id: 'two-months', label: 'Two months', sub: true },
-          { id: 'disabled', label: 'Disabled days', sub: true },
-          { id: 'months-and-years', label: 'Months and years', sub: true },
-          { id: 'display', label: 'Display options', sub: true },
-          { id: 'api', label: 'API' },
-          { id: 'props', label: 'Props', sub: true },
-          { id: 'data-attributes', label: 'Data attributes', sub: true },
-          { id: 'keyboard', label: 'Keyboard', sub: true },
-          { id: 'types', label: 'Types', sub: true },
-          { id: 'functions', label: 'Functions', sub: true },
-        ]}
-      />
+      <Toc items={pageAt('/calendar/').sections} />
     </div>
   )
 })
 
-export const head = docHead(
-  'Calendar',
-  'The qwik-date Calendar: one day, a range or several days, with every prop, data attribute and key.',
-  '/calendar/',
-)
+export const head = docHead('/calendar/')

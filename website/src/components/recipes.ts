@@ -1,4 +1,4 @@
-// The README's date picker recipes, as the site shows them
+// The date picker recipes, as the site shows them (src/recipes/popover.tsx runs the first one)
 
 export const NATIVE = `import { $, type Signal, component$, useId, useSignal } from '@qwik.dev/core';
 import { Calendar, type LocalDate, formatDate } from 'qwik-date';

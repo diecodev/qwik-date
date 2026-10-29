@@ -5,6 +5,7 @@ import { fillDates, useToday } from '~/components/dates'
 import { H2 } from '~/components/docs'
 import { docHead } from '~/components/seo'
 import { Toc } from '~/components/toc'
+import { pageAt } from '~/data/site'
 
 // the docs of qwik-date 1.0.0, from its README
 const INLINE = `import { component$, useSignal } from '@builder.io/qwik';
@@ -163,19 +164,9 @@ export default component$(() => {
         </div>
       </article>
 
-      <Toc
-        items={[
-          { id: 'install', label: 'Install' },
-          { id: 'calendar-inline', label: 'CalendarInline' },
-          { id: 'date-picker', label: 'DatePicker' },
-        ]}
-      />
+      <Toc items={pageAt('/v1/').sections} />
     </div>
   )
 })
 
-export const head = docHead(
-  'qwik-date@1',
-  'The docs of qwik-date 1.x, for Qwik v1: CalendarInline and DatePicker.',
-  '/v1/',
-)
+export const head = docHead('/v1/')

@@ -5,6 +5,7 @@ import { Install } from '~/components/code'
 import { H2, Preview } from '~/components/docs'
 import { docHead } from '~/components/seo'
 import { Toc } from '~/components/toc'
+import { pageAt } from '~/data/site'
 
 const USAGE = `import { component$, useSignal } from '@qwik.dev/core';
 import { Calendar, type LocalDate } from 'qwik-date';
@@ -23,7 +24,8 @@ export default component$(() => {
       <article class="article">
         <h1 class="h1">installation</h1>
         <p class="lead">
-          Install it, import it, bind it to a signal. That's the whole setup.
+          A calendar and date picker component for Qwik. Install it, import it,
+          bind it to a signal: that's the whole setup.
         </p>
 
         <H2 id="install">install</H2>
@@ -128,20 +130,9 @@ export default component$(() => {
         </div>
       </article>
 
-      <Toc
-        items={[
-          { id: 'install', label: 'Install' },
-          { id: 'usage', label: 'Usage' },
-          { id: 'compatibility', label: 'Compatibility' },
-          { id: 'next', label: 'Next' },
-        ]}
-      />
+      <Toc items={pageAt('/').sections} />
     </div>
   )
 })
 
-export const head = docHead(
-  'Installation',
-  'Install qwik-date, the calendar for Qwik: 2.x for Qwik v2, 1.x for Qwik v1.',
-  '/',
-)
+export const head = docHead('/')
