@@ -15,8 +15,18 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/e2e/animation/');
 });
 
-/** The animations started since the last call. */
-const started = (page: Page) => page.evaluate(() => (window as unknown as { started: string[] }).started.splice(0));
+/**
+ * The animations started since the page loaded, or since the last `forgetStarted`. Reading doesn't clear them:
+ * `expect.poll` reads again and again, and the grids can render apart, so a read that cleared them could take
+ * away the rows of one grid and leave the poll waiting for all of them at once.
+ */
+const started = (page: Page) => page.evaluate(() => [...(window as unknown as { started: string[] }).started]);
+
+/** Starts a new count of the animations. */
+const forgetStarted = (page: Page) =>
+  page.evaluate(() => {
+    (window as unknown as { started: string[] }).started.length = 0;
+  });
 
 test('no direction on load, then next or prev after each move', async ({ page }) => {
   const calendar = calendarIn(page, 'basic');
@@ -47,6 +57,7 @@ test('the rows of each month are new, so a CSS animation on them plays, in its d
   await expect.poll(() => before?.evaluate((el) => el.isConnected)).toBe(false);
   // September 2024 has five rows
   await expect.poll(() => started(page)).toEqual(Array(5).fill('TR:month-next'));
+  await forgetStarted(page);
   await prevButton(calendar).click();
   await expect(calendar.locator('[aria-live]')).toHaveText('August 2024');
   await expect.poll(() => started(page)).toEqual(Array(5).fill('TR:month-prev'));
