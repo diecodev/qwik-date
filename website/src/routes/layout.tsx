@@ -1,7 +1,11 @@
 import { Slot, component$ } from '@qwik.dev/core'
-import { routeLoader$ } from '@qwik.dev/router'
 import type { RequestHandler } from '@qwik.dev/router'
-import { Toaster } from 'qwik-sonner'
+import { Footer } from '~/components/footer'
+import { Header } from '~/components/header'
+import { Sidebar } from '~/components/sidebar'
+
+import '@fontsource-variable/geist'
+import '@fontsource-variable/geist-mono'
 
 export const onGet: RequestHandler = async ({ cacheControl }) => {
   // Control caching for this request for best performance and to reduce hosting costs:
@@ -14,19 +18,15 @@ export const onGet: RequestHandler = async ({ cacheControl }) => {
   })
 }
 
-export const useServerTimeLoader = routeLoader$(() => {
-  return {
-    date: new Date().toISOString(),
-  }
-})
-
-export default component$(() => {
-  return (
-    <>
-      <main>
-        <Toaster />
-        <Slot />
-      </main>
-    </>
-  )
-})
+export default component$(() => (
+  <>
+    <Header />
+    <div class="shell">
+      <aside class="sidebar">
+        <Sidebar />
+      </aside>
+      <Slot />
+    </div>
+    <Footer />
+  </>
+))

@@ -50,9 +50,12 @@ importers:
       '@biomejs/biome':
         specifier: 1.8.3
         version: 1.8.3
-      '@fontsource-variable/onest':
-        specifier: 5.0.4
-        version: 5.0.4
+      '@fontsource-variable/geist':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource-variable/geist-mono':
+        specifier: 5.3.0
+        version: 5.3.0
       '@qwik.dev/core':
         specifier: 2.0.0-rc.4
         version: 2.0.0-rc.4(@oxc-project/types@0.155.0)(rolldown@1.2.15)(rollup@4.19.1)(vite@8.3.5(@types/node@22.20.5)(jiti@1.21.6)(tsx@4.16.3)(yaml@2.9.1))(vitest@4.1.12(@types/node@22.20.5)(vite@8.3.5(@types/node@22.20.5)(jiti@1.21.6)(tsx@4.16.3)(yaml@2.9.1)))
@@ -71,9 +74,6 @@ importers:
       qwik-date:
         specifier: workspace:*
         version: link:..
-      qwik-sonner:
-        specifier: 2.0.0-beta.1
-        version: 2.0.0-beta.1(@qwik.dev/core@2.0.0-rc.4(@oxc-project/types@0.155.0)(rolldown@1.2.15)(rollup@4.19.1)(vite@8.3.5(@types/node@22.20.5)(jiti@1.21.6)(tsx@4.16.3)(yaml@2.9.1))(vitest@4.1.12(@types/node@22.20.5)(vite@8.3.5(@types/node@22.20.5)(jiti@1.21.6)(tsx@4.16.3)(yaml@2.9.1))))
       tailwindcss:
         specifier: 3.4.7
         version: 3.4.7
@@ -308,8 +308,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@fontsource-variable/onest@5.0.4':
-    resolution: {integrity: sha512-AgdtsALwfkuLuL3dMCCX/ag27ho7yMKNIrkX5AKYKsPDm5u6mrTZ0LcO9jtMI7Z4ant7Huf9c2QtPdK3az/mow==}
+  '@fontsource-variable/geist-mono@5.3.0':
+    resolution: {integrity: sha512-vBbuwDEo9AkrqADMXOrlAR3DFcJi4/JxeuU43FoiQERnNwsfXNnvxvReZG02cQKmyk4DZkZdBZX3oTDvy2zBAw==}
+
+  '@fontsource-variable/geist@5.3.0':
+    resolution: {integrity: sha512-j0m+vLQuG5XAYoHtGCVu0spvlGreR3EzpECUVzkFmI1mTVnAO38l/NEPDCFgZ177JxzYJCLSmTQibIiYPilGrA==}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -2848,12 +2851,6 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  qwik-sonner@2.0.0-beta.1:
-    resolution: {integrity: sha512-L9w3yXp4nyK1LdnOdZBOlyGK5DJ7UyGVgrfMatWbLejdjdrMPz5um4SLD6vvtEzJk/thN1l716OH7TNeVuPBHg==}
-    engines: {node: '>=22.x'}
-    peerDependencies:
-      '@qwik.dev/core': ^2.0.0-beta.37
-
   rc9@2.1.2:
     resolution: {integrity: sha512-btXCnMmRIBINM2LDZoEmOogIZU7Qe7zn4BpomSKZ/ykbLObuBdvG+mFq11DL6fjH1DRwHhrlgtYWG96bJiC7Cg==}
 
@@ -3728,7 +3725,9 @@ snapshots:
   '@esbuild/win32-x64@0.21.5':
     optional: true
 
-  '@fontsource-variable/onest@5.0.4': {}
+  '@fontsource-variable/geist-mono@5.3.0': {}
+
+  '@fontsource-variable/geist@5.3.0': {}
 
   '@img/colour@1.1.0': {}
 
@@ -6402,10 +6401,6 @@ snapshots:
       escape-goat: 4.0.0
 
   queue-microtask@1.2.3: {}
-
-  qwik-sonner@2.0.0-beta.1(@qwik.dev/core@2.0.0-rc.4(@oxc-project/types@0.155.0)(rolldown@1.2.15)(rollup@4.19.1)(vite@8.3.5(@types/node@22.20.5)(jiti@1.21.6)(tsx@4.16.3)(yaml@2.9.1))(vitest@4.1.12(@types/node@22.20.5)(vite@8.3.5(@types/node@22.20.5)(jiti@1.21.6)(tsx@4.16.3)(yaml@2.9.1)))):
-    dependencies:
-      '@qwik.dev/core': 2.0.0-rc.4(@oxc-project/types@0.155.0)(rolldown@1.2.15)(rollup@4.19.1)(vite@8.3.5(@types/node@22.20.5)(jiti@1.21.6)(tsx@4.16.3)(yaml@2.9.1))(vitest@4.1.12(@types/node@22.20.5)(vite@8.3.5(@types/node@22.20.5)(jiti@1.21.6)(tsx@4.16.3)(yaml@2.9.1)))
 
   rc9@2.1.2:
     dependencies:

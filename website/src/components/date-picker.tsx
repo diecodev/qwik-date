@@ -1,4 +1,5 @@
-// The README's first recipe, "Native popover + CSS anchor positioning", as the site runs it
+// The README's first recipe, "Native popover + CSS anchor positioning", as the site runs it (with theme="auto",
+// to follow the site's theme)
 import { $, type Signal, component$, useId, useSignal } from '@qwik.dev/core'
 import {
   Calendar,
@@ -35,6 +36,7 @@ export const DatePicker = component$<{
       </button>
       <Calendar
         autoFocus
+        theme="auto"
         bind:value={date}
         name={props.name}
         onChange$={() => document.getElementById(id)?.hidePopover()}
@@ -83,6 +85,7 @@ export const DateRangePicker = component$<{
       </button>
       <Calendar
         autoFocus
+        theme="auto"
         mode="range"
         bind:value={range}
         name={props.name}

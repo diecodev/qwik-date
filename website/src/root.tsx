@@ -23,10 +23,16 @@ export default component$(() => {
         <meta charset="utf-8" />
         <link rel="manifest" href="/manifest.json" />
         <RouterHead />
+        {/* the theme chosen with the header's toggle, before the first paint: without one, the system's */}
+        <script
+          dangerouslySetInnerHTML={
+            "try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}"
+          }
+        />
         {/* Qwik v2 has no service worker: this only unregisters the one installed by the v1 site. */}
         <ServiceWorkerRegister />
       </head>
-      <body lang="en" class="transition-all dark:bg-black">
+      <body lang="en">
         <RouterOutlet />
       </body>
     </>
