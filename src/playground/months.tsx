@@ -33,13 +33,28 @@ const OutsideDemo = component$(() => {
     <>
       <Calendar months={2} bind:value={date} />
       <p>
-        <button type='button' onClick$={() => (date.value = '2024-09-10')}>
+        <button
+          type='button'
+          onClick$={() => {
+            date.value = '2024-09-10';
+          }}
+        >
           Write Sep 10, 2024
         </button>{' '}
-        <button type='button' onClick$={() => (date.value = '2025-03-10')}>
+        <button
+          type='button'
+          onClick$={() => {
+            date.value = '2025-03-10';
+          }}
+        >
           Write Mar 10, 2025
         </button>{' '}
-        <button type='button' onClick$={() => (date.value = '2024-05-10')}>
+        <button
+          type='button'
+          onClick$={() => {
+            date.value = '2024-05-10';
+          }}
+        >
           Write May 10, 2024
         </button>
       </p>

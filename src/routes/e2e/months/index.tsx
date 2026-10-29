@@ -14,13 +14,31 @@ const Outside = component$(() => {
   return (
     <>
       <Calendar months={2} bind:value={date} />
-      <button type='button' id='outside-later' onClick$={() => (date.value = '2025-03-10')}>
+      <button
+        type='button'
+        id='outside-later'
+        onClick$={() => {
+          date.value = '2025-03-10';
+        }}
+      >
         2025-03-10
       </button>
-      <button type='button' id='outside-shown' onClick$={() => (date.value = '2024-09-10')}>
+      <button
+        type='button'
+        id='outside-shown'
+        onClick$={() => {
+          date.value = '2024-09-10';
+        }}
+      >
         2024-09-10
       </button>
-      <button type='button' id='outside-earlier' onClick$={() => (date.value = '2024-05-10')}>
+      <button
+        type='button'
+        id='outside-earlier'
+        onClick$={() => {
+          date.value = '2024-05-10';
+        }}
+      >
         2024-05-10
       </button>
     </>
