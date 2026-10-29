@@ -622,13 +622,18 @@ export const Root = component$<RootProps>(
       // the first run (the calendar just became visible, the page would load with a focused day) and
       // not after the month buttons, which keep the focus so they can be pressed repeatedly
       const root = rootRef.value;
-      const date = dateToFocus.value;
+      let date = dateToFocus.value;
       const first = { year: yearToRender.value, month: monthToRender.value };
       if (!focusDayOnMonthChange.value || !root || !isShown(date, first, months)) return;
 
       // the days render apart from this task (GridBody, or rows of your own), maybe after it: focus the day once
-      // it's there and enabled (with fullWeeks, the month before showed it as a disabled day of the next one)
-      const find = () => root.querySelector<HTMLElement>(`[data-value="${date}"]:not([disabled])`);
+      // it's there and enabled (with fullWeeks, the month before showed it as a disabled day of the next one). The
+      // day to focus then: a key pressed before they render (End after PageDown) moves it within the month, and
+      // can't focus it itself
+      const find = () => {
+        date = dateToFocus.value;
+        return root.querySelector<HTMLElement>(`[data-value="${date}"]:not([disabled])`);
+      };
       const focus = (day: HTMLElement) => {
         day.focus();
         day.setAttribute('tabindex', '0');
